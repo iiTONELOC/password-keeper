@@ -1,12 +1,8 @@
 {
-  "name": "passwordkeeper",
+  "name": "passwordkeeper.api-service",
   "version": "1.0.0",
-  "description": "Secure Password Manager",
+  "description": "RESTful API for Password Keeper",
   "main": "index.js",
-  "private": true,
-  "workspaces": [
-    "packages/*"
-  ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

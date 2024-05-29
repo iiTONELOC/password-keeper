@@ -2,6 +2,12 @@
 node_modules/
 **/node_modules/
 
+# Lock files
+package-lock.json
+**/package-lock.json
+yarn.lock
+**/yarn.lock
+
 # Build output
 dist/
 **/dist/

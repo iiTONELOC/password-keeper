@@ -1,0 +1,10 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "../../dist/api-service",
+    "declaration": true,
+    "declarationMap": true
+  },
+  "references": [{ "path": "../types" }],
+  "include": ["src"]
+}

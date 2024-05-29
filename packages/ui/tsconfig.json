@@ -1,0 +1,10 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "../../dist/ui",
+    "declaration": true,
+    "declarationMap": true
+  },
+  "references": [{ "path": "../types" }],
+  "include": ["src"]
+}

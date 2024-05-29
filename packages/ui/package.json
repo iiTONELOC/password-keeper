@@ -1,12 +1,8 @@
 {
-  "name": "passwordkeeper",
+  "name": "passwordkeeper.ui",
   "version": "1.0.0",
-  "description": "Secure Password Manager",
+  "description": "Reusable React Components for Passwork Keeper",
   "main": "index.js",
-  "private": true,
-  "workspaces": [
-    "packages/*"
-  ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
