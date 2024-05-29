@@ -1,0 +1,11 @@
+{
+  "name": "password-keeper",
+  "version": "1.0.0",
+  "description": "Secure Password Manager",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Anthony Tropeano",
+  "license": "ISC"
+}
