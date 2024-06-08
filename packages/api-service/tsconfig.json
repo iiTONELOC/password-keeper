@@ -3,8 +3,9 @@
   "compilerOptions": {
     "outDir": "../../dist/api-service",
     "declaration": true,
-    "declarationMap": true
+    "declarationMap": true,
+    "esModuleInterop": true
   },
-  "references": [{ "path": "../types" }],
+  "references": [{"path": "../types"}],
   "include": ["src"]
 }

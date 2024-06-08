@@ -1,11 +1,27 @@
 {
   "name": "passwordkeeper.api-service",
   "version": "1.0.0",
-  "description": "RESTful API for Password Keeper",
-  "main": "index.js",
+  "description": "API Microservice for Password Keeper",
+  "main": "../../dist/api-service/src",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "lint": "eslint",
+    "build": "cd .. && cd types/ && npm run build && cd .. && cd api-service/ && npm run lint && rimraf ../../dist/api-service && tsc",
+    "start": "dotenvx run  -- node ../../dist/api-service/src/index.js",
+    "dev": "dotenvx run  -- ts-node ./src/index.ts",
+    "test": "jest",
+    "test:dev": "jest --watch"
   },
   "author": "Anthony Tropeano",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "@dotenvx/dotenvx": "^0.44.1",
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "winston": "^3.13.0",
+    "winston-daily-rotate-file": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21"
+  }
 }

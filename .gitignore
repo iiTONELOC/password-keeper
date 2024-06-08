@@ -62,3 +62,11 @@ coverage/
 .env
 .env.*
 !.env.example
+
+# PKI
+.pki/
+keys/
+.csr
+.key
+.crt
+.pem

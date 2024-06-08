@@ -1,3 +1,1 @@
-export type testType = {
-  test: string;
-};
+export * from './api-service';
