@@ -1,7 +1,7 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "outDir": "../../dist/api-service",
+    "outDir": "./dist",
     "declaration": true,
     "declarationMap": true,
     "esModuleInterop": true

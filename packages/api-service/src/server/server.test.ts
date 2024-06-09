@@ -1,5 +1,5 @@
 import {createAppServer} from './server';
-import {AppServer} from 'packages/types/src';
+import {AppServer} from '../../../types';
 import {describe, expect, it} from '@jest/globals';
 
 describe('Create App Server', () => {

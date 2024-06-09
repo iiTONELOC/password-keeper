@@ -5,15 +5,16 @@ const {combine, timestamp, label, printf, colorize} = format;
 
 // Define a custom log format
 const myFormat = printf(({level, message, label, timestamp}) => {
-  return `${timestamp} [${label}] ${level}: ${message}`;
+  return `[${label}] ${timestamp} - ${level}: ${message}`;
 });
 
+// Define the options for the log rotation
 const rotationOptions = {
   filename: 'logs/application-%DATE%.log',
   datePattern: 'YYYY-MM-DD',
   maxFiles: '30d',
   zippedArchive: true,
-  level: 'info', // Only log info messages
+  level: 'info',
   format: combine(timestamp(), myFormat)
 };
 
@@ -24,7 +25,9 @@ const logger = createLogger({
   // Combine different formatters for the logger
   format: combine(
     // Add a label to the logs
-    label({label: 'api-server'}),
+    label({
+      label: `passwordkeeper.api-service.${process.env.NODE_ENV?.toUpperCase() ?? 'DEVELOPMENT'}`
+    }),
     // Add a timestamp to the logs
     timestamp(),
     // Apply the custom format
@@ -34,7 +37,6 @@ const logger = createLogger({
   transports: [
     // Daily rotate file transport for general logs
     new DailyRotateFile({...rotationOptions}),
-
     // Daily rotate file transport for error logs
     new DailyRotateFile({...rotationOptions, filename: 'logs/error-%DATE%.log', level: 'error'})
   ]
@@ -44,10 +46,7 @@ const logger = createLogger({
 if (process.env.NODE_ENV !== 'production') {
   logger.add(
     new transports.Console({
-      format: combine(
-        colorize(), // Add color to the log output
-        myFormat // Apply custom format
-      )
+      format: combine(colorize(), myFormat)
     })
   );
 }

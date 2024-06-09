@@ -3,7 +3,7 @@
   "compilerOptions": {
     "declaration": true,
     "declarationMap": true,
-    "outDir": "../../dist/types"
+    "outDir": "./dist"
   },
   "references": [{"path": "../api-service"}],
   "include": ["src"]

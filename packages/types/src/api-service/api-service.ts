@@ -14,7 +14,7 @@ export type AppPort = number | undefined;
 export type CreateAppServer = (port?: AppPort) => AppServer;
 
 /**
- * Contains the app server and methods for starting and stopping the server.
+ * Contains the express app, server, and methods for starting and stopping the http server.
  */
 export type AppServer = {
   app: Express;

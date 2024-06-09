@@ -18,6 +18,13 @@ app.use(routes);
 
 export const createAppServer: CreateAppServer = (port = 3000): AppServer => {
   let server: AppServer['server'] = null;
+
+  const connectedMessages = [
+    `🚀 Server started on port ${port}`,
+    `Server available locally at http://localhost:${port}`,
+    `Server available on LAN at http://${ip}:${port}`
+  ];
+
   return {
     app,
     server,
@@ -25,28 +32,31 @@ export const createAppServer: CreateAppServer = (port = 3000): AppServer => {
       try {
         port = portOverride ?? port;
         logger.info('🏁 Starting server');
+
         server = app.listen(port, () => {
-          logger.info(`🚀 Server started on port ${port}`);
-          logger.info(`Server available locally at http://localhost:${port}`);
-          logger.info(`Server available on LAN at http://${ip}:${port}`);
+          connectedMessages.forEach(msg => logger.info(msg));
+        });
+
+        // Handle nodemon restarts
+        process.on('SIGUSR2', () => {
+          logger.info('🔄 Restarting server');
+          server?.close();
+        });
+
+        // Handle graceful shutdown
+        process.on('SIGINT', () => {
+          logger.info('⛔ Gracefully shutting down server');
+          server?.close(() => process.exit(0));
         });
       } catch (error) {
         logger.error(`Error starting server: ${error}`);
         process.exit(1);
       }
     },
+
     stop: () => {
-      server?.close(() => 'Server stopped');
+      logger.info('🛑 Stopping server');
+      server?.close();
     }
   };
 };
-
-process.on('uncaughtException', error => {
-  logger.error('Uncaught Exception:', error);
-  process.exit(1);
-});
-
-process.on('unhandledRejection', (reason, promise) => {
-  logger.error('Unhandled Rejection at:', promise, 'reason:', reason);
-  process.exit(1);
-});
