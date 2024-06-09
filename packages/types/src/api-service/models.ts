@@ -26,3 +26,15 @@ export type IPublicKey = {
 
 export type IPublicKeyModel = Model<IPublicKey>;
 export type IPublicKeyDocument = HydratedDocument<IPublicKey, Timestamps>;
+
+// _________ Auth Sessions _______
+
+export type IAuthSession = {
+  nonce: string;
+  user: string | Types.ObjectId;
+  expiresAt: Date;
+  valid?: boolean;
+};
+
+export type IAuthSessionModel = Model<IAuthSession>;
+export type IAuthSessionDocument = HydratedDocument<IAuthSession, Timestamps>;

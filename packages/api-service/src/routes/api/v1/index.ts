@@ -9,8 +9,4 @@ apiVersion1Routes.get('/', (_, res) => {
 
 apiVersion1Routes.use('/public-key', publicKeyRoutes);
 
-apiVersion1Routes.use('/graphql', (_, res) => {
-  res.send('GraphQL');
-});
-
 export default apiVersion1Routes;

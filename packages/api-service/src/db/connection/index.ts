@@ -6,13 +6,13 @@ import {DBConnectionPromise, DBDisconnectPromise} from '../../../../types';
  * Connects to the database and returns the default connection object
  *
  * @param dbName Optional name of the database to connect to
- * Defaults to the value of the DB_NAME environment variable or 'pwd-keeper-test'
+ * Defaults to the value of the DB_NAME environment variable or 'test-land'
  * @returns the Mongoose connection object
  */
 export default async function connect(dbName?: string): DBConnectionPromise {
   // accepts the name as an argument
   // or uses the value of the DB_NAME environment variable
-  // if neither are provided, defaults to 'pwd-keeper-test'
+  // if neither are provided, defaults to 'test-land'
   // istanbul ignore next
   const name = dbName ?? process.env.DB_NAME ?? 'pwd-keeper-test';
   // istanbul ignore next

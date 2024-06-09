@@ -1,6 +1,5 @@
 import {Server} from 'http';
 import {Express} from 'express';
-
 /**
  * AppPort is the port number for the app server.
  * If the port is not provided, it will default to 3000.
@@ -19,6 +18,6 @@ export type CreateAppServer = (port?: AppPort) => AppServer;
 export type AppServer = {
   app: Express;
   server: Server | null;
-  start: (port: AppPort) => void;
-  stop: () => string | void;
+  start: (portOverride?: AppPort) => Promise<void>;
+  stop: () => Promise<string | void>;
 };
