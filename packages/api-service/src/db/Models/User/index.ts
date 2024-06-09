@@ -1,4 +1,4 @@
-import {Schema, model} from 'mongoose';
+import {Schema, model, Types} from 'mongoose';
 import {IUser, IUserModel} from '../../../../../types/src';
 
 // Define the User Schema
@@ -26,7 +26,7 @@ const UserSchema = new Schema<IUser>(
       match: [/.+@.+\..+/, 'Please enter a valid e-mail address!']
     },
     publicKeys: {
-      type: [String],
+      type: [{type: Types.ObjectId, ref: 'PublicKey'}],
       default: []
     }
   },
