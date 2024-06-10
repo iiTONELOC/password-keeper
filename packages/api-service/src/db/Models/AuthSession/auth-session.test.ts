@@ -1,6 +1,6 @@
 import AuthSessionModel from './index';
 import {describe, expect, it} from '@jest/globals';
-import {IAuthSessionModel} from 'passwordkeeper.types';
+import type {IAuthSessionModel} from 'passwordkeeper.types';
 
 describe('AuthSession Model', () => {
   it('Should be a function', () => {
@@ -19,7 +19,7 @@ describe('AuthSession Model', () => {
     const AuthSession: IAuthSessionModel = AuthSessionModel;
     const schemaPaths = Object.keys(AuthSession.schema.paths);
 
-    expect(schemaPaths).toHaveLength(8);
+    expect(schemaPaths).toHaveLength(7);
     expect(schemaPaths).toContain('_id');
     expect(schemaPaths).toContain('nonce');
     expect(schemaPaths).toContain('user');
@@ -27,6 +27,5 @@ describe('AuthSession Model', () => {
     expect(schemaPaths).toContain('createdAt');
     expect(schemaPaths).toContain('updatedAt');
     expect(schemaPaths).toContain('__v');
-    expect(schemaPaths).toContain('valid');
   });
 });

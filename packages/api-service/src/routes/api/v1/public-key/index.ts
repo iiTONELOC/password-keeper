@@ -1,14 +1,11 @@
-import path from 'path';
 import logger from '../../../../logger';
 import {Router, Request, Response} from 'express';
-import {ensureRsaKeysExist} from '../../../../utils';
+import {ensureRsaKeysExist, getPathToPublicKey} from '../../../../utils';
 
 const publicKeyRoutes = Router();
 
 publicKeyRoutes.get('/', async (req: Request, res: Response) => {
-  const keyFolder = process.env.KEYS_PATH;
-  const pathToKeyFolder = path.resolve(process.cwd(), keyFolder ?? './keys');
-  const publicKeyPath = path.resolve(pathToKeyFolder, 'pwd-keeper_public.pem');
+  const publicKeyPath = getPathToPublicKey();
 
   if (!publicKeyPath) {
     logger.error('Public key not found >> GENERATING NEW KEYS');

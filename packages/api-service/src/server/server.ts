@@ -9,55 +9,62 @@ import express, {Express} from 'express';
 import {withAuthContext} from './withAuth';
 import {ensureRsaKeysExist} from '../utils';
 import createApolloServer from './apolloServer';
+import type {AppServer} from 'passwordkeeper.types';
 import {expressMiddleware} from '@apollo/server/express4';
 import connectToDatabase, {disconnectFromDB} from '../db/connection';
 
-import type {AppServer} from 'passwordkeeper.types';
-
 const corsOptions: cors.CorsOptions = {
-  origin: ['http://localhost:*']
+  origin: []
 };
 
 export const createAppServer = (port = 3000): AppServer => {
   const app: Express = express();
   const httpServer: http.Server = http.createServer(app);
+  const apolloServer = createApolloServer(httpServer);
 
   let database: Mongoose | null = null;
 
-  const apolloServer = createApolloServer(httpServer);
-
-  const connectedMessages: string[] = [
-    `🚀 Server started on port ${port}`,
-    `Server available locally at http://localhost:${port}`,
-    `Server available on LAN at http://${ip}:${port}`
-  ];
-
-  // Handle nodemon restarts
-  process.on('SIGUSR2', () => {
-    logger.info('🔄 Restarting server');
-    httpServer.close();
-  });
-
-  // Handle graceful shutdown
-  process.on('SIGINT', () => {
+  const gracefulShutdown = () => {
     logger.info('⛔ Gracefully shutting down server');
     httpServer.close();
     process.exit(0);
-  });
+  };
+
+  // Handle graceful shutdown
+  process.on('SIGINT', gracefulShutdown);
+  process.on('SIGTERM', gracefulShutdown);
 
   return {
     app,
     server: httpServer,
 
-    async start(portOverride?: number) {
+    async start(portOverride?: number): Promise<void> {
       await ensureRsaKeysExist();
       port = portOverride ?? port;
       logger.info('🏁 Starting server');
 
+      const connectedMessages: string[] = [
+        `🚀 Server started on port ${port}`,
+        `Server available locally at http://localhost:${port}`,
+        `Server available on LAN at http://${ip}:${port}`
+      ];
+
+      // if we are in development mode, allow all origins, and display the graphql playground
+      if (process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 'test') {
+        corsOptions.origin = [`http://localhost:${port}`, `http://${ip}:${port}`];
+        connectedMessages.push(
+          `GraphQL Playground available at http://localhost:${port}/api/v1/graphql`
+        );
+      }
+
+      // if we are in production mode, only allow the production origins from the environment
+      if (process.env.NODE_ENV === 'production') {
+        corsOptions.origin = process.env.ALLOWED_ORIGINS?.split(',') ?? [];
+      }
+
       // disable headers
       app.disable('etag');
       app.disable('x-powered-by');
-
       // use middleware
       app.use(express.json());
 
@@ -66,7 +73,7 @@ export const createAppServer = (port = 3000): AppServer => {
 
       // attach apollo server to express as middleware on the /graphql route
       app.use(
-        '/graphql',
+        '/api/v1/graphql',
         cors<cors.CorsRequest>(corsOptions),
         bodyParser.json(),
         expressMiddleware(apolloServer, {
@@ -78,7 +85,7 @@ export const createAppServer = (port = 3000): AppServer => {
         })
       );
 
-      // routes
+      // attach routes
       app.use(routes);
 
       // connect to database

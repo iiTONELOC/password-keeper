@@ -23,7 +23,7 @@ export const hashData = async (data: string): Promise<string | undefined> => {
  * @param length - number of bytes to generate
  * @returns a string of random bytes in hexadecimal format or undefined if an error occurs
  */
-export const generateRandomBytes = async (length: number): Promise<string | undefined> => {
+export const generateRandomBytes = (length: number): string | undefined => {
   try {
     return randomBytes(length).toString('hex');
   } catch (error) {
@@ -36,5 +36,5 @@ export const generateRandomBytes = async (length: number): Promise<string | unde
  * Generate a nonce
  * @returns a string of random bytes in hexadecimal format or undefined if an error occurs
  */
-export const createNonce = async (length = 32): Promise<string | undefined> =>
+export const createNonce = (length = 32): string | undefined =>
   generateRandomBytes(length < 32 ? 32 : length);

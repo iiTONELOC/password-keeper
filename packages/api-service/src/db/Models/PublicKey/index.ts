@@ -1,5 +1,5 @@
 import {Schema, model} from 'mongoose';
-import {IPublicKey, IPublicKeyModel} from 'passwordkeeper.types';
+import type {IPublicKey, IPublicKeyModel} from 'passwordkeeper.types';
 
 const get30DaysFromNow = () => new Date(Date.now() + 2592000000); // 30 days from now
 

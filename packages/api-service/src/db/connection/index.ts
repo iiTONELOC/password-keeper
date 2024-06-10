@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import {DBConnectionPromise, DBDisconnectPromise} from 'passwordkeeper.types';
+import type {DBConnectionPromise, DBDisconnectPromise} from 'passwordkeeper.types';
 
 /**
  * Connects to the database and returns the default connection object

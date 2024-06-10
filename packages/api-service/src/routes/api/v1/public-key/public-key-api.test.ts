@@ -1,15 +1,12 @@
-import path from 'path';
+import type {AppServer} from 'passwordkeeper.types';
 import {createAppServer} from '../../../../server';
 import {describe, expect, it} from '@jest/globals';
-import {getPublicKey} from '../../../../utils/crypto';
-import {AppServer} from 'passwordkeeper.types';
-
-const keyFolder = process.env.KEYS_PATH;
-const pathToKeyFolder = path.resolve(process.cwd(), keyFolder ?? './keys');
-const publicKeyPath = path.resolve(pathToKeyFolder, 'pwd-keeper_public.pem');
+import {getPathToPublicKey, getPublicKey} from '../../../../utils/crypto';
 
 describe('Public Key API', () => {
   it('should return the public key', async () => {
+    const publicKeyPath = getPathToPublicKey();
+
     const publicKey: string | undefined = await getPublicKey(publicKeyPath);
 
     const appServer: AppServer = createAppServer(3004);

@@ -1,5 +1,5 @@
 import {Schema, model} from 'mongoose';
-import {IUser, IUserModel} from 'passwordkeeper.types';
+import type {IUser, IUserModel} from 'passwordkeeper.types';
 
 // Define the User Schema
 const UserSchema = new Schema<IUser>(

@@ -1,8 +1,13 @@
 import {IUserDocument} from './models';
 
 export type CreateUserMutationVariables = {
-  username: string;
-  email: string;
+  createUserArgs: {
+    username: string;
+    email: string;
+  };
 };
 
-export type CreateUserMutationPayload = Promise<{user: IUserDocument}>;
+export type CreateUserMutationPayload = {
+  user: IUserDocument;
+  inviteToken: {token: string; expiresAt: Date};
+};

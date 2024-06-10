@@ -3,7 +3,7 @@ import path from 'path';
 import crypto from 'crypto';
 import fs from 'fs/promises';
 import logger from '../../../logger';
-import {GeneratedRSAKeys, RSA4096Methods} from 'passwordkeeper.types';
+import type {GeneratedRSAKeys, RSA4096Methods} from 'passwordkeeper.types';
 
 export const KEY_FORMAT = 'pem';
 export const PUBLIC_KEY_TYPE = 'spki';
@@ -11,6 +11,16 @@ export const PRIVATE_KEY_TYPE = 'pkcs8';
 export const ENCRYPTION_ALGORITHM = 'aes-256-cbc';
 export const PUBLIC_KEY_PERMISSIONS = os.platform() !== 'win32' ? 0o644 : parseInt('644', 8);
 export const PRIVATE_KEY_PERMISSIONS = os.platform() !== 'win32' ? 0o600 : parseInt('600', 8);
+export const getPathToPublicKey = () => path.resolve(getPathToKeyFolder(), 'pwd-keeper_public.pem');
+export const getPathToPrivateKey = () =>
+  path.resolve(getPathToKeyFolder(), 'pwd-keeper_private.pem');
+
+export const getPathToKeyFolder = () => {
+  const keyFolder = process.env.KEYS_PATH;
+  const pathToKeyFolder = path.resolve(process.cwd(), keyFolder ?? './keys');
+
+  return pathToKeyFolder;
+};
 
 /**
  * Generates RSA keys using the crypto module
@@ -280,5 +290,8 @@ export const RSA4096: RSA4096Methods = {
   KEY_FORMAT,
   PUBLIC_KEY_TYPE,
   PRIVATE_KEY_TYPE,
-  ENCRYPTION_ALGORITHM
+  ENCRYPTION_ALGORITHM,
+  getPathToPublicKey,
+  getPathToPrivateKey,
+  getPathToKeyFolder
 };

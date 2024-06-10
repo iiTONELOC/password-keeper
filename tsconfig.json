@@ -7,20 +7,6 @@
     "strict": true,
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["eslint.config.mjs"],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "packages/*/node_modules",
-    "*.spec.ts",
-    "*.test.ts",
-    "*.spec.tsx",
-    "*.test.tsx",
-    "*.d.ts",
-    "*.config.js",
-    "*.config.ts",
-    "*.config.mjs",
-    "*.config.cjs",
-    "*.config.json"
-  ]
+  "include": ["eslint.config.mjs", "packages/**/*"],
+  "exclude": ["node_modules", "packages/**/node_modules", "packages/**/dist"]
 }

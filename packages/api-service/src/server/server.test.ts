@@ -1,12 +1,14 @@
 import {createAppServer} from './server';
-import {AppServer} from 'passwordkeeper.types';
 import {describe, expect, it} from '@jest/globals';
+import type {AppServer} from 'passwordkeeper.types';
 
 let appServer3: AppServer;
+
 beforeAll(async () => {
   appServer3 = createAppServer(3003);
   await appServer3.start(3003);
 });
+
 afterAll(async () => {
   await appServer3.stop();
 });

@@ -1,6 +1,6 @@
 import UserModel from './';
 import {describe, expect, it} from '@jest/globals';
-import {IUserModel} from 'passwordkeeper.types';
+import type {IUserModel} from 'passwordkeeper.types';
 
 describe('User Model', () => {
   it('Should be a function', () => {

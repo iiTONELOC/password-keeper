@@ -37,4 +37,7 @@ export type RSA4096Methods = {
   PRIVATE_KEY_TYPE: 'pkcs8';
   PUBLIC_KEY_TYPE: 'spki';
   ENCRYPTION_ALGORITHM: 'aes-256-cbc';
+  getPathToPublicKey: () => string;
+  getPathToPrivateKey: () => string;
+  getPathToKeyFolder: () => string;
 };

@@ -1,39 +1,57 @@
 const typeDefs = `#graphql
-
+ 
     type User {
-        id: ID!
+        _id: ID!
         username: String!
         email: String!
         publicKeys: [PublicKey!]!
     }
+    
+    type PublicKey {
+        _id: ID!
+        key: String!
+        owner: User!
+        expiresAt: String
+    }
+
+    type AccountCompletionInvite {
+        _id: ID!
+        nonce: String!
+        user: User!
+        expiresAt: String
+    }
+
+    type AuthSession {
+        _id: ID!
+        nonce: String!
+        user: ME!
+        expiresAt: String
+    }
 
     type ME {
-        id: ID!
+        _id: ID!
         username: String!
         email: String!
     }
 
-    type Auth {
-        token: ID!
-        user : ME!
+    type inviteToken {
+        token: String!
+        expiresAt: String!
     }
 
-    type PublicKey {
-        id: ID!
-        key: String!
-        owner: User!
-        expiresAt: String
-    }
-
-    type createUserPayload {
+    input createUserArgs {
         username: String!
         email: String!
     }
 
-    type createPublicKeyPayload {
-        key: String!
-        owner: User!
-        expiresAt: String
+    type createdUserPayload {
+        user: User!
+        inviteToken: inviteToken!
+    }
+    
+    input completeAccountArgs {
+        nonce: String!
+        publicKey: String!
     }
     
     type Query {        
@@ -41,9 +59,9 @@ const typeDefs = `#graphql
     }
 
     type Mutation {
-        createUser(username: String!, email: String!): createUserPayload!
-        createPublicKey(key: String!, owner: ID!, expiresAt: String): createPublicKeyPayload!
-        login(username: String!, email: String!): Auth!
+        createUser(createUserArgs:createUserArgs!): createdUserPayload!
+        completeAccount(completeAccountArgs:completeAccountArgs!): AuthSession!
+       
     }
 `;
 

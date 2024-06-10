@@ -1,8 +1,6 @@
-import {me} from './queries';
+import {mutations, queries} from '../controllers';
 
 export const resolvers = {
-  Query: {
-    me
-  },
-  Mutation: {}
+  Query: queries,
+  Mutation: mutations
 };
