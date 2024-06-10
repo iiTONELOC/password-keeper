@@ -2,10 +2,12 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "outDir": "./dist",
+    "rootDir": "./src",
     "declaration": true,
     "declarationMap": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "tsBuildInfoFile": "./dist/tsconfig.tsbuildinfo"
   },
-  "references": [{"path": "../types"}],
-  "include": ["src"]
+  "include": ["src"],
+  "exclude": ["node_modules", "dist", "src/**/*.test.ts"]
 }

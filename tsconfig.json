@@ -1,20 +1,10 @@
 {
-  "files": [],
-  "references": [
-    {"path": "./packages/ui"},
-    {"path": "./packages/types"},
-    {"path": "./packages/api-service"}
-  ],
   "compilerOptions": {
-    "strict": true,
-    "baseUrl": ".",
+    "rootDir": "./",
     "composite": true,
     "declaration": true,
-    "target": "ESNext",
-    "module": "NodeNext",
-    "declarationMap": true,
     "esModuleInterop": true,
-    "resolveJsonModule": true,
+    "strict": true,
     "forceConsistentCasingInFileNames": true
   },
   "include": ["eslint.config.mjs"],
@@ -22,15 +12,15 @@
     "node_modules",
     "dist",
     "packages/*/node_modules",
-    "**/*.spec.ts",
-    "**/*.test.ts",
-    "**/*.spec.tsx",
-    "**/*.test.tsx",
-    "**/*.d.ts",
-    "**/*.config.js",
-    "**/*.config.ts",
-    "**/*.config.mjs",
-    "**/*.config.cjs",
-    "**/*.config.json"
+    "*.spec.ts",
+    "*.test.ts",
+    "*.spec.tsx",
+    "*.test.tsx",
+    "*.d.ts",
+    "*.config.js",
+    "*.config.ts",
+    "*.config.mjs",
+    "*.config.cjs",
+    "*.config.json"
   ]
 }

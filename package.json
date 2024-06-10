@@ -4,9 +4,6 @@
   "description": "Secure Password Manager",
   "main": "index.js",
   "private": true,
-  "workspaces": [
-    "packages/*"
-  ],
   "scripts": {
     "test": "jest"
   },

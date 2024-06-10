@@ -1,5 +1,5 @@
 import {Schema, model} from 'mongoose';
-import {IAuthSession, IAuthSessionModel} from 'packages/types/src';
+import {IAuthSession, IAuthSessionModel} from 'passwordkeeper.types';
 
 // Define the AuthSession Schema
 const AuthSessionSchema = new Schema<IAuthSession>(

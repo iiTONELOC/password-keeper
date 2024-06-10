@@ -3,7 +3,7 @@ import path from 'path';
 import crypto from 'crypto';
 import fs from 'fs/promises';
 import logger from '../../../logger';
-import {GeneratedRSAKeys, RSA4096Methods} from 'packages/types/src';
+import {GeneratedRSAKeys, RSA4096Methods} from 'passwordkeeper.types';
 
 export const KEY_FORMAT = 'pem';
 export const PUBLIC_KEY_TYPE = 'spki';

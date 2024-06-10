@@ -1,10 +1,13 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src",
     "declaration": true,
     "declarationMap": true,
-    "outDir": "./dist"
+    "esModuleInterop": true,
+    "tsBuildInfoFile": "./dist/tsconfig.tsbuildinfo"
   },
-  "references": [{"path": "../api-service"}],
-  "include": ["src"]
+  "include": ["./src"],
+  "exclude": ["./node_modules", "./dist"]
 }

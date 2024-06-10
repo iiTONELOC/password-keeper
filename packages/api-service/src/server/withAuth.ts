@@ -1,4 +1,4 @@
-import {AuthContext} from 'packages/types/src';
+import {AuthContext} from 'passwordkeeper.types';
 
 export const withAuthContext = async (req: Express.Request): Promise<AuthContext | undefined> => {
   return undefined;

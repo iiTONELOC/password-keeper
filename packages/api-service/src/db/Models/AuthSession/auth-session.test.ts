@@ -1,6 +1,6 @@
 import AuthSessionModel from './index';
 import {describe, expect, it} from '@jest/globals';
-import {IAuthSessionModel} from '../../../../../types/src';
+import {IAuthSessionModel} from 'passwordkeeper.types';
 
 describe('AuthSession Model', () => {
   it('Should be a function', () => {

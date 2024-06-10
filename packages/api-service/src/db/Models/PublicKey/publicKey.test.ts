@@ -1,6 +1,6 @@
 import PublicKeyModel from './index';
 import {describe, expect, it} from '@jest/globals';
-import {IPublicKeyModel} from '../../../../../types/src';
+import {IPublicKeyModel} from 'passwordkeeper.types';
 
 describe('PublicKey Model', () => {
   it('Should be a function', () => {

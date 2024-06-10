@@ -1,6 +1,6 @@
 import http from 'http';
-import {AuthContext} from 'packages/types/src';
 import {resolvers, typeDefs} from '../graphql';
+import {AuthContext} from 'passwordkeeper.types';
 import {ApolloServer, ApolloServerPlugin} from '@apollo/server';
 import {ApolloServerPluginDrainHttpServer} from '@apollo/server/plugin/drainHttpServer';
 

@@ -1,4 +1,4 @@
-import {AuthContext} from 'packages/types/src';
+import {AuthContext} from 'passwordkeeper.types';
 
 const me = async (parent: undefined, args: undefined, context: AuthContext | undefined) => {
   return {};

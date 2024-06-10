@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import connect, {disconnectFromDB} from '.';
-import type {DBConnection} from '../../../../types';
+import type {DBConnection} from 'passwordkeeper.types';
 import {describe, expect, it, beforeAll, afterAll} from '@jest/globals';
 
 describe('Connection Module', () => {

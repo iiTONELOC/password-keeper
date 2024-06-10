@@ -1,5 +1,5 @@
 import {createAppServer} from './server';
-import {AppServer} from '../../../types';
+import {AppServer} from 'passwordkeeper.types';
 import {describe, expect, it} from '@jest/globals';
 
 let appServer3: AppServer;

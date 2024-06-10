@@ -1,5 +1,4 @@
 import ip from '../ip';
-
 import cors from 'cors';
 import http from 'http';
 import logger from '../logger';
@@ -8,12 +7,12 @@ import {Mongoose} from 'mongoose';
 import bodyParser from 'body-parser';
 import express, {Express} from 'express';
 import {withAuthContext} from './withAuth';
+import {ensureRsaKeysExist} from '../utils';
 import createApolloServer from './apolloServer';
 import {expressMiddleware} from '@apollo/server/express4';
 import connectToDatabase, {disconnectFromDB} from '../db/connection';
 
-import type {AppServer} from '../../../types/src';
-import {ensureRsaKeysExist} from '../utils';
+import type {AppServer} from 'passwordkeeper.types';
 
 const corsOptions: cors.CorsOptions = {
   origin: ['http://localhost:*']
@@ -42,7 +41,8 @@ export const createAppServer = (port = 3000): AppServer => {
   // Handle graceful shutdown
   process.on('SIGINT', () => {
     logger.info('⛔ Gracefully shutting down server');
-    httpServer.close(() => process.exit(0));
+    httpServer.close();
+    process.exit(0);
   });
 
   return {

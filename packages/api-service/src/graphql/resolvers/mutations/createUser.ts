@@ -4,13 +4,13 @@ import type {
   IUserDocument,
   CreateUserMutationPayload,
   CreateUserMutationVariables
-} from 'packages/types/src/';
+} from 'passwordkeeper.types';
 
 export const createUser = async (
   _: undefined,
   args: CreateUserMutationVariables,
   __: undefined
-): CreateUserMutationPayload => {
+): Promise<CreateUserMutationPayload> => {
   const {username, email} = args;
 
   if (!username) {
