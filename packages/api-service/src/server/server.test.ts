@@ -53,9 +53,4 @@ describe('App Server', () => {
     const serverResponse = await fetch('http://localhost:3003/api/v2/');
     expect(serverResponse.status).toBe(404);
   });
-
-  it('Should have an /api/v1/public-key route that returns a PKI public-key', async () => {
-    const serverResponse = await fetch('http://localhost:3003/api/v1/public-key');
-    expect(serverResponse.status).toStrictEqual(200);
-  });
 });

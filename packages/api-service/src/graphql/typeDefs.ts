@@ -36,8 +36,7 @@ const typeDefs = `#graphql
         expiresAt: String
     }
     
-    type Query {
-        users: [User!]!
+    type Query {        
         me: ME
     }
 

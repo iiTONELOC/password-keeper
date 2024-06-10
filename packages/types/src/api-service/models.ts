@@ -16,6 +16,13 @@ export type IUser = {
 export type IUserModel = Model<IUser>;
 export type IUserDocument = HydratedDocument<IUser, Timestamps>;
 
+// _______ Account Completion Invites _______
+export type IAccountCompletionInvite = {
+  nonce: string;
+  user: string | Types.ObjectId;
+  expiresAt: Date;
+};
+
 //  _______ Public Keys _______
 
 export type IPublicKey = {

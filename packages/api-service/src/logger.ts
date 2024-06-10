@@ -14,14 +14,14 @@ const rotationOptions = {
   datePattern: 'YYYY-MM-DD',
   maxFiles: '30d',
   zippedArchive: true,
-  level: 'info',
+  level: 'silly',
   format: combine(timestamp(), myFormat)
 };
 
 // Create the logger instance
 const logger = createLogger({
   // Set the default log level
-  level: 'info',
+  level: 'silly',
   // Combine different formatters for the logger
   format: combine(
     // Add a label to the logs
