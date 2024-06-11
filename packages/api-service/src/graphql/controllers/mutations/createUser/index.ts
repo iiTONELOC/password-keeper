@@ -1,5 +1,5 @@
 import {GraphQLError} from 'graphql';
-import {UserModel, AccountCompletionInviteModel} from '../../../db/Models';
+import {UserModel, AccountCompletionInviteModel} from '../../../../db/Models';
 import type {
   IUserDocument,
   CreateUserMutationPayload,
@@ -11,8 +11,8 @@ import {
   encryptWithPrivateKey,
   getPathToPrivateKey,
   getPrivateKey
-} from '../../../utils';
-import logger from '../../../logger';
+} from '../../../../utils';
+import logger from '../../../../logger';
 
 export const createUser = async (
   _: undefined,

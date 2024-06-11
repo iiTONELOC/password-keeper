@@ -1,4 +1,5 @@
 import {createUser} from './createUser';
+import {completeAccount} from './completeAccount';
 
 const mutations = {
   createUser

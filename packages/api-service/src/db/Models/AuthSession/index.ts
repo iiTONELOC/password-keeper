@@ -7,14 +7,12 @@ const AuthSessionSchema = new Schema<IAuthSession>(
     nonce: {
       type: String,
       required: true,
-      unique: true,
-      // validate the nonce is a 64 character hex string
-      validate: {
-        validator: function (value: string) {
-          return /^[0-9a-f]{64}$/.test(value);
-        },
-        message: 'nonce must be a 64 character hex string'
-      }
+      unique: true
+    },
+    iv: {
+      type: String,
+      required: false,
+      default: undefined
     },
     user: {
       type: Schema.Types.ObjectId,

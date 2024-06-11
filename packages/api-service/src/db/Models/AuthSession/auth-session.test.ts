@@ -15,14 +15,15 @@ describe('AuthSession Model', () => {
     expect(AuthSession.modelName).toEqual('AuthSession');
   });
 
-  it('Should have a schema with 5 total properties', () => {
+  it('Should have a schema with 7 total properties', () => {
     const AuthSession: IAuthSessionModel = AuthSessionModel;
     const schemaPaths = Object.keys(AuthSession.schema.paths);
 
-    expect(schemaPaths).toHaveLength(7);
+    expect(schemaPaths).toHaveLength(8);
     expect(schemaPaths).toContain('_id');
     expect(schemaPaths).toContain('nonce');
     expect(schemaPaths).toContain('user');
+    expect(schemaPaths).toContain('iv');
     expect(schemaPaths).toContain('expiresAt');
     expect(schemaPaths).toContain('createdAt');
     expect(schemaPaths).toContain('updatedAt');

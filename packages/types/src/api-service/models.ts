@@ -1,4 +1,4 @@
-import {HydratedDocument, Model, Types} from 'mongoose';
+import {Model, Types} from 'mongoose';
 
 export type Timestamps = {
   createdAt: Date;
@@ -14,7 +14,12 @@ export type IUser = {
 };
 
 export type IUserModel = Model<IUser>;
-export type IUserDocument = HydratedDocument<IUser, Timestamps>;
+export type IUserDocument = IUserModel &
+  IUser &
+  Timestamps & {
+    _id: Types.ObjectId;
+    publicKeys: IPublicKeyDocument[];
+  };
 
 // _______ Account Completion Invites _______
 
@@ -25,10 +30,12 @@ export type IAccountCompletionInvite = {
 };
 
 export type IAccountCompletionInviteModel = Model<IAccountCompletionInvite>;
-export type IAccountCompletionInviteDocument = HydratedDocument<
-  IAccountCompletionInvite,
-  Timestamps
->;
+export type IAccountCompletionInviteDocument = IAccountCompletionInviteModel &
+  IAccountCompletionInvite &
+  Timestamps & {
+    _id: Types.ObjectId;
+    user: IUserDocument;
+  };
 
 //  _______ Public Keys _______
 
@@ -39,7 +46,12 @@ export type IPublicKey = {
 };
 
 export type IPublicKeyModel = Model<IPublicKey>;
-export type IPublicKeyDocument = HydratedDocument<IPublicKey, Timestamps>;
+export type IPublicKeyDocument = IPublicKeyModel &
+  IPublicKey &
+  Timestamps & {
+    _id: Types.ObjectId;
+    owner: IUserDocument;
+  };
 
 // _________ Auth Sessions _______
 
@@ -47,8 +59,13 @@ export type IAuthSession = {
   nonce: string;
   user: string | Types.ObjectId;
   expiresAt: Date;
-  valid?: boolean;
+  iv?: string;
 };
 
 export type IAuthSessionModel = Model<IAuthSession>;
-export type IAuthSessionDocument = HydratedDocument<IAuthSession, Timestamps>;
+export type IAuthSessionDocument = IAuthSessionModel &
+  IAuthSession &
+  Timestamps & {
+    _id: Types.ObjectId;
+    user: IUserDocument;
+  };

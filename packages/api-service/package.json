@@ -6,9 +6,9 @@
   "scripts": {
     "lint": "eslint",
     "start": "node --env-file=./.env  ./dist/index.js",
-    "test": "node --env-file=./.env ./node_modules/.bin/jest",
-    "test:dev": "node --env-file=./.env ./node_modules/.bin/jest --watch",
-    "dev": "node --watch --env-file=./.env -r ts-node/register ./src/index.ts",
+    "test": "rimraf /logs && node --env-file=./.env ./node_modules/.bin/jest",
+    "test:dev": "rimraf /logs && node --env-file=./.env ./node_modules/.bin/jest --watch",
+    "dev": "rimraf /logs && node --watch --env-file=./.env -r ts-node/register ./src/index.ts",
     "build": "cd .. && cd types/ && npm run build && cd .. && cd api-service/ && npm run lint && rimraf ./dist && tsc"
   },
   "author": "Anthony Tropeano",

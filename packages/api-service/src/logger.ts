@@ -10,7 +10,7 @@ const myFormat = printf(({level, message, label, timestamp}) => {
 
 // Define the options for the log rotation
 const rotationOptions = {
-  filename: 'logs/application-%DATE%.log',
+  filename: 'logs/general/application-%DATE%.log',
   datePattern: 'YYYY-MM-DD',
   maxFiles: '30d',
   zippedArchive: true,
@@ -35,10 +35,24 @@ const logger = createLogger({
   ),
   // Define the transports for logging
   transports: [
-    // Daily rotate file transport for general logs
+    // general logs
     new DailyRotateFile({...rotationOptions}),
-    // Daily rotate file transport for error logs
-    new DailyRotateFile({...rotationOptions, filename: 'logs/error-%DATE%.log', level: 'error'})
+    // error logs
+    new DailyRotateFile({
+      ...rotationOptions,
+      filename: 'logs/error/error-%DATE%.log',
+      level: 'error'
+    }),
+    // http logs
+    new DailyRotateFile({
+      ...rotationOptions,
+      filename: 'logs/http/http-%DATE%.log',
+      level: 'http'
+    }),
+    // warning logs
+    new DailyRotateFile({...rotationOptions, filename: 'logs/warn/warn-%DATE%.log', level: 'warn'}),
+    // info logs
+    new DailyRotateFile({...rotationOptions, filename: 'logs/info/info-%DATE%.log', level: 'info'})
   ]
 });
 

@@ -1,7 +1,6 @@
-import {createUser} from './index';
-import dbConnection, {disconnectFromDB} from '../../../db/connection';
+import {createUser} from '../index';
+import dbConnection, {disconnectFromDB} from '../../../../db/connection';
 import {describe, expect, it, beforeAll, afterAll} from '@jest/globals';
-import {UserModel, AccountCompletionInviteModel} from '../../../db/Models';
 import type {
   IUser,
   IUserDocument,
@@ -26,8 +25,6 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-  await UserModel.deleteMany();
-  await AccountCompletionInviteModel.deleteMany();
   db && (await disconnectFromDB(db));
 });
 
