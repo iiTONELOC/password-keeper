@@ -11,6 +11,7 @@ export const ensureRsaKeysExist = async () => {
 
   const privateKeyPassphrase = process.env.PRIVATE_KEY_PASSPHRASE;
 
+  logger.warn('Generating RSA keys for the server...');
   let keys = await RSA4096.generateRSAKeys(
     'pwd-keeper',
     {

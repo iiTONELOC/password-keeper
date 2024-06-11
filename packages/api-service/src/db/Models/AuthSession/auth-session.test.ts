@@ -19,11 +19,10 @@ describe('AuthSession Model', () => {
     const AuthSession: IAuthSessionModel = AuthSessionModel;
     const schemaPaths = Object.keys(AuthSession.schema.paths);
 
-    expect(schemaPaths).toHaveLength(8);
+    expect(schemaPaths).toHaveLength(7);
     expect(schemaPaths).toContain('_id');
     expect(schemaPaths).toContain('nonce');
     expect(schemaPaths).toContain('user');
-    expect(schemaPaths).toContain('iv');
     expect(schemaPaths).toContain('expiresAt');
     expect(schemaPaths).toContain('createdAt');
     expect(schemaPaths).toContain('updatedAt');

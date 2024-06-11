@@ -6,10 +6,11 @@
   "scripts": {
     "lint": "eslint",
     "start": "node --env-file=./.env  ./dist/index.js",
-    "test": "rimraf /logs && node --env-file=./.env ./node_modules/.bin/jest",
-    "test:dev": "rimraf /logs && node --env-file=./.env ./node_modules/.bin/jest --watch",
+    "test": "rimraf /logs && node --env-file=./.env ./node_modules/.bin/jest --detectOpenHandles",
+    "test:dev": "rimraf /logs && node --env-file=./.env ./node_modules/.bin/jest --watch --detectOpenHandles",
     "dev": "rimraf /logs && node --watch --env-file=./.env -r ts-node/register ./src/index.ts",
-    "build": "cd .. && cd types/ && npm run build && cd .. && cd api-service/ && npm run lint && rimraf ./dist && tsc"
+    "build": "cd .. && cd types/ && npm run build && cd .. && cd api-service/ && npm run lint && rimraf ./dist && tsc",
+    "complete-account": "node --env-file=./.env -r ts-node/register ./scripts/complete-account.ts"
   },
   "author": "Anthony Tropeano",
   "license": "ISC",

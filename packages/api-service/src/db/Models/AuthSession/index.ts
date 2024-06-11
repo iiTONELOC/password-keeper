@@ -1,19 +1,16 @@
 import {Schema, model} from 'mongoose';
+import EncryptedDataSchema from '../Schemas/EncryptedDataSchema';
 import type {IAuthSession, IAuthSessionModel} from 'passwordkeeper.types';
 
 // Define the AuthSession Schema
 const AuthSessionSchema = new Schema<IAuthSession>(
   {
     nonce: {
-      type: String,
+      type: EncryptedDataSchema,
       required: true,
       unique: true
     },
-    iv: {
-      type: String,
-      required: false,
-      default: undefined
-    },
+
     user: {
       type: Schema.Types.ObjectId,
       ref: 'User',

@@ -1,12 +1,13 @@
 import {GraphQLError} from 'graphql';
 import logger from '../../../../logger';
 import {createAuthSession} from '../../helpers';
-import {PublicKeyModel, AccountCompletionInviteModel} from '../../../../db/Models';
+import {PublicKeyModel, AccountCompletionInviteModel, UserModel} from '../../../../db/Models';
 import {getPrivateKey, decryptWithPrivateKey, getPathToPrivateKey} from '../../../../utils';
 import type {
   CompleteAccountMutationPayload,
   CompleteAccountMutationVariables,
-  IAccountCompletionInviteDocument
+  IAccountCompletionInviteDocument,
+  IUserDocument
 } from 'passwordkeeper.types';
 
 export const completeAccount = async (
@@ -60,10 +61,24 @@ export const completeAccount = async (
   }
 
   // create a new public key for the user
-  await PublicKeyModel.create({key: publicKey, owner: invite.user});
+  const pubKey = await PublicKeyModel.create({key: publicKey, owner: invite.user});
+
+  // update the user model with the new public key
+  const updatedUser = (
+    await UserModel.findByIdAndUpdate(
+      {_id: invite.user._id},
+      {
+        $addToSet: {publicKeys: pubKey._id}
+      },
+      {
+        runValidators: true,
+        returnNewDocument: true
+      }
+    ).select('_id username email')
+  )?.toObject();
 
   // delete the invite
   await AccountCompletionInviteModel.deleteOne({_id: invite._id});
 
-  return createAuthSession({publicKey, user: invite.user});
+  return createAuthSession({publicKey, user: updatedUser as Partial<IUserDocument>});
 };

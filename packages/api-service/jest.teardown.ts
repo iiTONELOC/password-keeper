@@ -4,6 +4,7 @@ import {
   UserModel,
   PublicKeyModel,
   AuthSessionModel,
+  LoginInviteModel,
   AccountCompletionInviteModel
 } from './src/db/Models';
 
@@ -12,6 +13,7 @@ const globalTeardown = async () => {
     UserModel.deleteMany(),
     PublicKeyModel.deleteMany(),
     AuthSessionModel.deleteMany(),
+    LoginInviteModel.deleteMany(),
     AccountCompletionInviteModel.deleteMany()
   ]);
 

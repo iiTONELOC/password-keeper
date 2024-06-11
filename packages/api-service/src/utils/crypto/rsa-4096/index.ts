@@ -11,6 +11,7 @@ export const PRIVATE_KEY_TYPE = 'pkcs8';
 export const ENCRYPTION_ALGORITHM = 'aes-256-cbc';
 export const PUBLIC_KEY_PERMISSIONS = os.platform() !== 'win32' ? 0o644 : parseInt('644', 8);
 export const PRIVATE_KEY_PERMISSIONS = os.platform() !== 'win32' ? 0o600 : parseInt('600', 8);
+
 export const getPathToPublicKey = () => path.resolve(getPathToKeyFolder(), 'pwd-keeper_public.pem');
 export const getPathToPrivateKey = () =>
   path.resolve(getPathToKeyFolder(), 'pwd-keeper_private.pem');
@@ -49,6 +50,8 @@ export const generateRSAKeys = async (
     ) {
       const publicKey = await fs.readFile(publicKeyFile, {encoding: 'utf8'});
       const privateKey = await fs.readFile(privateKeyFile, {encoding: 'utf8'});
+
+      logger.warn(`RSA keys already exist for ${keyName}`);
       return {
         pathToPrivateKey: privateKeyFile,
         pathToPublicKey: publicKeyFile,
@@ -88,6 +91,8 @@ export const generateRSAKeys = async (
       mode: PRIVATE_KEY_PERMISSIONS
     });
     await fs.writeFile(publicKeyFile, publicKey, {encoding: 'utf8', mode: PUBLIC_KEY_PERMISSIONS});
+
+    logger.warn(`RSA keys generated for ${keyName}`);
 
     return {
       pathToPrivateKey: privateKeyFile,

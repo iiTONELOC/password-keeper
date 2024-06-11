@@ -1,12 +1,14 @@
 import {GraphQLError} from 'graphql';
 import logger from '../../../../logger';
-import {AuthSessionModel} from '../../../../db/Models';
 import {createNonce, encryptWithPublicKey} from '../../../../utils';
+import {AuthSessionModel, PublicKeyModel, UserModel} from '../../../../db/Models';
+
 import {generateAESEncryptionKey, encryptAES} from '../../../../utils/crypto/aes-256';
 import type {
   IUserDocument,
   AES_EncryptionData,
-  CompleteAccountMutationPayload
+  CompleteAccountMutationPayload,
+  IAuthSessionDocument
 } from 'passwordkeeper.types';
 
 const thirtyMinutes = 30 * 60 * 1000;
@@ -27,7 +29,7 @@ export const createAuthSession = async ({
   expiresAt?: Date;
 }): Promise<CompleteAccountMutationPayload> => {
   // create a new nonce - this will be used to create an AES key
-  const authSessionNonce = createNonce(32);
+  const authSessionNonce: string | undefined = createNonce(32);
 
   if (!authSessionNonce) {
     logger.error('completeAccount mutationError - error creating auth session nonce!');
@@ -35,10 +37,10 @@ export const createAuthSession = async ({
   }
 
   // encrypt the nonce for storage using the aes key
-  const aesPassword = process.env.SYMMETRIC_KEY_PASSPHRASE ?? 'password';
+  const aesPassword: string = process.env.SYMMETRIC_KEY_PASSPHRASE ?? 'password';
 
   // create an encryption key
-  const aesEncryptionKey = await generateAESEncryptionKey(aesPassword);
+  const aesEncryptionKey: Buffer = await generateAESEncryptionKey(aesPassword);
 
   if (!aesEncryptionKey) {
     logger.error('completeAccount mutationError - error creating encryption key!');
@@ -55,8 +57,8 @@ export const createAuthSession = async ({
   // force the expiresAt date if provided to be at least 30 minutes from now but not more than 24 hours
   // enforcing this here will prevent an error when creating the session
   if (expiresAt) {
-    const now = new Date();
-    const diff = expiresAt.getTime() - now.getTime();
+    const now: Date = new Date();
+    const diff: number = expiresAt.getTime() - now.getTime();
 
     // if the expiration time is less than 30 minutes from now, set it to 30 minutes from now
     if (diff < thirtyMinutes) {
@@ -72,12 +74,13 @@ export const createAuthSession = async ({
   }
 
   // create a new auth session
-  const authSession = await AuthSessionModel.create({
-    expiresAt,
-    user: user._id,
-    iv: safeAtRestNonce.iv,
-    nonce: safeAtRestNonce.encryptedData
-  });
+  const authSession: IAuthSessionDocument = (
+    await AuthSessionModel.create({
+      expiresAt,
+      user: user._id,
+      nonce: safeAtRestNonce
+    })
+  ).toObject();
 
   if (!authSession) {
     logger.error('completeAccount mutationError - error creating auth session!');

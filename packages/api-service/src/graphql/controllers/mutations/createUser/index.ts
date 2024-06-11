@@ -13,6 +13,7 @@ import {
   getPrivateKey
 } from '../../../../utils';
 import logger from '../../../../logger';
+import {warn} from 'winston';
 
 export const createUser = async (
   _: undefined,
@@ -23,6 +24,8 @@ export const createUser = async (
     createUserArgs: {username, email}
   } = args;
 
+  const loggerHeader = 'createUser mutation::';
+
   if (!username) {
     throw new GraphQLError('Username is required');
   }
@@ -32,6 +35,7 @@ export const createUser = async (
   }
 
   try {
+    logger.warn(`${loggerHeader} User: ${username} requested to create an account`);
     const user: IUserDocument = (await UserModel.create({username, email}))?.toObject();
 
     if (!user) {
@@ -43,15 +47,16 @@ export const createUser = async (
     // lookup the path to the private key
     const privateKeyPath = getPathToPrivateKey();
     // get the private key
+    logger.warn(`${loggerHeader} accessing private key for user creation: ${username}`);
     const privateKey = await getPrivateKey(privateKeyPath, process.env.PRIVATE_KEY_PASSPHRASE);
 
     if (!nonce) {
-      logger.error('createUser mutationError - error creating nonce!');
+      logger.error(`${loggerHeader} Error creating nonce for user: ${username}`);
       throw new GraphQLError('Error creating nonce');
     }
 
     if (!privateKey) {
-      logger.error('createUser mutationError - getting private key!');
+      logger.error(`${loggerHeader} Error getting private key for user: ${username}`);
       throw new GraphQLError('Error getting private key');
     }
 
@@ -59,10 +64,11 @@ export const createUser = async (
     const signedNonce = await encryptWithPrivateKey(privateKey, nonce);
 
     if (!signedNonce) {
-      logger.error('createUser mutationError - error signing nonce!');
+      logger.error(`${loggerHeader} Error signing nonce for user: ${username}`);
       throw new GraphQLError('Error signing nonce');
     }
 
+    logger.warn(`${loggerHeader} User: ${username} created successfully. Generating invite token.`);
     // const signedNonce = await encryptWithPrivateKey
     let inviteToken: IAccountCompletionInviteDocument = (
       await AccountCompletionInviteModel.create({
@@ -75,9 +81,10 @@ export const createUser = async (
     return {user, inviteToken: {token: signedNonce, expiresAt: inviteToken.expiresAt}};
   } catch (error: any) {
     if (error?.toString()?.includes('E11000 duplicate key error')) {
+      logger.error(`${loggerHeader} User: ${username} already exists!`);
       throw new GraphQLError('User already exists');
     } else {
-      logger.error('createUser mutationError', error);
+      logger.error(`${loggerHeader} Error creating user: ${error}`);
       throw new GraphQLError('Error creating user');
     }
   }

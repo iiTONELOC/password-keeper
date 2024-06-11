@@ -55,14 +55,17 @@ describe('completeAccount', () => {
     const {inviteToken} = newUser || {};
 
     // get the app's public key to decrypt the nonce
-    const appPublicKey = await getPublicKey(getPathToPublicKey());
+    const appPublicKey: string | undefined = await getPublicKey(getPathToPublicKey());
 
     if (!appPublicKey) {
       throw new Error('Error getting public key');
     }
 
     //decrypt the nonce
-    const decryptedNonce = await decryptWithPublicKey(appPublicKey, inviteToken?.token);
+    const decryptedNonce: string | undefined = await decryptWithPublicKey(
+      appPublicKey,
+      inviteToken?.token
+    );
 
     if (!decryptedNonce) {
       throw new Error('Error decrypting nonce');
@@ -81,7 +84,10 @@ describe('completeAccount', () => {
     }
 
     // re-encrypt the nonce with the app's public key
-    const reEncryptedNonce = await encryptWithPublicKey(appPublicKey, decryptedNonce);
+    const reEncryptedNonce: string | undefined = await encryptWithPublicKey(
+      appPublicKey,
+      decryptedNonce
+    );
 
     if (!reEncryptedNonce) {
       throw new Error('Error re-encrypting nonce');
@@ -100,8 +106,6 @@ describe('completeAccount', () => {
       competeAccountArgs,
       undefined
     );
-
-    console.log('NEW SESSION RESULT:', result);
 
     // check the result should have a _id, nonce, user, and expiresAt
     expect(result).toBeDefined();
