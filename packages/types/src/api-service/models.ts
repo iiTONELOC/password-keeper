@@ -5,6 +5,12 @@ export type Timestamps = {
   updatedAt: Date;
 };
 
+// _______ Encrypted Data _______
+export type IEncryptedData = {
+  encryptedData: string;
+  iv: string;
+};
+
 //  _______ Users _______
 
 export type IUser = {
@@ -56,15 +62,31 @@ export type IPublicKeyDocument = IPublicKeyModel &
 // _________ Auth Sessions _______
 
 export type IAuthSession = {
-  nonce: string;
+  nonce: IEncryptedData;
   user: string | Types.ObjectId;
   expiresAt: Date;
-  iv?: string;
 };
 
 export type IAuthSessionModel = Model<IAuthSession>;
 export type IAuthSessionDocument = IAuthSessionModel &
   IAuthSession &
+  Timestamps & {
+    _id: Types.ObjectId;
+    user: IUserDocument;
+  };
+
+// _________ Login Invites _______
+export type ILoginInvite = {
+  nonce: IEncryptedData;
+  user: string | Types.ObjectId;
+  challenge: IEncryptedData;
+  expiresAt: Date;
+};
+
+export type ILoginInviteModel = Model<ILoginInvite>;
+
+export type ILoginInviteDocument = ILoginInviteModel &
+  ILoginInvite &
   Timestamps & {
     _id: Types.ObjectId;
     user: IUserDocument;
