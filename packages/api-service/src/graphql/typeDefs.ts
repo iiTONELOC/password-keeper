@@ -85,7 +85,7 @@ const typeDefs = `#graphql
     }
 
     type Mutation {
-        getLoginNone(getLoginNonceArgs:getLoginNonceArgs!): getLoginNoncePayload!
+        getLoginNonce(getLoginNonceArgs:getLoginNonceArgs!): getLoginNoncePayload!
         completeLogin(completeLoginArgs:completeLoginArgs!): AuthSession!
         createUser(createUserArgs:createUserArgs!): createdUserPayload!
         completeAccount(completeAccountArgs:completeAccountArgs!): AuthSession!

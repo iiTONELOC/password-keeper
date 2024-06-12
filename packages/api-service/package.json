@@ -10,7 +10,9 @@
     "test:dev": "rimraf /logs && node --env-file=./.env ./node_modules/.bin/jest --watch --detectOpenHandles",
     "dev": "rimraf /logs && node --watch --env-file=./.env -r ts-node/register ./src/index.ts",
     "build": "cd .. && cd types/ && npm run build && cd .. && cd api-service/ && npm run lint && rimraf ./dist && tsc",
-    "complete-account": "node --env-file=./.env -r ts-node/register ./scripts/complete-account.ts"
+    "complete-account": "node --env-file=./.env -r ts-node/register ./test-scripts/complete-account.ts",
+    "login-challenge": "node --env-file=./.env -r ts-node/register ./test-scripts/login-challenge.ts",
+    "complete-login": "node --env-file=./.env -r ts-node/register ./test-scripts/complete-login.ts"
   },
   "author": "Anthony Tropeano",
   "license": "ISC",
