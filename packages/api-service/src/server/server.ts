@@ -12,7 +12,6 @@ import createApolloServer from './apolloServer';
 import type {AppServer} from 'passwordkeeper.types';
 import {expressMiddleware} from '@apollo/server/express4';
 import connectToDatabase, {disconnectFromDB} from '../db/connection';
-import {removeExpired} from '../db/scripts/removeExpired';
 
 const corsOptions: cors.CorsOptions = {
   origin: []
@@ -102,14 +101,6 @@ export const createAppServer = (port = 3000): AppServer => {
           logger.info(message);
         }
       });
-
-      // remove expired items from the database now
-      await removeExpired();
-      // set an interval to check for expired items in the database every hour
-      setInterval(async () => {
-        logger.info('Checking for expired items in the database');
-        await removeExpired();
-      }, 1000 * 60 * 60);
     },
 
     async stop(): Promise<void> {

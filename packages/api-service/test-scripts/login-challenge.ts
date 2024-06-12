@@ -32,14 +32,10 @@ const createLoginSignature = async (username: string, challenge: string): Promis
 
   const pathToKeys = getPathToKeyFolder().replace('.private', `.${username}`);
 
-  console.log('\n\nGET PATH TO KEY FOLDER: ', pathToKeys, '\n\n');
-
   const usersPrivateKey: KeyObject = (await getPrivateKey(
     path.join(pathToKeys, `${username}_private.pem`),
     username
   )) as KeyObject;
-
-  console.log('\n\nGET PRIVATE KEY: ', usersPrivateKey, '\n\n');
 
   if (!usersPrivateKey) {
     throw new Error('Error getting private key');
@@ -78,6 +74,7 @@ if (require.main === module) {
     ]);
 
     console.log('Login challenge and signature:');
-    console.log({encryptedChallenge, signature});
+    console.log(`\n\nChallenge: ${encryptedChallenge}`);
+    console.log(`\n\nSignature: ${signature}`);
   })();
 }

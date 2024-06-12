@@ -29,7 +29,7 @@ const decryptTokenAndReEncrypt = async (token: string): Promise<void> => {
     throw new Error('Error re-encrypting token');
   }
 
-  console.log('\nRe-encrypted token:');
+  console.log('\n\nRe-encrypted token:');
   console.log(reEncryptedToken);
 };
 
@@ -48,8 +48,8 @@ const generateRSAKeysForUser = async (username: string): Promise<void> => {
   );
 
   if (userKeys) {
-    console.log(`\nKeys for ${username} created at ${keyPath}`);
-    console.log(`\nPublic key for ${username}:`);
+    console.log(`\n\nKeys for ${username} created at ${keyPath}`);
+    console.log(`\n\nPublic key for ${username}:`);
 
     // preserve newlines in the public key so we can copy and paste if form the command line as a single string
     // into apollo playground
@@ -76,7 +76,6 @@ if (require.main === module) {
   const username = process.argv[3];
 
   (async () => {
-    await decryptTokenAndReEncrypt(token);
-    await generateRSAKeysForUser(username);
+    await Promise.all([decryptTokenAndReEncrypt(token), generateRSAKeysForUser(username)]);
   })();
 }

@@ -8,25 +8,28 @@ const myFormat = printf(({level, message, label, timestamp}) => {
   return `[${label}] ${timestamp} - ${level}: ${message}`;
 });
 
+const ENVIRONMENT = process.env.NODE_ENV?.toUpperCase() ?? `DEVELOPMENT`;
+const ENVIRONMENT_LOWER = ENVIRONMENT.toLowerCase();
+
 // Define the options for the log rotation
 const rotationOptions = {
-  filename: 'logs/general/application-%DATE%.log',
-  datePattern: 'YYYY-MM-DD',
-  maxFiles: '30d',
+  filename: `logs/${ENVIRONMENT_LOWER}/general/application-%DATE%.${ENVIRONMENT}.log`,
+  datePattern: `YYYY-MM-DD`,
+  maxFiles: `30d`,
   zippedArchive: true,
-  level: 'silly',
+  level: `silly`,
   format: combine(timestamp(), myFormat)
 };
 
 // Create the logger instance
 const logger = createLogger({
   // Set the default log level
-  level: 'silly',
+  level: `silly`,
   // Combine different formatters for the logger
   format: combine(
     // Add a label to the logs
     label({
-      label: `passwordkeeper.api-service.${process.env.NODE_ENV?.toUpperCase() ?? 'DEVELOPMENT'}`
+      label: `passwordkeeper.api-service.${ENVIRONMENT}`
     }),
     // Add a timestamp to the logs
     timestamp(),
@@ -40,24 +43,32 @@ const logger = createLogger({
     // error logs
     new DailyRotateFile({
       ...rotationOptions,
-      filename: 'logs/error/error-%DATE%.log',
-      level: 'error'
+      filename: `logs/${ENVIRONMENT_LOWER}/error/error-%DATE%.${ENVIRONMENT_LOWER}.log`,
+      level: `error`
     }),
     // http logs
     new DailyRotateFile({
       ...rotationOptions,
-      filename: 'logs/http/http-%DATE%.log',
-      level: 'http'
+      filename: `logs/${ENVIRONMENT_LOWER}/http/http-%DATE%.${ENVIRONMENT_LOWER}.log`,
+      level: `http`
     }),
     // warning logs
-    new DailyRotateFile({...rotationOptions, filename: 'logs/warn/warn-%DATE%.log', level: 'warn'}),
+    new DailyRotateFile({
+      ...rotationOptions,
+      filename: `logs/${ENVIRONMENT_LOWER}/warn/warn-%DATE%.${ENVIRONMENT_LOWER}.log`,
+      level: `warn`
+    }),
     // info logs
-    new DailyRotateFile({...rotationOptions, filename: 'logs/info/info-%DATE%.log', level: 'info'})
+    new DailyRotateFile({
+      ...rotationOptions,
+      filename: `logs/${ENVIRONMENT_LOWER}/info/info-%DATE%.${ENVIRONMENT_LOWER}.log`,
+      level: `info`
+    })
   ]
 });
 
 // Add console transport for development environments
-if (process.env.NODE_ENV !== 'production') {
+if (process.env.NODE_ENV !== `production`) {
   logger.add(
     new transports.Console({
       format: combine(colorize(), myFormat)

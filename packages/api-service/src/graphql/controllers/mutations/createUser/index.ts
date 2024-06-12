@@ -1,4 +1,5 @@
 import {GraphQLError} from 'graphql';
+import logger from '../../../../logger';
 import {UserModel, AccountCompletionInviteModel} from '../../../../db/Models';
 import type {
   IUserDocument,
@@ -12,8 +13,6 @@ import {
   getPathToPrivateKey,
   getPrivateKey
 } from '../../../../utils';
-import logger from '../../../../logger';
-import {warn} from 'winston';
 
 export const createUser = async (
   _: undefined,

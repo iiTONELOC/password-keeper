@@ -96,8 +96,8 @@ if (require.main === module) {
     const encryptedNonce = await encryptNonceWithAppsPublicKey(decryptedNonce);
     const signature = await createSignature(userId, username, decryptedNonce);
 
-    console.log(`\bNonce: ${encryptedNonce}`);
-    console.log(`\bSignature: ${signature}`);
+    console.log(`\n\nNonce: ${encryptedNonce}`);
+    console.log(`\n\nSignature: ${signature}`);
   })().catch(error => {
     console.error(error);
     process.exit(1);
