@@ -1,4 +1,4 @@
-import crypto from 'crypto';
+import path from 'path';
 import {describe, expect, it} from '@jest/globals';
 import {
   getPublicKey,
@@ -13,11 +13,12 @@ import {
   KEY_FORMAT,
   PRIVATE_KEY_TYPE
 } from './index';
+import {PrivateKey} from 'passwordkeeper.types';
 
 const TEST_KEY_FOLDER = './keys/test-keys';
 const TEST_PRIVATE_KEY_PASSPHRASE = 'test-passphrase';
 
-const publicKeyPath = `${TEST_KEY_FOLDER}/rsa-4096-test/`;
+const publicKeyPath = path.join(TEST_KEY_FOLDER, `rsa-4096-test/`);
 
 describe('RSA-4096 Key Generation', () => {
   it('should generate a public and private key pair', async () => {
@@ -81,7 +82,7 @@ describe('RSA-4096 Key Generation', () => {
     const privateKey = (await getPrivateKey(
       `${publicKeyPath}keygen-test_private.${KEY_FORMAT}`,
       TEST_PRIVATE_KEY_PASSPHRASE
-    )) as crypto.KeyObject;
+    )) as PrivateKey;
 
     const encrypted = await encryptWithPublicKey(publicKey, message);
 
@@ -106,7 +107,7 @@ describe('RSA-4096 Key Generation', () => {
     const privateKey = (await getPrivateKey(
       `${publicKeyPath}keygen-test_private.${KEY_FORMAT}`,
       TEST_PRIVATE_KEY_PASSPHRASE
-    )) as crypto.KeyObject;
+    )) as PrivateKey;
 
     const signature = await signWithPrivateKey(privateKey, message);
 
@@ -129,7 +130,7 @@ describe('RSA-4096 Key Generation', () => {
     const privateKey = (await getPrivateKey(
       `${publicKeyPath}keygen-test_private.${KEY_FORMAT}`,
       TEST_PRIVATE_KEY_PASSPHRASE
-    )) as crypto.KeyObject;
+    )) as PrivateKey;
 
     const encrypted = await encryptWithPrivateKey(privateKey, message);
 
@@ -154,7 +155,7 @@ describe('RSA-4096 Key Generation', () => {
     const privateKey = (await getPrivateKey(
       `${publicKeyPath}keygen-test_private.${KEY_FORMAT}`,
       TEST_PRIVATE_KEY_PASSPHRASE
-    )) as crypto.KeyObject;
+    )) as PrivateKey;
 
     const signature = await signWithPrivateKey(privateKey, message);
 
@@ -168,6 +169,29 @@ describe('RSA-4096 Key Generation', () => {
     );
 
     expect(verified).toBeFalsy();
+
+    expect.assertions(3);
+  });
+
+  it('Should be able to verify a signature with a public key', async () => {
+    const message = 'This is a test message';
+    const publicKey = (await getPublicKey(
+      `${publicKeyPath}keygen-test_public.${KEY_FORMAT}`
+    )) as string;
+
+    const privateKey = (await getPrivateKey(
+      `${publicKeyPath}keygen-test_private.${KEY_FORMAT}`,
+      TEST_PRIVATE_KEY_PASSPHRASE
+    )) as PrivateKey;
+
+    const signature = await signWithPrivateKey(privateKey, message);
+
+    expect(signature).toBeDefined();
+    expect(signature).not.toBeNull();
+
+    const verified = await verifyWithPublicKey(publicKey, message, signature ?? '');
+
+    expect(verified).toBeTruthy();
 
     expect.assertions(3);
   });

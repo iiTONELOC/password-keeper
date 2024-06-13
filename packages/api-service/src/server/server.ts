@@ -5,11 +5,12 @@ import logger from '../logger';
 import routes from '../routes';
 import {Mongoose} from 'mongoose';
 import bodyParser from 'body-parser';
+import {getAuth} from '../middleware';
 import express, {Express} from 'express';
-import {withAuthContext} from './withAuth';
+
 import {ensureRsaKeysExist} from '../utils';
 import createApolloServer from './apolloServer';
-import type {AppServer} from 'passwordkeeper.types';
+import type {AppServer, IAuthSessionDocument} from 'passwordkeeper.types';
 import {expressMiddleware} from '@apollo/server/express4';
 import connectToDatabase, {disconnectFromDB} from '../db/connection';
 
@@ -78,9 +79,8 @@ export const createAppServer = (port = 3000): AppServer => {
         bodyParser.json(),
         expressMiddleware(apolloServer, {
           context: async ({req}) => {
-            return {
-              ...(await withAuthContext(req))
-            };
+            const session: IAuthSessionDocument = (await getAuth(req)) as IAuthSessionDocument;
+            return {session};
           }
         })
       );

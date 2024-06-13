@@ -1,5 +1,4 @@
 import path from 'path';
-import {KeyObject} from 'crypto';
 import {getLoginNonce} from './index';
 import {createUser} from '../createUser';
 import {completeAccount} from '../completeAccount';
@@ -7,6 +6,7 @@ import dbConnection, {disconnectFromDB} from '../../../../db/connection';
 import {describe, expect, it, beforeAll, afterAll} from '@jest/globals';
 import type {
   IUser,
+  PrivateKey,
   DBConnection,
   IUserDocument,
   GeneratedRSAKeys,
@@ -133,13 +133,13 @@ describe('getLoginNonce', () => {
     // create a hash of the username + challenge
     const signatureHash = await hashData(testUser.username + loginChallenge);
     // get the users keys
-    const usersPrivateKey: KeyObject | undefined = await getPrivateKey(
+    const usersPrivateKey: PrivateKey | undefined = await getPrivateKey(
       testUserKeys.pathToPrivateKey
     );
 
     // sign the hash with the user's private key
     const userSignature: string | undefined = await encryptWithPrivateKey(
-      usersPrivateKey as KeyObject,
+      usersPrivateKey as PrivateKey,
       signatureHash as string
     );
 
@@ -174,7 +174,7 @@ describe('getLoginNonce', () => {
 
     // decrypt the nonce with the user's private key
     const decryptedNonce: string | undefined = await decryptWithPrivateKey(
-      usersPrivateKey as KeyObject,
+      usersPrivateKey as PrivateKey,
       nonce
     );
 
@@ -184,7 +184,7 @@ describe('getLoginNonce', () => {
 
     // decrypt the challenge response with the users private key
     const decryptedChallengeResponse: string | undefined = await decryptWithPrivateKey(
-      usersPrivateKey as KeyObject,
+      usersPrivateKey as PrivateKey,
       challengeResponse
     );
 

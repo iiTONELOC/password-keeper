@@ -4,6 +4,7 @@ import crypto from 'crypto';
 import fs from 'fs/promises';
 import logger from '../../../logger';
 import type {GeneratedRSAKeys, RSA4096Methods} from 'passwordkeeper.types';
+import {hashData} from '..';
 
 export const KEY_FORMAT = 'pem';
 export const PUBLIC_KEY_TYPE = 'spki';
@@ -17,8 +18,8 @@ export const getPathToPrivateKey = () =>
   path.resolve(getPathToKeyFolder(), 'pwd-keeper_private.pem');
 
 export const getPathToKeyFolder = () => {
-  const keyFolder = process.env.KEYS_PATH;
-  const pathToKeyFolder = path.resolve(process.cwd(), keyFolder ?? './keys');
+  const keyFolder: string | undefined = process.env.KEYS_PATH;
+  const pathToKeyFolder: string = path.resolve(process.cwd(), keyFolder ?? './keys');
 
   return pathToKeyFolder;
 };
@@ -38,8 +39,8 @@ export const generateRSAKeys = async (
 ): Promise<GeneratedRSAKeys | undefined> => {
   try {
     const {privateKeyPath, publicKeyPath} = pathToFolders;
-    const privateKeyFile = path.join(privateKeyPath, `${keyName}_private.${KEY_FORMAT}`);
-    const publicKeyFile = path.join(publicKeyPath, `${keyName}_public.${KEY_FORMAT}`);
+    const privateKeyFile: string = path.join(privateKeyPath, `${keyName}_private.${KEY_FORMAT}`);
+    const publicKeyFile: string = path.join(publicKeyPath, `${keyName}_public.${KEY_FORMAT}`);
 
     // if the folders exist, then return the existing keys
     if (
@@ -48,8 +49,8 @@ export const generateRSAKeys = async (
         .then(() => true)
         .catch(() => false)
     ) {
-      const publicKey = await fs.readFile(publicKeyFile, {encoding: 'utf8'});
-      const privateKey = await fs.readFile(privateKeyFile, {encoding: 'utf8'});
+      const publicKey: string = await fs.readFile(publicKeyFile, {encoding: 'utf8'});
+      const privateKey: string = await fs.readFile(privateKeyFile, {encoding: 'utf8'});
 
       logger.warn(`RSA keys already exist for ${keyName}`);
       return {
@@ -133,8 +134,8 @@ export const getPrivateKey = async (
   password?: string
 ): Promise<crypto.KeyObject | undefined> => {
   try {
-    const encryptedPrivateKeyPem = await fs.readFile(privateKeyPath, 'utf8');
-    const encryptedPrivateKeyBuffer = Buffer.from(encryptedPrivateKeyPem);
+    const encryptedPrivateKeyPem: string = await fs.readFile(privateKeyPath, 'utf8');
+    const encryptedPrivateKeyBuffer: Buffer = Buffer.from(encryptedPrivateKeyPem);
 
     return crypto.createPrivateKey({
       key: encryptedPrivateKeyBuffer,
@@ -160,8 +161,8 @@ export const encryptWithPublicKey = async (
   data: string
 ): Promise<string | undefined> => {
   try {
-    const buffer = Buffer.from(data, 'utf8');
-    const encrypted = crypto.publicEncrypt(publicKey, buffer);
+    const buffer: Buffer = Buffer.from(data, 'utf8');
+    const encrypted: Buffer = crypto.publicEncrypt(publicKey, buffer);
     return encrypted.toString('base64');
   } catch (error) {
     logger.error('Error encrypting data with public key:', error);
@@ -183,8 +184,8 @@ export const decryptWithPrivateKey = async (
   try {
     if (!encryptedData) throw new Error('No data to decrypt');
 
-    const buffer = Buffer.from(encryptedData, 'base64');
-    const decrypted = crypto.privateDecrypt(privateKey, buffer);
+    const buffer: Buffer = Buffer.from(encryptedData, 'base64');
+    const decrypted: Buffer = crypto.privateDecrypt(privateKey, buffer);
     return decrypted.toString('utf8');
   } catch (error) {
     logger.error('Decryption Error:', error);
@@ -204,7 +205,7 @@ export const signWithPrivateKey = async (
   data: string
 ): Promise<string | undefined> => {
   try {
-    const signature = crypto.sign(null, Buffer.from(data), {
+    const signature: Buffer = crypto.sign(null, Buffer.from(data), {
       key: privateKey,
       padding: crypto.constants.RSA_PKCS1_PSS_PADDING
     });
@@ -229,7 +230,7 @@ export const verifyWithPublicKey = async (
   signature: string
 ): Promise<boolean> => {
   try {
-    const isVerified = crypto.verify(
+    const isVerified: boolean = crypto.verify(
       null,
       Buffer.from(data),
       {key: publicKey, padding: crypto.constants.RSA_PKCS1_PSS_PADDING},
@@ -254,7 +255,7 @@ export const encryptWithPrivateKey = async (
   data: string
 ): Promise<string | undefined> => {
   try {
-    const encryptedData = crypto.privateEncrypt(privateKey, Buffer.from(data));
+    const encryptedData: Buffer = crypto.privateEncrypt(privateKey, Buffer.from(data));
     return encryptedData.toString('base64');
   } catch (error) {
     logger.error('Error encrypting data with private key:', error);
@@ -274,7 +275,10 @@ export const decryptWithPublicKey = async (
   encryptedData: string
 ): Promise<string | undefined> => {
   try {
-    const decryptedData = crypto.publicDecrypt(publicKey, Buffer.from(encryptedData, 'base64'));
+    const decryptedData: Buffer = crypto.publicDecrypt(
+      publicKey,
+      Buffer.from(encryptedData, 'base64')
+    );
     return decryptedData.toString();
   } catch (error) {
     logger.error('Error decrypting data with public key:', error);
@@ -282,21 +286,63 @@ export const decryptWithPublicKey = async (
   }
 };
 
+/**
+ * Verifies the signature for the given session and user.
+ * @param userId The user ID.
+ * @param nonce The nonce associated with the session.
+ * @param signature The signature to verify.
+ * @param userPublicKey The user's public key.
+ * @returns `true` if the signature is valid, `false` otherwise.
+ */
+export const verifySignature = async (
+  userId: string,
+  nonce: string,
+  signature: string,
+  userPublicKey: string
+): Promise<boolean> => {
+  // Compute the hash of the user ID and nonce
+  const signatureHash = (await hashData(userId + nonce)) as string;
+
+  const msgHeader = `verifySignature:: Error verifying signature for user ${userId} - `;
+
+  if (!signatureHash) {
+    logger.error(`${msgHeader} error hashing data`);
+    return false;
+  }
+
+  // Decrypt the signature using the user's public key
+  const decryptedSignature = await decryptWithPublicKey(userPublicKey, signature);
+
+  if (!decryptedSignature) {
+    logger.error(`${msgHeader} error decrypting signature`);
+    return false;
+  }
+
+  // Compare the hash with the decrypted signature
+  if (signatureHash !== decryptedSignature) {
+    logger.error(`${msgHeader} signature does not match hash`);
+    return false;
+  }
+
+  return true;
+};
+
 export const RSA4096: RSA4096Methods = {
   getPublicKey,
   getPrivateKey,
   generateRSAKeys,
+  verifySignature,
   signWithPrivateKey,
   verifyWithPublicKey,
   encryptWithPublicKey,
   decryptWithPublicKey,
   decryptWithPrivateKey,
   encryptWithPrivateKey,
+  getPathToPublicKey,
+  getPathToPrivateKey,
+  getPathToKeyFolder,
   KEY_FORMAT,
   PUBLIC_KEY_TYPE,
   PRIVATE_KEY_TYPE,
-  ENCRYPTION_ALGORITHM,
-  getPathToPublicKey,
-  getPathToPrivateKey,
-  getPathToKeyFolder
+  ENCRYPTION_ALGORITHM
 };

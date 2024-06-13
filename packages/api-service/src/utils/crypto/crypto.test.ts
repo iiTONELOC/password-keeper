@@ -11,17 +11,17 @@ describe('Crypto Utils', () => {
     expect(hashedData).not.toBe(data);
   });
 
-  it('should generate random bytes', async () => {
+  it('should generate random bytes', () => {
     const length = 32;
-    const randomBytes = await generateRandomBytes(length);
+    const randomBytes = generateRandomBytes(length);
     expect(randomBytes).toBeDefined();
     expect(randomBytes).not.toBeNull();
     expect(randomBytes).not.toBe('');
     expect(randomBytes?.length).toBe(length * 2);
   });
 
-  it('should create a nonce', async () => {
-    const nonce = await createNonce();
+  it('should create a nonce', () => {
+    const nonce = createNonce();
     expect(nonce).toBeDefined();
     expect(nonce).not.toBeNull();
     expect(nonce).not.toBe('');

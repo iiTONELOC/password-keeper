@@ -1,9 +1,9 @@
-import {KeyObject} from 'crypto';
 import {GraphQLError} from 'graphql';
 import logger from '../../../../logger';
 import {encryptAES} from '../../../../utils/crypto/aes-256';
 import {UserModel, LoginInviteModel} from '../../../../db/Models';
 import type {
+  PrivateKey,
   IUserDocument,
   IPublicKeyDocument,
   AES_EncryptionData,
@@ -15,9 +15,9 @@ import {
   hashData,
   createNonce,
   getPrivateKey,
+  verifySignature,
   getPathToPrivateKey,
   encryptWithPublicKey,
-  decryptWithPublicKey,
   decryptWithPrivateKey,
   encryptWithPrivateKey
 } from '../../../../utils';
@@ -76,7 +76,7 @@ export const getLoginNonce = async (
   logger.warn(`${logHeader} accessing private key to decrypt challenge for user`);
 
   // get the app's private key - decrypt the key using the passphrase
-  const privateKey: KeyObject | undefined = await getPrivateKey(
+  const privateKey: PrivateKey | undefined = await getPrivateKey(
     privateKeyPath,
     process.env.PRIVATE_KEY_PASSPHRASE
   );
@@ -96,23 +96,16 @@ export const getLoginNonce = async (
 
   // 4. Verify the signature which is the hash of the username + challenge signed with the user's private key
   // generate a sha256 hash of the username + challenge
-  const hash: string | undefined = await hashData(username + decryptedChallenge);
-
-  // decrypt the signature with the user's public key
-  const decryptedSignature: string | undefined = await decryptWithPublicKey(
-    userPublicKey.key,
-    signature
+  const verifiedSignature: boolean = await verifySignature(
+    user.username,
+    decryptedChallenge,
+    signature,
+    userPublicKey.key
   );
 
-  // verify the signature matches the hash
-  if (!decryptedSignature) {
-    logger.error(`${logHeader} - ERROR - could not decrypt signature`);
-    throw new GraphQLError('Error decrypting signature');
-  }
-
-  if (hash !== decryptedSignature) {
-    logger.error(`${logHeader} - ERROR - signature does not match`);
-    throw new GraphQLError('Signature does not match');
+  if (!verifiedSignature) {
+    logger.error(`${logHeader} - ERROR - could not verify signature`);
+    throw new GraphQLError('Error verifying signature');
   }
 
   // 5. re-encrypt the challenge with the user's public key - for transport

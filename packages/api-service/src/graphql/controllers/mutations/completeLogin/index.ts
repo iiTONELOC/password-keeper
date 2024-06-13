@@ -3,10 +3,9 @@ import logger from '../../../../logger';
 import {createAuthSession} from '../../helpers';
 import {LoginInviteModel} from '../../../../db/Models';
 import {
-  hashData,
   getPrivateKey,
+  verifySignature,
   getPathToPrivateKey,
-  decryptWithPublicKey,
   decryptWithPrivateKey
 } from '../../../../utils';
 import type {
@@ -19,7 +18,7 @@ import {decryptAES} from '../../../../utils/crypto/aes-256';
 export const completeLogin = async (
   _: undefined,
   args: CompleteLoginMutationVariables,
-  __: undefined
+  context: undefined
 ): Promise<CompleteLoginMutationPayload> => {
   const {
     completeLoginArgs: {nonce, signature, userId}
@@ -76,27 +75,17 @@ export const completeLogin = async (
     logger.error(`${logHeader} - ERROR - could not get the user's public key!`);
     throw new GraphQLError('User public key not found');
   }
-
   // verify the signature
-  const reproducedHash = await hashData(userInvite.user._id + decryptedNonce);
+  const verifiedSignature = await verifySignature(
+    userInvite.user._id.toString(),
+    decryptedNonce,
+    signature,
+    userPublicKey
+  );
 
-  if (!reproducedHash) {
-    logger.error(`${logHeader} - ERROR - could not reproduce the hash!`);
-    throw new GraphQLError('Error hashing data');
-  }
-
-  // decrypt the signature with the user's public key
-  const decryptedSignature = await decryptWithPublicKey(userPublicKey, signature);
-
-  if (!decryptedSignature) {
-    logger.error(`${logHeader} - ERROR - could not decrypt the signature!`);
-    throw new GraphQLError('Error decrypting signature');
-  }
-
-  // verify the decrypted signature matches the hash
-  if (reproducedHash !== decryptedSignature) {
-    logger.error(`${logHeader} - ERROR - the signature does not match the hash!`);
-    throw new GraphQLError('Signature does not match hash');
+  if (!verifiedSignature) {
+    logger.error(`${logHeader} - ERROR - could not verify the signature!`);
+    throw new GraphQLError('Error verifying signature');
   }
 
   // decrypt the nonce from the database using the app's private aes key

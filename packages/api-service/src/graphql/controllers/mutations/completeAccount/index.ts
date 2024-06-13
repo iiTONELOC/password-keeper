@@ -7,7 +7,9 @@ import type {
   CompleteAccountMutationPayload,
   CompleteAccountMutationVariables,
   IAccountCompletionInviteDocument,
-  IUserDocument
+  IPublicKeyDocument,
+  IUserDocument,
+  PrivateKey
 } from 'passwordkeeper.types';
 
 export const completeAccount = async (
@@ -32,15 +34,18 @@ export const completeAccount = async (
   // since this is for account creation, their public key is being sent with the
   // nonce. Therefore, for this time only,they send this value back encrypted with
   // the app's public key
-  const privateKeyPath = getPathToPrivateKey();
-  const privateKey = await getPrivateKey(privateKeyPath, process.env.PRIVATE_KEY_PASSPHRASE);
+  const privateKeyPath: string | undefined = getPathToPrivateKey();
+  const privateKey: PrivateKey | undefined = await getPrivateKey(
+    privateKeyPath,
+    process.env.PRIVATE_KEY_PASSPHRASE
+  );
 
   if (!privateKey) {
     logger.error('completeAccount mutationError - getting private key!');
     throw new GraphQLError('Error getting private key');
   }
 
-  const decryptedNonce = await decryptWithPrivateKey(privateKey, nonce);
+  const decryptedNonce: string | undefined = await decryptWithPrivateKey(privateKey, nonce);
 
   if (!decryptedNonce) {
     logger.error('completeAccount mutationError - error decrypting nonce!');
@@ -61,10 +66,12 @@ export const completeAccount = async (
   }
 
   // create a new public key for the user
-  const pubKey = await PublicKeyModel.create({key: publicKey, owner: invite.user});
+  const pubKey: IPublicKeyDocument = (
+    await PublicKeyModel.create({key: publicKey, owner: invite.user})
+  ).toObject();
 
   // update the user model with the new public key
-  const updatedUser = (
+  const updatedUser: IUserDocument | undefined = (
     await UserModel.findByIdAndUpdate(
       {_id: invite.user._id},
       {

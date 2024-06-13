@@ -6,10 +6,11 @@ export type GeneratedRSAKeys = {
   publicKey: string;
   privateKey: string;
 };
+export type PrivateKey = KeyObject;
 
 export type RSA4096Methods = {
   getPublicKey: (publicKeyPath: string) => Promise<string | undefined>;
-  getPrivateKey: (privateKeyPath: string, password?: string) => Promise<KeyObject | undefined>;
+  getPrivateKey: (privateKeyPath: string, password?: string) => Promise<PrivateKey | undefined>;
   generateRSAKeys: (
     keyName: string,
     pathToFolders: {
@@ -19,11 +20,17 @@ export type RSA4096Methods = {
     password?: string
   ) => Promise<GeneratedRSAKeys | undefined>;
   encryptWithPublicKey: (publicKey: string, data: string) => Promise<string | undefined>;
-  decryptWithPrivateKey: (privateKey: KeyObject, data: string) => Promise<string | undefined>;
+  decryptWithPrivateKey: (privateKey: PrivateKey, data: string) => Promise<string | undefined>;
   decryptWithPublicKey: (publicKey: string, data: string) => Promise<string | undefined>;
-  encryptWithPrivateKey: (privateKey: KeyObject, data: string) => Promise<string | undefined>;
+  encryptWithPrivateKey: (privateKey: PrivateKey, data: string) => Promise<string | undefined>;
   verifyWithPublicKey: (publicKey: string, data: string, signature: string) => Promise<boolean>;
-  signWithPrivateKey: (privateKey: KeyObject, data: string) => Promise<string | undefined>;
+  signWithPrivateKey: (privateKey: PrivateKey, data: string) => Promise<string | undefined>;
+  verifySignature: (
+    userId: string,
+    nonce: string,
+    signature: string,
+    userPublicKey: string
+  ) => Promise<boolean>;
   KEY_FORMAT: 'pem';
   PRIVATE_KEY_TYPE: 'pkcs8';
   PUBLIC_KEY_TYPE: 'spki';

@@ -1,5 +1,4 @@
 import path from 'path';
-import {KeyObject} from 'crypto';
 import {
   hashData,
   getPublicKey,
@@ -10,16 +9,17 @@ import {
   encryptWithPrivateKey,
   decryptWithPrivateKey
 } from '../src/utils';
+import {PrivateKey} from 'passwordkeeper.types';
 
 const decryptNonceWithUsersPrivateKey = async (
   encryptedNonce: string,
   username: string
 ): Promise<string> => {
   const pathToKeys = getPathToKeyFolder().replace('.private', `.${username}`);
-  const usersPrivateKey: KeyObject = (await getPrivateKey(
+  const usersPrivateKey: PrivateKey = (await getPrivateKey(
     path.join(pathToKeys, `${username}_private.pem`),
     username
-  )) as KeyObject;
+  )) as PrivateKey;
 
   if (!usersPrivateKey) {
     throw new Error('Error getting private key');
@@ -59,10 +59,10 @@ const createSignature = async (
   const signatureHash: string = (await hashData(userId + decryptedNonce)) as string;
 
   const pathToKeys = getPathToKeyFolder().replace('.private', `.${username}`);
-  const usersPrivateKey: KeyObject = (await getPrivateKey(
+  const usersPrivateKey: PrivateKey = (await getPrivateKey(
     path.join(pathToKeys, `${username}_private.pem`),
     username
-  )) as KeyObject;
+  )) as PrivateKey;
 
   if (!usersPrivateKey) {
     throw new Error('Error getting private key');

@@ -1,9 +1,8 @@
 import {GraphQLError} from 'graphql';
-import logger from '../../../../logger';
-import {createNonce, encryptWithPublicKey} from '../../../../utils';
-import {AuthSessionModel, PublicKeyModel, UserModel} from '../../../../db/Models';
-
-import {generateAESEncryptionKey, encryptAES} from '../../../../utils/crypto/aes-256';
+import logger from '../../../logger';
+import {AuthSessionModel} from '../../../db/Models';
+import {createNonce, encryptWithPublicKey} from '../../../utils';
+import {generateAESEncryptionKey, encryptAES} from '../../../utils/crypto/aes-256';
 import type {
   IUserDocument,
   AES_EncryptionData,

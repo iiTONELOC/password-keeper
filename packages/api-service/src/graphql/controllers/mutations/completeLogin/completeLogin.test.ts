@@ -1,5 +1,4 @@
 import path from 'path';
-import {KeyObject} from 'crypto';
 import {completeLogin} from './index';
 import {createUser} from '../createUser';
 import {getLoginNonce} from '../loginInvite';
@@ -18,7 +17,8 @@ import type {
   CompleteLoginMutationVariables,
   GetLoginNonceMutationVariables,
   CompleteAccountMutationPayload,
-  CompleteAccountMutationVariables
+  CompleteAccountMutationVariables,
+  PrivateKey
 } from 'passwordkeeper.types';
 import {
   hashData,
@@ -130,11 +130,13 @@ beforeAll(async () => {
   // create a hash of the username + challenge
   const signatureHash: string | undefined = await hashData(testUser.username + loginChallenge);
   // get the users keys
-  const usersPrivateKey: KeyObject | undefined = await getPrivateKey(testUserKeys.pathToPrivateKey);
+  const usersPrivateKey: PrivateKey | undefined = await getPrivateKey(
+    testUserKeys.pathToPrivateKey
+  );
 
   // sign the hash with the user's private key
   const userSignature: string | undefined = await encryptWithPrivateKey(
-    usersPrivateKey as KeyObject,
+    usersPrivateKey as PrivateKey,
     signatureHash as string
   );
 
@@ -167,10 +169,10 @@ afterAll(async () => {
 describe('completeLogin', () => {
   it('should complete the login process and return an AuthSession', async () => {
     const {nonce} = loginInvite || {};
-    const privateKey: KeyObject | undefined = await getPrivateKey(testUserKeys.pathToPrivateKey);
+    const privateKey: PrivateKey | undefined = await getPrivateKey(testUserKeys.pathToPrivateKey);
     // decrypt the nonce using the user's private key
     const decryptedNonce: string | undefined = await decryptWithPrivateKey(
-      privateKey as KeyObject,
+      privateKey as PrivateKey,
       nonce
     );
 
@@ -191,7 +193,7 @@ describe('completeLogin', () => {
 
     // sign the hash with the user's private key
     const userSignature: string | undefined = await encryptWithPrivateKey(
-      privateKey as KeyObject,
+      privateKey as PrivateKey,
       signatureHash as string
     );
 
