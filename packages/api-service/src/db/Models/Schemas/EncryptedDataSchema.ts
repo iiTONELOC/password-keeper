@@ -13,7 +13,7 @@ export const EncryptedDataSchema = new Schema<IEncryptedData>(
       required: true
     }
   },
-  {id: false, timestamps: false}
+  {id: false, _id: false, timestamps: false}
 );
 
 export default EncryptedDataSchema;

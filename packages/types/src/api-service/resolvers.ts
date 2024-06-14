@@ -1,6 +1,7 @@
 import {Types} from 'mongoose';
 import {IUserDocument} from './models';
 
+// ______________ Create User Mutation ______________
 export type CreateUserMutationVariables = {
   createUserArgs: {
     username: string;
@@ -13,6 +14,7 @@ export type CreateUserMutationPayload = {
   inviteToken: {token: string; expiresAt: Date};
 };
 
+// ______________ Complete Account Mutation ______________
 export type CompleteAccountMutationVariables = {
   completeAccountArgs: {
     nonce: string;
@@ -27,6 +29,7 @@ export type CompleteAccountMutationPayload = {
   expiresAt: Date;
 };
 
+// ______________ Get Login Nonce Mutation ______________
 export type GetLoginNonceMutationVariables = {
   getLoginNonceArgs: {
     username: string;
@@ -38,6 +41,11 @@ export type GetLoginNonceMutationVariables = {
      * signed with the user's private key
      */
     signature: string;
+    /**
+     * Optionally specify the index of the public key
+     * defaults to 0
+     */
+    keyIndex?: number;
   };
 };
 
@@ -53,11 +61,17 @@ export type GetLoginNonceMutationPayload = {
   signature: string;
 };
 
+// ______________ Complete Login Mutation ______________
 export type CompleteLoginMutationVariables = {
   completeLoginArgs: {
     nonce: string;
     signature: string;
     userId: string;
+    /**
+     * Optionally specify the index of the public key
+     * defaults to 0
+     */
+    keyIndex?: number;
   };
 };
 

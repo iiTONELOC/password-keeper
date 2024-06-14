@@ -30,7 +30,7 @@ export const getLoginNonce = async (
   __: undefined
 ): Promise<GetLoginNonceMutationPayload> => {
   const {
-    getLoginNonceArgs: {username, challenge, signature}
+    getLoginNonceArgs: {username, challenge, signature, keyIndex}
   } = args;
 
   if (!username) {
@@ -61,7 +61,9 @@ export const getLoginNonce = async (
   }
 
   // 2. get the user's public key from the db
-  const userPublicKey: IPublicKeyDocument = user?.publicKeys?.[0] as unknown as IPublicKeyDocument;
+  const userPublicKey: IPublicKeyDocument = user?.publicKeys?.[
+    keyIndex ?? 0
+  ] as unknown as IPublicKeyDocument;
 
   logger.warn(`${logHeader} retrieving public key for user`);
 

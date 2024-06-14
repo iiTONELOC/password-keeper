@@ -20,6 +20,8 @@ export const getAuth = async (req: Request): Promise<IAuthSessionDocument | unde
   const authHeader: string | undefined = req.headers.authorization;
   // Look for the signature header
   const signatureHeader: string | string[] | undefined = req.headers.signature;
+  // Look for an optional Key Index header, which is used to specify the public key to use for signature verification
+  const keyIndexHeader: string | string[] | undefined = req.headers['key-index'];
 
   if (authHeader && signatureHeader) {
     // Get the private key for the app to decrypt the auth header to get the session ID
@@ -57,7 +59,8 @@ export const getAuth = async (req: Request): Promise<IAuthSessionDocument | unde
 
     // Decrypt the nonce
     const decryptedNonce: string | undefined = await decryptAES(session.nonce, AES_KEY);
-    const userPublicKey = session.user.publicKeys[0].key;
+    const userPublicKey =
+      session.user.publicKeys[keyIndexHeader ? parseInt(keyIndexHeader as string, 10) : 0].key;
     if (!decryptedNonce || !userPublicKey) {
       return undefined;
     }

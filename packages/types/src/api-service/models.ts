@@ -1,5 +1,14 @@
 import {Model, Types} from 'mongoose';
 
+export enum ValidAccountTypes {
+  FREE = 'FREE',
+  PRO = 'PRO',
+  BUSINESS = 'BUSINESS',
+  TIERED_BUSINESS_1 = 'TIERED_BUSINESS_1',
+  TIERED_BUSINESS_2 = 'TIERED_BUSINESS_2',
+  TIERED_BUSINESS_3 = 'TIERED_BUSINESS_3'
+}
+
 export type Timestamps = {
   createdAt: Date;
   updatedAt: Date;
@@ -11,6 +20,23 @@ export type IEncryptedData = {
   iv: string;
 };
 
+//  _______ Account Type _______
+export type IAccountType = {
+  type: ValidAccountTypes;
+  price: number;
+  // -1 for unlimited
+  maxUsers: number;
+  maxPasswords: number;
+};
+
+export type IAccountTypeModel = Model<IAccountType>;
+export type IAccountTypeDocument = IAccountTypeModel &
+  IAccountType &
+  Timestamps & {
+    _id: Types.ObjectId;
+  };
+
+export type IAccountTypeMap = Record<ValidAccountTypes, IAccountType>;
 //  _______ Users _______
 
 export type IUser = {
