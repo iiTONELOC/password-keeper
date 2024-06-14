@@ -1,5 +1,6 @@
 import connectToDB from './src/db/connection';
 import {DBConnection} from 'passwordkeeper.types';
+import {seedAccountTypes} from './src/scripts/seedDatabase';
 import {
   UserModel,
   PublicKeyModel,
@@ -14,6 +15,7 @@ const globalSetup = async () => {
   db = await connectToDB('pwd-keeper-test');
 
   await Promise.all([
+    seedAccountTypes(),
     UserModel.deleteMany(),
     PublicKeyModel.deleteMany(),
     AuthSessionModel.deleteMany(),

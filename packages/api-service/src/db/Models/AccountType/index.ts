@@ -17,10 +17,10 @@ const AccountTypeSchema = new Schema<IAccountType>(
       required: true,
       default: AccountTypeMap[ValidAccountTypes.FREE].price
     },
-    maxUsers: {
+    maxDevices: {
       type: Number,
       required: true,
-      default: AccountTypeMap[ValidAccountTypes.FREE].maxUsers
+      default: AccountTypeMap[ValidAccountTypes.FREE].maxDevices
     },
     maxPasswords: {
       type: Number,
@@ -34,3 +34,5 @@ const AccountTypeSchema = new Schema<IAccountType>(
 const AccountType: IAccountTypeModel = model<IAccountType>('AccountType', AccountTypeSchema);
 
 export default AccountType;
+
+export {DefaultAccountTypes, AccountTypeMap};

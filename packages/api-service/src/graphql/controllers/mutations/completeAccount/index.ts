@@ -1,13 +1,12 @@
 import {GraphQLError} from 'graphql';
 import logger from '../../../../logger';
-import {createAuthSession} from '../../helpers';
-import {PublicKeyModel, AccountCompletionInviteModel, UserModel} from '../../../../db/Models';
+import {createAuthSession, addPublicKey} from '../../helpers';
+import {AccountCompletionInviteModel} from '../../../../db/Models';
 import {getPrivateKey, decryptWithPrivateKey, getPathToPrivateKey} from '../../../../utils';
 import type {
   CompleteAccountMutationPayload,
   CompleteAccountMutationVariables,
   IAccountCompletionInviteDocument,
-  IPublicKeyDocument,
   IUserDocument,
   PrivateKey
 } from 'passwordkeeper.types';
@@ -65,24 +64,7 @@ export const completeAccount = async (
     throw new GraphQLError('Invite not found');
   }
 
-  // create a new public key for the user
-  const pubKey: IPublicKeyDocument = (
-    await PublicKeyModel.create({key: publicKey, owner: invite.user})
-  ).toObject();
-
-  // update the user model with the new public key
-  const updatedUser: IUserDocument | undefined = (
-    await UserModel.findByIdAndUpdate(
-      {_id: invite.user._id},
-      {
-        $addToSet: {publicKeys: pubKey._id}
-      },
-      {
-        runValidators: true,
-        returnNewDocument: true
-      }
-    ).select('_id username email')
-  )?.toObject();
+  const updatedUser = await addPublicKey(invite.user._id, publicKey);
 
   // delete the invite
   await AccountCompletionInviteModel.deleteOne({_id: invite._id});

@@ -5,6 +5,13 @@ export const enforceUserSession = (context: AuthContext) => {
     session: false
   };
 
+  // check the expiration time of the session
+  const now = new Date();
+
+  if (session?.expiresAt && session.expiresAt < now) {
+    throw new Error('Session Expired');
+  }
+
   if (!session) {
     throw new Error('Not Authenticated');
   }

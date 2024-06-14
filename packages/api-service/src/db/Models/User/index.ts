@@ -1,5 +1,6 @@
 import {Schema, model} from 'mongoose';
-import type {IUser, IUserModel} from 'passwordkeeper.types';
+import {DefaultAccountTypes} from '../AccountType';
+import {IUser, IUserModel, ValidAccountTypes} from 'passwordkeeper.types';
 
 // Define the User Schema
 const UserSchema = new Schema<IUser>(
@@ -32,7 +33,13 @@ const UserSchema = new Schema<IUser>(
         required: false,
         default: []
       }
-    ]
+    ],
+    accountType: {
+      type: String,
+      required: true,
+      enum: [...DefaultAccountTypes],
+      default: ValidAccountTypes.FREE
+    }
   },
   {id: false, timestamps: true}
 );

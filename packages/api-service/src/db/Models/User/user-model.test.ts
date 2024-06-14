@@ -19,13 +19,15 @@ describe('User Model', () => {
     const User: IUserModel = UserModel;
     const schemaPaths = Object.keys(User.schema.paths);
 
-    expect(schemaPaths).toHaveLength(7);
-    expect(schemaPaths).toContain('username');
-    expect(schemaPaths).toContain('email');
-    expect(schemaPaths).toContain('publicKeys');
+    expect(schemaPaths).toHaveLength(8);
+
     expect(schemaPaths).toContain('_id');
     expect(schemaPaths).toContain('__v');
+    expect(schemaPaths).toContain('email');
+    expect(schemaPaths).toContain('username');
     expect(schemaPaths).toContain('createdAt');
     expect(schemaPaths).toContain('updatedAt');
+    expect(schemaPaths).toContain('publicKeys');
+    expect(schemaPaths).toContain('accountType');
   });
 });

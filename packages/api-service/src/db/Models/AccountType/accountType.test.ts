@@ -1,6 +1,6 @@
 import AccountType from './index';
-import {AccountTypeMap} from './account-details';
 import {describe, expect, it} from '@jest/globals';
+import {AccountTypeMap, DefaultAccountTypes} from './account-details';
 import {IAccountTypeModel, ValidAccountTypes} from 'passwordkeeper.types';
 
 describe('AccountType Model', () => {
@@ -25,25 +25,38 @@ describe('AccountType Model', () => {
     expect(schemaPaths).toContain('__v');
     expect(schemaPaths).toContain('type');
     expect(schemaPaths).toContain('price');
-    expect(schemaPaths).toContain('maxUsers');
+    expect(schemaPaths).toContain('maxDevices');
     expect(schemaPaths).toContain('maxPasswords');
   });
 });
 
-describe('ValidAccountTypes', () => {
-  it('Should be an object', () => {
-    expect(ValidAccountTypes).toBeInstanceOf(Object);
+describe('Default Account Types', () => {
+  it('Should be an array', () => {
+    expect(DefaultAccountTypes).toBeInstanceOf(Array);
   });
 
-  it('Should have 6 properties', () => {
-    const keys = Object.keys(ValidAccountTypes);
-    expect(keys).toHaveLength(6);
-    expect(keys).toContain('FREE');
-    expect(keys).toContain('PRO');
-    expect(keys).toContain('BUSINESS');
-    expect(keys).toContain('TIERED_BUSINESS_1');
-    expect(keys).toContain('TIERED_BUSINESS_2');
-    expect(keys).toContain('TIERED_BUSINESS_3');
+  it('Should have 6 elements', () => {
+    expect(DefaultAccountTypes).toHaveLength(6);
+  });
+
+  it('Should contain all valid account types', () => {
+    expect(DefaultAccountTypes).toContain(ValidAccountTypes.FREE);
+    expect(DefaultAccountTypes).toContain(ValidAccountTypes.PRO);
+    expect(DefaultAccountTypes).toContain(ValidAccountTypes.BUSINESS);
+    expect(DefaultAccountTypes).toContain(ValidAccountTypes.TIERED_BUSINESS_1);
+    expect(DefaultAccountTypes).toContain(ValidAccountTypes.TIERED_BUSINESS_2);
+    expect(DefaultAccountTypes).toContain(ValidAccountTypes.TIERED_BUSINESS_3);
+  });
+
+  it('Should be frozen', () => {
+    expect(Object.isFrozen(DefaultAccountTypes)).toBeTruthy();
+  });
+
+  it('Should not be able to be modified', () => {
+    const fn = () => {
+      DefaultAccountTypes.push(ValidAccountTypes.FREE);
+    };
+    expect(fn).toThrowError();
   });
 });
 
@@ -67,38 +80,54 @@ describe('AccountTypeMap', () => {
     expect(AccountTypeMap.FREE).toEqual({
       type: ValidAccountTypes.FREE,
       price: 0,
-      maxUsers: 3,
+      maxDevices: 3,
       maxPasswords: 100
     });
     expect(AccountTypeMap.PRO).toEqual({
       type: ValidAccountTypes.PRO,
       price: 5,
-      maxUsers: 10,
+      maxDevices: 10,
       maxPasswords: 500
     });
     expect(AccountTypeMap.BUSINESS).toEqual({
       type: ValidAccountTypes.BUSINESS,
       price: 10,
-      maxUsers: 25,
+      maxDevices: 25,
       maxPasswords: 1000
     });
     expect(AccountTypeMap.TIERED_BUSINESS_1).toEqual({
       type: ValidAccountTypes.TIERED_BUSINESS_1,
       price: 25,
-      maxUsers: 50,
+      maxDevices: 50,
       maxPasswords: 2000
     });
     expect(AccountTypeMap.TIERED_BUSINESS_2).toEqual({
       type: ValidAccountTypes.TIERED_BUSINESS_2,
       price: 50,
-      maxUsers: 100,
+      maxDevices: 100,
       maxPasswords: 5000
     });
     expect(AccountTypeMap.TIERED_BUSINESS_3).toEqual({
       type: ValidAccountTypes.TIERED_BUSINESS_3,
       price: 100,
-      maxUsers: -1,
+      maxDevices: -1,
       maxPasswords: -1
     });
+  });
+
+  it('Should be frozen', () => {
+    expect(Object.isFrozen(AccountTypeMap)).toBeTruthy();
+  });
+
+  it('Should not be able to be modified', () => {
+    const fn = () => {
+      AccountTypeMap.FREE = {
+        type: ValidAccountTypes.FREE,
+        price: 0,
+        maxDevices: 3,
+        maxPasswords: 100
+      };
+    };
+    expect(fn).toThrowError();
   });
 });

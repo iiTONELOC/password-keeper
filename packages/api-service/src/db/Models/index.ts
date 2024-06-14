@@ -3,3 +3,4 @@ export {default as PublicKeyModel} from './PublicKey';
 export {default as AuthSessionModel} from './AuthSession';
 export {default as LoginInviteModel} from './LoginInvite';
 export {default as AccountCompletionInviteModel} from './AccountCompletionInvite';
+export {default as AccountTypeModel, AccountTypeMap, DefaultAccountTypes} from './AccountType';
