@@ -17,10 +17,10 @@ const AccountTypeSchema = new Schema<IAccountType>(
       required: true,
       default: AccountTypeMap[ValidAccountTypes.FREE].price
     },
-    maxDevices: {
+    maxPublicKeys: {
       type: Number,
       required: true,
-      default: AccountTypeMap[ValidAccountTypes.FREE].maxDevices
+      default: AccountTypeMap[ValidAccountTypes.FREE].maxPublicKeys
     },
     maxPasswords: {
       type: Number,

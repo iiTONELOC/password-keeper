@@ -27,6 +27,7 @@ export type IAccountType = {
   // -1 for unlimited
   maxUsers: number;
   maxPasswords: number;
+  maxPublicKeys: number;
 };
 
 export type IAccountTypeModel = Model<IAccountType>;
@@ -43,6 +44,8 @@ export type IUser = {
   username: string;
   email: string;
   publicKeys?: Types.ObjectId[];
+  accountType?: ValidAccountTypes;
+  subUsers?: Types.ObjectId[];
 };
 
 export type IUserModel = Model<IUser>;
@@ -51,6 +54,8 @@ export type IUserDocument = IUserModel &
   Timestamps & {
     _id: Types.ObjectId;
     publicKeys: IPublicKeyDocument[];
+    accountType: IAccountTypeDocument;
+    subUsers: IUserDocument[];
   };
 
 // _______ Account Completion Invites _______
@@ -80,6 +85,74 @@ export type IPublicKey = {
 export type IPublicKeyModel = Model<IPublicKey>;
 export type IPublicKeyDocument = IPublicKeyModel &
   IPublicKey &
+  Timestamps & {
+    _id: Types.ObjectId;
+    owner: IUserDocument;
+  };
+
+// _______ Passwords _______
+/**
+ * Password objects are encrypted using AES-256-GCM on the client
+ * side before being sent to the server. Their data is then encrypted
+ * using AES-256-GCM with a server-side key before being stored in the
+ * database.
+ */
+
+/**
+ * Represents a password object that is not encrypted - this is how a user
+ * would view a password object that they have decrypted using their AES
+ * key
+ */
+export type IPassword = {
+  name: string;
+  username: string;
+  password: string;
+  url?: string;
+  owner: string | Types.ObjectId;
+  expiresAt?: Date;
+};
+
+/**
+ * Represents how a user would present a password object for storage that
+ * has been encrypted using their AES key
+ */
+export type IPasswordEncrypted = {
+  name: IEncryptedData;
+  username: IEncryptedData;
+  password: IEncryptedData;
+  url?: IEncryptedData;
+  owner: string | Types.ObjectId;
+  expiresAt?: Date;
+};
+
+/**
+ * Represents a password object that has been encrypted for placement in the database
+ * using the server-side AES key
+ */
+export type IPasswordEncryptedAtRest = {
+  name: {
+    encryptedData: IEncryptedData;
+    iv: string;
+  };
+  username: {
+    encryptedData: IEncryptedData;
+    iv: string;
+  };
+  password: {
+    encryptedData: IEncryptedData;
+    iv: string;
+  };
+  url?: {
+    encryptedData: IEncryptedData;
+    iv: string;
+  };
+  expiresAt?: Date;
+  owner: Types.ObjectId;
+};
+
+export type IUserPasswordModel = Model<IPasswordEncryptedAtRest>;
+export type IUserPasswordDocument = IUserPasswordModel &
+  IPasswordEncryptedAtRest &
   Timestamps & {
     _id: Types.ObjectId;
     owner: IUserDocument;

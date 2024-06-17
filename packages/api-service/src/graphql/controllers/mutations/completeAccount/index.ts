@@ -4,11 +4,11 @@ import {createAuthSession, addPublicKey} from '../../helpers';
 import {AccountCompletionInviteModel} from '../../../../db/Models';
 import {getPrivateKey, decryptWithPrivateKey, getPathToPrivateKey} from '../../../../utils';
 import type {
+  PrivateKey,
+  IUserDocument,
   CompleteAccountMutationPayload,
   CompleteAccountMutationVariables,
-  IAccountCompletionInviteDocument,
-  IUserDocument,
-  PrivateKey
+  IAccountCompletionInviteDocument
 } from 'passwordkeeper.types';
 
 export const completeAccount = async (
@@ -40,14 +40,14 @@ export const completeAccount = async (
   );
 
   if (!privateKey) {
-    logger.error('completeAccount mutationError - getting private key!');
+    logger.error('completeAccount:: mutationError - getting private key!');
     throw new GraphQLError('Error getting private key');
   }
 
   const decryptedNonce: string | undefined = await decryptWithPrivateKey(privateKey, nonce);
 
   if (!decryptedNonce) {
-    logger.error('completeAccount mutationError - error decrypting nonce!');
+    logger.error('completeAccount:: mutationError - error decrypting nonce!');
     throw new GraphQLError('Error decrypting nonce');
   }
 
@@ -64,10 +64,18 @@ export const completeAccount = async (
     throw new GraphQLError('Invite not found');
   }
 
-  const updatedUser = await addPublicKey(invite.user._id, publicKey);
+  try {
+    // add the public key to the user
+    const updatedUser = await addPublicKey(invite.user._id, publicKey);
 
-  // delete the invite
-  await AccountCompletionInviteModel.deleteOne({_id: invite._id});
+    // delete the invite
+    await AccountCompletionInviteModel.deleteOne({_id: invite._id});
 
-  return createAuthSession({publicKey, user: updatedUser as Partial<IUserDocument>});
+    return createAuthSession({publicKey, user: updatedUser as Partial<IUserDocument>});
+  } catch (error) {
+    logger.error('completeAccount:: mutationError - error adding public key!');
+    // delete the invite
+    await AccountCompletionInviteModel.deleteOne({_id: invite._id});
+    throw new GraphQLError('Error completing account');
+  }
 };

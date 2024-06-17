@@ -30,7 +30,7 @@ export const getLoginNonce = async (
   __: undefined
 ): Promise<GetLoginNonceMutationPayload> => {
   const {
-    getLoginNonceArgs: {username, challenge, signature, keyIndex}
+    getLoginNonceArgs: {username, challenge, signature, publicKeyId}
   } = args;
 
   if (!username) {
@@ -61,13 +61,13 @@ export const getLoginNonce = async (
   }
 
   // 2. get the user's public key from the db
-  const userPublicKey: IPublicKeyDocument = user?.publicKeys?.[
-    keyIndex ?? 0
-  ] as unknown as IPublicKeyDocument;
+  const userPublicKeyDoc: IPublicKeyDocument | undefined =
+    user?.publicKeys?.find((key: IPublicKeyDocument) => key._id.toString() === publicKeyId) ??
+    user?.publicKeys?.[0];
 
   logger.warn(`${logHeader} retrieving public key for user`);
 
-  if (!userPublicKey) {
+  if (!userPublicKeyDoc) {
     logger.error(`${logHeader} - ERROR -  no public key found for user`);
     throw new GraphQLError('User public key not found');
   }
@@ -102,7 +102,7 @@ export const getLoginNonce = async (
     user.username,
     decryptedChallenge,
     signature,
-    userPublicKey.key
+    userPublicKeyDoc.key
   );
 
   if (!verifiedSignature) {
@@ -112,7 +112,7 @@ export const getLoginNonce = async (
 
   // 5. re-encrypt the challenge with the user's public key - for transport
   const reEncryptedChallenge: string | undefined = await encryptWithPublicKey(
-    userPublicKey.key,
+    userPublicKeyDoc.key,
     decryptedChallenge
   );
 
@@ -131,7 +131,7 @@ export const getLoginNonce = async (
 
   // encrypt the nonce with the user's public key - for transport
   const userEncryptedNonce: string | undefined = await encryptWithPublicKey(
-    userPublicKey.key,
+    userPublicKeyDoc.key,
     nonce
   );
 

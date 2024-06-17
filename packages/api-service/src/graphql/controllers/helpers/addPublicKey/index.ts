@@ -1,6 +1,6 @@
 import {Types} from 'mongoose';
-import {AccountTypeMap, PublicKeyModel, UserModel} from '../../../db/Models';
 import type {IUserDocument, ValidAccountTypes} from 'passwordkeeper.types';
+import {AccountTypeMap, PublicKeyModel, UserModel} from '../../../../db/Models';
 
 /**
  * Adds a new public key to the user's account in accordance with their account type
@@ -24,7 +24,8 @@ export const addPublicKey = async (
   const publicKeyCount = existingUser?.publicKeys?.length ?? 0;
 
   // determine the max number of public keys this user can have according to their type
-  const maxPublicKeys = AccountTypeMap[existingUser?.accountType as ValidAccountTypes].maxDevices;
+  const maxPublicKeys =
+    AccountTypeMap[existingUser?.accountType as ValidAccountTypes].maxPublicKeys;
 
   // if the user has reached the max number of public keys, throw an error
   if (publicKeyCount >= maxPublicKeys) {

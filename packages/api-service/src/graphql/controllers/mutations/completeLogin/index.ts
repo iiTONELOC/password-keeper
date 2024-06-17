@@ -11,7 +11,8 @@ import {
 import type {
   ILoginInviteDocument,
   CompleteLoginMutationPayload,
-  CompleteLoginMutationVariables
+  CompleteLoginMutationVariables,
+  IPublicKeyDocument
 } from 'passwordkeeper.types';
 import {decryptAES} from '../../../../utils/crypto/aes-256';
 
@@ -21,7 +22,7 @@ export const completeLogin = async (
   context: undefined
 ): Promise<CompleteLoginMutationPayload> => {
   const {
-    completeLoginArgs: {nonce, signature, userId, keyIndex}
+    completeLoginArgs: {nonce, signature, userId, publicKeyId}
   } = args;
 
   if (!nonce) {
@@ -69,7 +70,10 @@ export const completeLogin = async (
   }
 
   // get the user's public key from the userInvite data
-  const userPublicKey = userInvite?.user?.publicKeys?.[keyIndex ?? 0]?.key;
+  const userPublicKey =
+    userInvite?.user?.publicKeys?.find(
+      (key: IPublicKeyDocument) => key._id.toString() === publicKeyId
+    )?.key ?? userInvite?.user?.publicKeys?.[0]?.key;
 
   if (!userPublicKey) {
     logger.error(`${logHeader} - ERROR - could not get the user's public key!`);

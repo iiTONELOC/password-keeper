@@ -39,7 +39,15 @@ const UserSchema = new Schema<IUser>(
       required: true,
       enum: [...DefaultAccountTypes],
       default: ValidAccountTypes.FREE
-    }
+    },
+    subUsers: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+        required: false,
+        default: []
+      }
+    ]
   },
   {id: false, timestamps: true}
 );

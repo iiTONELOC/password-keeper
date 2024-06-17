@@ -25,7 +25,7 @@ describe('AccountType Model', () => {
     expect(schemaPaths).toContain('__v');
     expect(schemaPaths).toContain('type');
     expect(schemaPaths).toContain('price');
-    expect(schemaPaths).toContain('maxDevices');
+    expect(schemaPaths).toContain('maxPublicKeys');
     expect(schemaPaths).toContain('maxPasswords');
   });
 });
@@ -80,37 +80,43 @@ describe('AccountTypeMap', () => {
     expect(AccountTypeMap.FREE).toEqual({
       type: ValidAccountTypes.FREE,
       price: 0,
-      maxDevices: 3,
+      maxUsers: 1,
+      maxPublicKeys: 3,
       maxPasswords: 100
     });
     expect(AccountTypeMap.PRO).toEqual({
       type: ValidAccountTypes.PRO,
       price: 5,
-      maxDevices: 10,
+      maxUsers: 3,
+      maxPublicKeys: 9,
       maxPasswords: 500
     });
     expect(AccountTypeMap.BUSINESS).toEqual({
       type: ValidAccountTypes.BUSINESS,
       price: 10,
-      maxDevices: 25,
-      maxPasswords: 1000
+      maxUsers: 10,
+      maxPublicKeys: 30,
+      maxPasswords: 2000
     });
     expect(AccountTypeMap.TIERED_BUSINESS_1).toEqual({
       type: ValidAccountTypes.TIERED_BUSINESS_1,
       price: 25,
-      maxDevices: 50,
-      maxPasswords: 2000
+      maxUsers: 25,
+      maxPublicKeys: 75,
+      maxPasswords: 5000
     });
     expect(AccountTypeMap.TIERED_BUSINESS_2).toEqual({
       type: ValidAccountTypes.TIERED_BUSINESS_2,
       price: 50,
-      maxDevices: 100,
-      maxPasswords: 5000
+      maxUsers: 50,
+      maxPublicKeys: 150,
+      maxPasswords: 10000
     });
     expect(AccountTypeMap.TIERED_BUSINESS_3).toEqual({
       type: ValidAccountTypes.TIERED_BUSINESS_3,
       price: 100,
-      maxDevices: -1,
+      maxUsers: -1,
+      maxPublicKeys: -1,
       maxPasswords: -1
     });
   });
@@ -124,7 +130,8 @@ describe('AccountTypeMap', () => {
       AccountTypeMap.FREE = {
         type: ValidAccountTypes.FREE,
         price: 0,
-        maxDevices: 3,
+        maxUsers: 2,
+        maxPublicKeys: 3,
         maxPasswords: 100
       };
     };

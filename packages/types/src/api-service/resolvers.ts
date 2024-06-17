@@ -41,11 +41,7 @@ export type GetLoginNonceMutationVariables = {
      * signed with the user's private key
      */
     signature: string;
-    /**
-     * Optionally specify the index of the public key
-     * defaults to 0
-     */
-    keyIndex?: number;
+    publicKeyId?: string;
   };
 };
 
@@ -67,11 +63,7 @@ export type CompleteLoginMutationVariables = {
     nonce: string;
     signature: string;
     userId: string;
-    /**
-     * Optionally specify the index of the public key
-     * defaults to 0
-     */
-    keyIndex?: number;
+    publicKeyId?: string;
   };
 };
 

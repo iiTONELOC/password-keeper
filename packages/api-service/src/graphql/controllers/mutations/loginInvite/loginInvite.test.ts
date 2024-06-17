@@ -1,7 +1,6 @@
 import path from 'path';
 import {getLoginNonce} from './index';
-import {createUser} from '../createUser';
-import {completeAccount} from '../completeAccount';
+import {createTestUser} from '../../testHelpers';
 import dbConnection, {disconnectFromDB} from '../../../../db/connection';
 import {describe, expect, it, beforeAll, afterAll} from '@jest/globals';
 import type {
@@ -10,19 +9,15 @@ import type {
   DBConnection,
   IUserDocument,
   GeneratedRSAKeys,
-  CreateUserMutationPayload,
   CreateUserMutationVariables,
   GetLoginNonceMutationPayload,
-  GetLoginNonceMutationVariables,
-  CompleteAccountMutationPayload,
-  CompleteAccountMutationVariables
+  GetLoginNonceMutationVariables
 } from 'passwordkeeper.types';
 import {
   hashData,
   createNonce,
   getPublicKey,
   getPrivateKey,
-  generateRSAKeys,
   getPathToKeyFolder,
   getPathToPublicKey,
   encryptWithPublicKey,
@@ -31,22 +26,21 @@ import {
   encryptWithPrivateKey
 } from '../../../../utils';
 
+// store variables needed to test the login process
 let db: DBConnection;
 let testUser: IUserDocument;
 let testUserKeys: GeneratedRSAKeys;
 
+// get the path to the keys for the getLoginNonce test
 const pathToKeys: string = path.join(
   getPathToKeyFolder()?.replace('.private', 'test-keys'),
   'getLoginNonce'
 );
 
+// test user data
 const testUserCreationData: IUser = {
   username: 'testLoginNonce',
   email: 'testloginnonce@test.com'
-};
-
-const testUserCreationVariables: CreateUserMutationVariables = {
-  createUserArgs: {username: testUserCreationData.username, email: testUserCreationData.email}
 };
 
 /**
@@ -54,70 +48,15 @@ const testUserCreationVariables: CreateUserMutationVariables = {
  */
 beforeAll(async () => {
   db = await dbConnection('pwd-keeper-test');
-  // create the user
-  const newUser: CreateUserMutationPayload = await createUser(
-    undefined,
-    testUserCreationVariables,
-    undefined
-  );
 
-  // get the invite token for the completeAccount mutation
-  const {inviteToken} = newUser || {};
+  const createUser = await createTestUser({
+    user: {createUserArgs: {...testUserCreationData} as IUser} as CreateUserMutationVariables,
+    pathToKeys: pathToKeys,
+    userRSAKeyName: 'getLoginNonce'
+  });
 
-  // get the app's public key to decrypt the nonce
-  const appPublicKey: string | undefined = await getPublicKey(getPathToPublicKey());
-
-  if (!appPublicKey) {
-    throw new Error('Error getting public key');
-  }
-
-  //decrypt the nonce
-  const decryptedNonce: string | undefined = await decryptWithPublicKey(
-    appPublicKey,
-    inviteToken?.token
-  );
-
-  if (!decryptedNonce) {
-    throw new Error('Error decrypting nonce');
-  }
-
-  // - the user will have their own keys but we need to generate some for the test
-  testUserKeys = (await generateRSAKeys('getLoginNonce', {
-    privateKeyPath: pathToKeys,
-    publicKeyPath: pathToKeys
-  })) as GeneratedRSAKeys;
-
-  const {publicKey, privateKey} = testUserKeys || {};
-
-  if (!publicKey || !privateKey) {
-    throw new Error('Error generating keys');
-  }
-
-  // re-encrypt the nonce with the app's public key
-  const reEncryptedNonce: string | undefined = await encryptWithPublicKey(
-    appPublicKey,
-    decryptedNonce
-  );
-
-  if (!reEncryptedNonce) {
-    throw new Error('Error re-encrypting nonce');
-  }
-
-  const competeAccountArgs: CompleteAccountMutationVariables = {
-    completeAccountArgs: {
-      nonce: reEncryptedNonce,
-      publicKey
-    }
-  };
-
-  // complete the account creation process
-  const result: CompleteAccountMutationPayload = await completeAccount(
-    undefined,
-    competeAccountArgs,
-    undefined
-  );
-
-  testUser = result.user as IUserDocument;
+  testUser = createUser.createdAuthSession.user as IUserDocument;
+  testUserKeys = createUser.userKeys;
 });
 
 afterAll(async () => {

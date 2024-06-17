@@ -6,12 +6,9 @@ import logger from '../logger';
 
 // seed the AccountType collection with the default account types using the data from the AccountTypeMap
 export const createDefaultAccountTypes = async () => {
-  const accountTypes: IAccountType[] = Object.values(AccountTypeMap).map(accountType => ({
-    type: accountType.type,
-    price: accountType.price,
-    maxDevices: accountType.maxDevices,
-    maxPasswords: accountType.maxPasswords
-  }));
+  const accountTypes: IAccountType[] = Object.values(AccountTypeMap).map(
+    accountType => accountType
+  );
 
   await AccountTypeModel.insertMany(accountTypes);
 };
