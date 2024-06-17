@@ -7,6 +7,24 @@ const typeDefs = `#graphql
         username: String!
         email: String!
         publicKeys: [PublicKey!]!
+        accountType: String!
+        subUsers: [User!]!
+        passwords: [EncryptedUserPassword!]!
+    }
+
+    type EncryptedData {
+        encryptedData: String!  
+        iv: String!
+    }
+
+    type EncryptedUserPassword {
+        _id: ID!
+        name: EncryptedData!
+        username: EncryptedData!
+        password: EncryptedData!
+        url: EncryptedData
+        owner: User!
+        expiresAt: String
     }
     
     type PublicKey {

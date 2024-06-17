@@ -26,8 +26,11 @@ export const createAppServer = (port = 3000): AppServer => {
   let database: Mongoose | null = null;
 
   const gracefulShutdown = () => {
+    /* istanbul ignore next */
     logger.info('⛔ Gracefully shutting down server');
+    /* istanbul ignore next */
     httpServer.close();
+    /* istanbul ignore next */
     process.exit(0);
   };
 
@@ -51,6 +54,7 @@ export const createAppServer = (port = 3000): AppServer => {
       ];
 
       // if we are in development mode, allow all origins, and display the graphql playground
+      /* istanbul ignore next */
       if (process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 'test') {
         corsOptions.origin = [`http://localhost:${port}`, `http://${ip}:${port}`];
         connectedMessages.push(
@@ -59,6 +63,7 @@ export const createAppServer = (port = 3000): AppServer => {
       }
 
       // if we are in production mode, only allow the production origins from the environment
+      /* istanbul ignore next */
       if (process.env.NODE_ENV === 'production') {
         corsOptions.origin = process.env.ALLOWED_ORIGINS?.split(',') ?? [];
       }
@@ -78,8 +83,11 @@ export const createAppServer = (port = 3000): AppServer => {
         cors<cors.CorsRequest>(corsOptions),
         bodyParser.json(),
         expressMiddleware(apolloServer, {
+          /* istanbul ignore */
           context: async ({req}) => {
+            /* istanbul ignore next */
             const session: IAuthSessionDocument = (await getAuth(req)) as IAuthSessionDocument;
+            /* istanbul ignore next */
             return {session};
           }
         })

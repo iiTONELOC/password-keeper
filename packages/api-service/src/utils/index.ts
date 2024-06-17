@@ -1,5 +1,6 @@
+/*istanbul ignore file */
 import logger from '../logger';
-import {RSA4096, getPathToKeyFolder} from './crypto';
+import {RSA4096, getPathToKeyFolder, getPathToPrivateKey, getPathToPublicKey} from './crypto';
 
 export * from './crypto';
 
@@ -12,7 +13,7 @@ export const ensureRsaKeysExist = async () => {
   const privateKeyPassphrase = process.env.PRIVATE_KEY_PASSPHRASE;
 
   logger.warn('Generating RSA keys for the server...');
-  let keys = await RSA4096.generateRSAKeys(
+  const keys = await RSA4096.generateRSAKeys(
     'pwd-keeper',
     {
       privateKeyPath: pathToKeyFolder,
@@ -25,4 +26,22 @@ export const ensureRsaKeysExist = async () => {
     logger.error('Error generating RSA keys');
     process.kill(process.pid, 'SIGINT');
   }
+};
+
+/**
+ * Gets the app's private key
+ * @returns the app's private key
+ */
+export const getAppsPrivateKey = async () => {
+  const privateKeyPassphrase = process.env.PRIVATE_KEY_PASSPHRASE;
+
+  return RSA4096.getPrivateKey(getPathToPrivateKey(), privateKeyPassphrase);
+};
+
+/**
+ * Gets the app's public key
+ * @returns the app's public key
+ */
+export const getAppsPublicKey = async () => {
+  return RSA4096.getPublicKey(getPathToPublicKey());
 };

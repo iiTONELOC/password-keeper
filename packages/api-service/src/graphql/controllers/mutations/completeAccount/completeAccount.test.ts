@@ -1,24 +1,10 @@
 import path from 'path';
-import {completeAccount} from './index';
-import {createUser} from '../createUser';
-import {
-  DBConnection,
-  GeneratedRSAKeys,
-  CreateUserMutationPayload,
-  CreateUserMutationVariables,
-  CompleteAccountMutationPayload,
-  CompleteAccountMutationVariables
-} from 'passwordkeeper.types';
-import {
-  getPublicKey,
-  generateRSAKeys,
-  getPathToKeyFolder,
-  getPathToPublicKey,
-  decryptWithPublicKey,
-  encryptWithPublicKey
-} from '../../../../utils';
+import {getPathToKeyFolder} from '../../../../utils';
+import {createTestUser} from '../../../../testHelpers';
 import {describe, expect, it, beforeAll, afterAll} from '@jest/globals';
 import dbConnection, {disconnectFromDB} from '../../../../db/connection';
+import {DBConnection, CreateUserMutationVariables} from 'passwordkeeper.types';
+import {AccountCompletionInviteModel} from '../../../../db/Models';
 
 const pathToKeys: string = path.join(
   getPathToKeyFolder()?.replace('.private', 'test-keys'),
@@ -44,68 +30,15 @@ describe('completeAccount', () => {
       }
     };
 
-    // create the user
-    const newUser: CreateUserMutationPayload = await createUser(
-      undefined,
-      testUserCreationData,
-      undefined
-    );
-
-    // get the invite token for the completeAccount mutation
-    const {inviteToken} = newUser || {};
-
-    // get the app's public key to decrypt the nonce
-    const appPublicKey: string | undefined = await getPublicKey(getPathToPublicKey());
-
-    if (!appPublicKey) {
-      throw new Error('Error getting public key');
-    }
-
-    //decrypt the nonce
-    const decryptedNonce: string | undefined = await decryptWithPublicKey(
-      appPublicKey,
-      inviteToken?.token
-    );
-
-    if (!decryptedNonce) {
-      throw new Error('Error decrypting nonce');
-    }
-
-    // - the user will have their own keys but we need to generate some for the test
-    const testUserKeys: GeneratedRSAKeys | undefined = await generateRSAKeys('completeAccount', {
-      privateKeyPath: pathToKeys,
-      publicKeyPath: pathToKeys
+    // create a test user
+    const newUser = await createTestUser({
+      pathToKeys,
+      userRSAKeyName: 'completeAccount',
+      user: testUserCreationData
     });
 
-    const {publicKey, privateKey} = testUserKeys || {};
-
-    if (!publicKey || !privateKey) {
-      throw new Error('Error generating keys');
-    }
-
-    // re-encrypt the nonce with the app's public key
-    const reEncryptedNonce: string | undefined = await encryptWithPublicKey(
-      appPublicKey,
-      decryptedNonce
-    );
-
-    if (!reEncryptedNonce) {
-      throw new Error('Error re-encrypting nonce');
-    }
-
-    const competeAccountArgs: CompleteAccountMutationVariables = {
-      completeAccountArgs: {
-        nonce: reEncryptedNonce,
-        publicKey
-      }
-    };
-
-    // complete the account creation process
-    const result: CompleteAccountMutationPayload = await completeAccount(
-      undefined,
-      competeAccountArgs,
-      undefined
-    );
+    // get the created auth session for the test user
+    const result = newUser.createdAuthSession;
 
     // check the result should have a _id, nonce, user, and expiresAt
     expect(result).toBeDefined();
@@ -122,6 +55,11 @@ describe('completeAccount', () => {
     expect(result.expiresAt).toBeDefined();
     expect(result.expiresAt).toBeInstanceOf(Date);
 
-    expect.assertions(9);
+    // the invite should be deleted from the database
+    expect(
+      await AccountCompletionInviteModel.find({user: newUser.createdAuthSession.user._id})
+    ).toHaveLength(0);
+
+    expect.assertions(10);
   });
 });

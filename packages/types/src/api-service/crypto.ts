@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/consistent-type-definitions */
 import {KeyObject} from 'crypto';
 
 export type GeneratedRSAKeys = {

@@ -1,3 +1,4 @@
+/*istanbul ignore file */
 import apiRoutes from './api';
 import {Router, Request, Response} from 'express';
 

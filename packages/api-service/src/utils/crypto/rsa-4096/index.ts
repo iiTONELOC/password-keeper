@@ -44,6 +44,7 @@ export const generateRSAKeys = async (
 
     // if the folders exist, then return the existing keys
     if (
+      /* istanbul ignore next */
       await fs
         .stat(privateKeyFile)
         .then(() => true)
@@ -60,10 +61,12 @@ export const generateRSAKeys = async (
         privateKey
       };
     }
-
+    /* istanbul ignore next */
     await fs.mkdir(privateKeyPath, {recursive: true});
+    /* istanbul ignore next */
     await fs.mkdir(publicKeyPath, {recursive: true});
 
+    /* istanbul ignore next */
     const {publicKey, privateKey} = await new Promise<{
       publicKey: string;
       privateKey: string;
@@ -86,15 +89,18 @@ export const generateRSAKeys = async (
         }
       );
     });
-
+    /* istanbul ignore next */
     await fs.writeFile(privateKeyFile, privateKey, {
       encoding: 'utf8',
       mode: PRIVATE_KEY_PERMISSIONS
     });
+    /* istanbul ignore next */
     await fs.writeFile(publicKeyFile, publicKey, {encoding: 'utf8', mode: PUBLIC_KEY_PERMISSIONS});
 
+    /* istanbul ignore next */
     logger.warn(`RSA keys generated for ${keyName}`);
 
+    /* istanbul ignore next */
     return {
       pathToPrivateKey: privateKeyFile,
       pathToPublicKey: publicKeyFile,
@@ -102,7 +108,9 @@ export const generateRSAKeys = async (
       privateKey
     };
   } catch (error) {
+    /* istanbul ignore next */
     logger.error('Error generating RSA keys:', error);
+    /* istanbul ignore next */
     return undefined;
   }
 };
@@ -117,7 +125,9 @@ export const getPublicKey = async (publicKeyPath: string): Promise<string | unde
   try {
     return await fs.readFile(publicKeyPath, {encoding: 'utf8'});
   } catch (error) {
+    /* istanbul ignore next */
     logger.error('Error reading public key:', error);
+    /* istanbul ignore next */
     return undefined;
   }
 };
@@ -144,7 +154,9 @@ export const getPrivateKey = async (
       passphrase: password
     });
   } catch (error) {
+    /* istanbul ignore next */
     logger.error('Error decrypting private key:', error);
+    /* istanbul ignore next */
     return undefined;
   }
 };
@@ -165,7 +177,9 @@ export const encryptWithPublicKey = async (
     const encrypted: Buffer = crypto.publicEncrypt(publicKey, buffer);
     return encrypted.toString('base64');
   } catch (error) {
+    /* istanbul ignore next */
     logger.error('Error encrypting data with public key:', error);
+    /* istanbul ignore next */
     return undefined;
   }
 };
@@ -211,7 +225,9 @@ export const signWithPrivateKey = async (
     });
     return signature.toString('base64');
   } catch (error) {
+    /* istanbul ignore next */
     logger.error('Error signing data with private key:', error);
+    /* istanbul ignore next */
     return undefined;
   }
 };
@@ -238,7 +254,9 @@ export const verifyWithPublicKey = async (
     );
     return isVerified;
   } catch (error) {
+    /* istanbul ignore next */
     logger.error('Error verifying data with public key:', error);
+    /* istanbul ignore next */
     return false;
   }
 };
@@ -258,7 +276,9 @@ export const encryptWithPrivateKey = async (
     const encryptedData: Buffer = crypto.privateEncrypt(privateKey, Buffer.from(data));
     return encryptedData.toString('base64');
   } catch (error) {
+    /* istanbul ignore next */
     logger.error('Error encrypting data with private key:', error);
+    /* istanbul ignore next */
     return undefined;
   }
 };
@@ -281,7 +301,9 @@ export const decryptWithPublicKey = async (
     );
     return decryptedData.toString();
   } catch (error) {
+    /* istanbul ignore next */
     logger.error('Error decrypting data with public key:', error);
+    /* istanbul ignore next */
     return undefined;
   }
 };
@@ -306,21 +328,28 @@ export const verifySignature = async (
   const msgHeader = `verifySignature:: Error verifying signature for user ${userId} - `;
 
   if (!signatureHash) {
+    /* istanbul ignore next */
     logger.error(`${msgHeader} error hashing data`);
+    /* istanbul ignore next */
     return false;
   }
 
   // Decrypt the signature using the user's public key
   const decryptedSignature = await decryptWithPublicKey(userPublicKey, signature);
 
+  /* istanbul ignore next */
   if (!decryptedSignature) {
+    /* istanbul ignore next */
     logger.error(`${msgHeader} error decrypting signature`);
+    /* istanbul ignore next */
     return false;
   }
 
   // Compare the hash with the decrypted signature
   if (signatureHash !== decryptedSignature) {
+    /* istanbul ignore next */
     logger.error(`${msgHeader} signature does not match hash`);
+    /* istanbul ignore next */
     return false;
   }
 

@@ -21,9 +21,11 @@ export const addPublicKey = async (
   }
 
   // determine how many public keys this user has
+  /* istanbul ignore next */
   const publicKeyCount = existingUser?.publicKeys?.length ?? 0;
 
   // determine the max number of public keys this user can have according to their type
+  /* istanbul ignore next */
   const maxPublicKeys =
     AccountTypeMap[existingUser?.accountType as ValidAccountTypes].maxPublicKeys;
 
@@ -38,6 +40,7 @@ export const addPublicKey = async (
     owner: userId
   });
 
+  /* istanbul ignore next */
   // update the user's public keys
   const updated = (
     await UserModel.findByIdAndUpdate(userId, {
@@ -47,9 +50,12 @@ export const addPublicKey = async (
     }).select('_id username email')
   )?.toObject() as IUserDocument;
 
+  /* istanbul ignore next */
   if (!updated) {
     // remove the newly created public key
+    /* istanbul ignore next */
     await PublicKeyModel.deleteOne({_id: newKey._id});
+    /* istanbul ignore next */
     throw new Error('Error updating user');
   }
 

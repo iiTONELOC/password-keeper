@@ -1,6 +1,6 @@
 import path from 'path';
 import {getLoginNonce} from './index';
-import {createTestUser} from '../../testHelpers';
+import {createTestUser} from '../../../../testHelpers';
 import dbConnection, {disconnectFromDB} from '../../../../db/connection';
 import {describe, expect, it, beforeAll, afterAll} from '@jest/globals';
 import type {
@@ -16,14 +16,13 @@ import type {
 import {
   hashData,
   createNonce,
-  getPublicKey,
   getPrivateKey,
   getPathToKeyFolder,
-  getPathToPublicKey,
   encryptWithPublicKey,
   decryptWithPublicKey,
   decryptWithPrivateKey,
-  encryptWithPrivateKey
+  encryptWithPrivateKey,
+  getAppsPublicKey
 } from '../../../../utils';
 
 // store variables needed to test the login process
@@ -40,7 +39,8 @@ const pathToKeys: string = path.join(
 // test user data
 const testUserCreationData: IUser = {
   username: 'testLoginNonce',
-  email: 'testloginnonce@test.com'
+  email: 'testloginnonce@test.com',
+  userRole: 'Account Owner'
 };
 
 /**
@@ -67,7 +67,7 @@ describe('getLoginNonce', () => {
   it('should return a nonce, user, challenge, and signature', async () => {
     const loginChallenge = createNonce() as string;
 
-    const appsPublicKey: string | undefined = await getPublicKey(getPathToPublicKey());
+    const appsPublicKey: string | undefined = await getAppsPublicKey();
 
     // create a hash of the username + challenge
     const signatureHash = await hashData(testUser.username + loginChallenge);
@@ -152,5 +152,75 @@ describe('getLoginNonce', () => {
     expect(signatureMatch).toBeTruthy();
 
     expect.assertions(5);
+  });
+
+  it('should throw an error if the username is missing', async () => {
+    await getLoginNonce(
+      undefined,
+      {
+        // @ts-expect-error - checking for username error handling
+        getLoginNonceArgs: {
+          challenge: 'testChallenge',
+          signature: 'testSignature'
+        }
+      },
+      undefined
+    ).catch(error => {
+      expect(error).toBeDefined();
+      expect(error.toString()).toBe('Username is required');
+    });
+
+    expect.assertions(2);
+  });
+
+  it('should throw an error if the challenge is missing', async () => {
+    await getLoginNonce(
+      undefined,
+      {
+        // @ts-expect-error - checking for challenge error handling
+        getLoginNonceArgs: {
+          username: 'testUsername',
+          signature: 'testSignature'
+        }
+      },
+      undefined
+    ).catch(error => {
+      expect(error).toBeDefined();
+      expect(error.toString()).toBe('Challenge is required');
+    });
+  });
+
+  it('should throw an error if the signature is missing', async () => {
+    await getLoginNonce(
+      undefined,
+      {
+        // @ts-expect-error - checking for signature error handling
+        getLoginNonceArgs: {
+          username: 'testUsername',
+          challenge: 'testChallenge'
+        }
+      },
+      undefined
+    ).catch(error => {
+      expect(error).toBeDefined();
+      expect(error.toString()).toBe('Signature is required');
+    });
+  });
+
+  it('should throw an error if the user is not found', async () => {
+    await getLoginNonce(
+      undefined,
+      {
+        getLoginNonceArgs: {
+          username: 'testUsername12',
+          challenge: 'testChallenge',
+          signature: 'testSignature'
+        }
+      },
+      undefined
+    ).catch(error => {
+      expect(error).toBeDefined();
+      expect(error.toString()).toBe('User not found');
+    });
   });
 });

@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/consistent-type-definitions */
 /**istanbul ignore file */
-import {getLoginNonce} from '../mutations';
+import {getLoginNonce} from '../graphql/controllers/mutations';
 import type {
   IUser,
   GeneratedRSAKeys,
@@ -13,7 +14,7 @@ import {
   getPrivateKey,
   encryptWithPublicKey,
   encryptWithPrivateKey
-} from '../../../utils';
+} from '../utils';
 
 export type RequestLoginForTestUserProps = {
   testUser: IUser;

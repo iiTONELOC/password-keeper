@@ -1,9 +1,9 @@
+/* eslint-disable @typescript-eslint/consistent-type-definitions */
 import type {
   PrivateKey,
   IUserDocument,
   GeneratedRSAKeys,
   GetLoginNonceMutationPayload,
-  CompleteLoginMutationPayload,
   CompleteLoginMutationVariables
 } from 'passwordkeeper.types';
 import {
@@ -14,8 +14,7 @@ import {
   encryptWithPublicKey,
   decryptWithPrivateKey,
   encryptWithPrivateKey
-} from '../../../utils';
-import {completeLogin} from '../mutations';
+} from '../utils';
 
 export type LoginTestUserProps = {
   testUser: IUserDocument;
@@ -23,9 +22,9 @@ export type LoginTestUserProps = {
   loginInvite: GetLoginNonceMutationPayload;
 };
 
-export const loginTestUser = async (
+export const getLoginMutationVariables = async (
   props: LoginTestUserProps
-): Promise<CompleteLoginMutationPayload> => {
+): Promise<CompleteLoginMutationVariables> => {
   const {nonce} = props.loginInvite || {};
   const privateKey: PrivateKey | undefined = await getPrivateKey(
     props.testUserKeys.pathToPrivateKey
@@ -36,14 +35,18 @@ export const loginTestUser = async (
     nonce
   );
 
+  /* istanbul ignore next */
   if (!decryptedNonce) {
+    /* istanbul ignore next */
     throw new Error('Error decrypting nonce');
   }
 
   // get the app's public key
   const appPublicKey: string | undefined = await getPublicKey(getPathToPublicKey());
 
+  /* istanbul ignore next */
   if (!appPublicKey) {
+    /* istanbul ignore next */
     throw new Error('Error getting public key');
   }
 
@@ -57,7 +60,9 @@ export const loginTestUser = async (
     signatureHash as string
   );
 
+  /* istanbul ignore next */
   if (!userSignature) {
+    /* istanbul ignore next */
     throw new Error('Error signing hash');
   }
 
@@ -67,7 +72,9 @@ export const loginTestUser = async (
     decryptedNonce
   );
 
+  /* istanbul ignore next */
   if (!encryptedNonce) {
+    /* istanbul ignore next */
     throw new Error('Error encrypting nonce');
   }
 
@@ -79,5 +86,5 @@ export const loginTestUser = async (
     }
   };
 
-  return await completeLogin(undefined, completeLoginArgs, undefined);
+  return completeLoginArgs;
 };

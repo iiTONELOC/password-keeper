@@ -1,4 +1,6 @@
+// istanbul ignore file
 import path from 'path';
+import {PrivateKey} from 'passwordkeeper.types';
 import {
   hashData,
   getPublicKey,
@@ -9,9 +11,8 @@ import {
   encryptWithPublicKey,
   decryptWithPrivateKey
 } from '../src/utils';
-import {PrivateKey} from 'passwordkeeper.types';
 
-const encryptChallengeWithAppsPublicKey = async (challenge: string): Promise<string> => {
+const encryptNonceWithAppsPublicKey = async (nonce: string): Promise<string> => {
   const publicKeyPath = getPathToPublicKey();
   const publicKey = await getPublicKey(publicKeyPath);
 
@@ -19,17 +20,17 @@ const encryptChallengeWithAppsPublicKey = async (challenge: string): Promise<str
     throw new Error('Error getting public key');
   }
 
-  const encryptedChallenge = await encryptWithPublicKey(publicKey, challenge);
+  const encryptedNonce = await encryptWithPublicKey(publicKey, nonce);
 
-  if (!encryptedChallenge) {
-    throw new Error('Error encrypting challenge');
+  if (!encryptedNonce) {
+    throw new Error('Error encrypting Nonce');
   }
 
-  return encryptedChallenge;
+  return encryptedNonce;
 };
 
-const decryptChallengeWithUsersPrivateKey = async (
-  challenge: string,
+export const decryptNonceWithUsersPrivateKey = async (
+  nonce: string,
   username: string
 ): Promise<string> => {
   const pathToKeys = getPathToKeyFolder().replace('.private', `.${username}`);
@@ -43,21 +44,21 @@ const decryptChallengeWithUsersPrivateKey = async (
     throw new Error('Error getting private key');
   }
 
-  const decryptedChallenge = await decryptWithPrivateKey(usersPrivateKey, challenge);
+  const decryptedNonce = await decryptWithPrivateKey(usersPrivateKey, nonce);
 
-  if (!decryptedChallenge) {
-    throw new Error('Error decrypting challenge');
+  if (!decryptedNonce) {
+    throw new Error('Error decrypting Nonce');
   }
 
-  return decryptedChallenge;
+  return decryptedNonce;
 };
 
 const createSignature = async (
   userId: string,
   username: string,
-  decryptedChallenge: string
+  decryptedNonce: string
 ): Promise<string> => {
-  const signatureHash: string = (await hashData(userId + decryptedChallenge)) as string;
+  const signatureHash: string = (await hashData(userId + decryptedNonce)) as string;
 
   const pathToKeys = getPathToKeyFolder().replace('.private', `.${username}`);
 
@@ -85,13 +86,14 @@ if (require.main === module) {
     throw new Error('Cannot run this script in production');
   }
 
-  const challenge = process.argv[2];
+  const nonce = process.argv[2];
   const username = process.argv[3];
   const userId = process.argv[4];
   const sessionId = process.argv[5];
+  const overrideKeyName = process.argv[6] || username;
 
-  if (!challenge) {
-    throw new Error('Challenge is required');
+  if (!nonce) {
+    throw new Error('Nonce is required');
   }
 
   if (!username) {
@@ -107,14 +109,14 @@ if (require.main === module) {
   }
 
   (async () => {
-    // need the challenge to create a signature
-    const decryptedChallenge = await decryptChallengeWithUsersPrivateKey(challenge, username);
+    // need the Nonce to create a signature
+    const decryptedNonce = await decryptNonceWithUsersPrivateKey(nonce, overrideKeyName);
     // need the session ID for sever communication
-    const decryptedID = await decryptChallengeWithUsersPrivateKey(sessionId, username);
+    const decryptedID = await decryptNonceWithUsersPrivateKey(sessionId, overrideKeyName);
     // re-encrypt the session ID with the app's public key for server communication
-    const reEncryptedID = await encryptChallengeWithAppsPublicKey(decryptedID);
-    // create a signature of the user ID and the decrypted challenge to authenticate the user
-    const signature = await createSignature(userId, username, decryptedChallenge);
+    const reEncryptedID = await encryptNonceWithAppsPublicKey(decryptedID);
+    // create a signature of the user ID and the decrypted Nonce to authenticate the user
+    const signature = await createSignature(userId, overrideKeyName, decryptedNonce);
 
     console.log(`\nEncrypted Session ID: ${reEncryptedID}`);
     console.log(`\nSignature: ${signature}`);

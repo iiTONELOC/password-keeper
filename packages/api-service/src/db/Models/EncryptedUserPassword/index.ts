@@ -13,8 +13,7 @@ const EncryptedUserPasswordSchema = new Schema<IPasswordEncryptedAtRest>(
       iv: {
         type: String,
         required: true
-      },
-      required: true
+      }
     },
     username: {
       encryptedData: {
@@ -24,8 +23,7 @@ const EncryptedUserPasswordSchema = new Schema<IPasswordEncryptedAtRest>(
       iv: {
         type: String,
         required: true
-      },
-      required: true
+      }
     },
     password: {
       encryptedData: {
@@ -35,8 +33,7 @@ const EncryptedUserPasswordSchema = new Schema<IPasswordEncryptedAtRest>(
       iv: {
         type: String,
         required: true
-      },
-      required: true
+      }
     },
     url: {
       encryptedData: {
@@ -48,8 +45,7 @@ const EncryptedUserPasswordSchema = new Schema<IPasswordEncryptedAtRest>(
         type: String,
         required: false,
         default: undefined
-      },
-      required: false
+      }
     },
     owner: {
       type: Schema.Types.ObjectId,

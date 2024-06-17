@@ -34,6 +34,7 @@ describe('Create App Server', () => {
     expect(
       await fetch('http://localhost:3002')
         .then(data => data)
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         .catch(_ => 'Error')
     ).toBe('Error');
   });

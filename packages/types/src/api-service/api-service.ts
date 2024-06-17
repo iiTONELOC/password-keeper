@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/consistent-type-definitions */
 import {Server} from 'http';
 import {Express} from 'express';
 /**
@@ -19,5 +20,5 @@ export type AppServer = {
   app: Express;
   server: Server | null;
   start: (portOverride?: AppPort) => Promise<void>;
-  stop: () => Promise<string | void>;
+  stop: () => Promise<void>;
 };

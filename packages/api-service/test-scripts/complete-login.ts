@@ -1,4 +1,6 @@
+// istanbul ignore file
 import path from 'path';
+import {PrivateKey} from 'passwordkeeper.types';
 import {
   hashData,
   getPublicKey,
@@ -9,7 +11,6 @@ import {
   encryptWithPrivateKey,
   decryptWithPrivateKey
 } from '../src/utils';
-import {PrivateKey} from 'passwordkeeper.types';
 
 const decryptNonceWithUsersPrivateKey = async (
   encryptedNonce: string,

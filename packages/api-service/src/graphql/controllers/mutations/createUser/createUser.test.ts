@@ -11,7 +11,8 @@ import type {
 
 const testUserCreationData: IUser = {
   username: 'testCreateUser',
-  email: 'testuser@test.com'
+  email: 'testuser@test.com',
+  userRole: 'Account Owner'
 };
 
 const testUserCreationVariables: CreateUserMutationVariables = {
@@ -61,6 +62,7 @@ describe('createUser', () => {
 
     try {
       await createUser(undefined, testVariables, undefined);
+      // eslint-disable-next-line
     } catch (error: any) {
       expect(error.message).toBe('Username is required');
     }
@@ -73,6 +75,7 @@ describe('createUser', () => {
 
     try {
       await createUser(undefined, newUserData, undefined);
+      // eslint-disable-next-line
     } catch (error: any) {
       expect(error.message).toBe('Email is required');
     }
@@ -85,6 +88,7 @@ describe('createUser', () => {
 
     try {
       await createUser(undefined, newUserData, undefined);
+      // eslint-disable-next-line
     } catch (error: any) {
       expect(error.message).toBe('Username is required');
     }
@@ -95,6 +99,7 @@ describe('createUser', () => {
 
     try {
       await createUser(undefined, newUserData, undefined);
+      // eslint-disable-next-line
     } catch (error: any) {
       expect(error.message).toBe('Username is required');
     }
@@ -103,6 +108,7 @@ describe('createUser', () => {
   it('should throw an error if the user already exists', async () => {
     try {
       await createUser(undefined, testUserCreationVariables, undefined);
+      // eslint-disable-next-line
     } catch (error: any) {
       expect(error.message).toBe('User already exists');
     }

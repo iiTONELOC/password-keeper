@@ -1,23 +1,22 @@
 import path from 'path';
 import {addPublicKey} from '.';
 import {UserModel} from '../../../../db/Models';
-import {createTestUser} from '../../testHelpers';
-import {beforeAll, afterAll} from '@jest/globals';
 import {getPathToKeyFolder} from '../../../../utils';
+import {createTestUser} from '../../../../testHelpers';
+import {beforeAll, afterAll, describe, it} from '@jest/globals';
 import dbConnection, {disconnectFromDB} from '../../../../db/connection';
 import type {
   IUser,
   DBConnection,
   IUserDocument,
-  GeneratedRSAKeys,
-  CreateUserMutationVariables,
-  IPublicKeyDocument
+  IPublicKeyDocument,
+  CreateUserMutationVariables
 } from 'passwordkeeper.types';
+import {Types} from 'mongoose';
 
 // store variables needed to test the login invite process
 let db: DBConnection;
 let testUser: IUserDocument;
-let testUserKeys: GeneratedRSAKeys;
 
 // path to the test keys
 const pathToKeys: string = path.join(
@@ -28,7 +27,8 @@ const pathToKeys: string = path.join(
 // data to create a test user
 const testUserCreationData: IUser = {
   username: 'testAddPublicKeyToUser',
-  email: 'testAddPublicKeyToUser@test.com'
+  email: 'testAddPublicKeyToUser@test.com',
+  userRole: 'Account Owner'
 };
 
 // variables to create a test user using graphql mutation
@@ -49,7 +49,6 @@ beforeAll(async () => {
     user: {...testUserCreationVariables}
   });
 
-  testUserKeys = createTestUserResult.userKeys;
   testUser = createTestUserResult.createdAuthSession.user as IUserDocument;
 });
 
@@ -117,5 +116,18 @@ describe('addPublicKeyToUser', () => {
     expect(addedKey).toBeDefined();
 
     expect(addedKey?.key).toBe(newPublicKey);
+  });
+
+  it('Should throw an error if the existing user is not found', async () => {
+    const newPublicKey = 'newPublicKey';
+
+    // create a fake id
+    const fakeObjectId = '60f1b9b3b3b3b3b3b3b3b3b3';
+    const fakeId = new Types.ObjectId(fakeObjectId);
+
+    await addPublicKey(fakeId, newPublicKey).catch(error => {
+      expect(error).toBeDefined();
+      expect(error?.toString()).toBe('Error: User not found');
+    });
   });
 });

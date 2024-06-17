@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/consistent-type-definitions */
 import {IAuthSessionDocument} from './models';
 
 export * from './db';

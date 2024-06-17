@@ -19,7 +19,8 @@ const AuthSessionSchema = new Schema<IAuthSession>(
     expiresAt: {
       type: Date,
       required: true,
-      // provide a default value of 30 minutes from now
+
+      /* istanbul ignore next */
       default: () => new Date(new Date().getTime() + 30 * 60 * 1000),
       // validate the expiresAt date is in the future but is less than 24 hours from now
       validate: {

@@ -16,7 +16,8 @@ const me = async (
     const sanitizedUser: QueryMeResponse = {
       _id: session.user._id,
       username: session.user.username,
-      email: session.user.email
+      email: session.user.email,
+      userRole: session.user.userRole
     };
 
     return sanitizedUser;

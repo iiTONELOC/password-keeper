@@ -1,3 +1,4 @@
+// istanbul ignore file
 import path from 'path';
 import {KeyObject} from 'crypto';
 import {

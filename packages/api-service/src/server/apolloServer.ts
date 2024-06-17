@@ -7,6 +7,7 @@ import {ApolloServerPluginDrainHttpServer} from '@apollo/server/plugin/drainHttp
 import {ApolloServerPluginLandingPageLocalDefault} from '@apollo/server/plugin/landingPage/default';
 
 const plugins = (httpServer: http.Server): ApolloServerPlugin<AuthContext>[] => {
+  /* istanbul ignore next */
   return process.env.NODE_ENV !== 'production'
     ? [
         ApolloServerPluginDrainHttpServer({httpServer}),

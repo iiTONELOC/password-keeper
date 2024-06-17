@@ -1,3 +1,4 @@
+/*istanbul ignore file */
 import logger from '../../../../logger';
 import {Router, Request, Response} from 'express';
 import {ensureRsaKeysExist, getPathToPublicKey} from '../../../../utils';

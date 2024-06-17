@@ -47,6 +47,14 @@ const UserSchema = new Schema<IUser>(
         required: false,
         default: []
       }
+    ],
+    passwords: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'EncryptedUserPassword',
+        required: false,
+        default: []
+      }
     ]
   },
   {id: false, timestamps: true}

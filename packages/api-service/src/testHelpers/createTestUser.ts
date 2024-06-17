@@ -1,6 +1,6 @@
+/* eslint-disable @typescript-eslint/consistent-type-definitions */
 /**istanbul ignore file */
-import {createUser, completeAccount} from '../mutations';
-
+import {createUser, completeAccount} from '../graphql/controllers/mutations';
 import type {
   GeneratedRSAKeys,
   CreateUserMutationPayload,
@@ -14,7 +14,7 @@ import {
   getPathToPublicKey,
   encryptWithPublicKey,
   decryptWithPublicKey
-} from '../../../utils';
+} from '../utils';
 
 export type TestUserCreationProps = {
   user: CreateUserMutationVariables;
@@ -44,7 +44,9 @@ export const createTestUser = async (
   // get the app's public key to decrypt the nonce
   const appPublicKey: string | undefined = await getPublicKey(getPathToPublicKey());
 
+  /* istanbul ignore next */
   if (!appPublicKey) {
+    /* istanbul ignore next */
     throw new Error('Error getting public key');
   }
 
@@ -54,7 +56,9 @@ export const createTestUser = async (
     inviteToken?.token
   );
 
+  /* istanbul ignore next */
   if (!decryptedNonce) {
+    /* istanbul ignore next */
     throw new Error('Error decrypting nonce');
   }
 
@@ -66,6 +70,7 @@ export const createTestUser = async (
 
   const {publicKey, privateKey} = testUserKeys || {};
 
+  /* istanbul ignore next */
   if (!publicKey || !privateKey) {
     throw new Error('Error generating keys');
   }
@@ -76,7 +81,9 @@ export const createTestUser = async (
     decryptedNonce
   );
 
+  /* istanbul ignore next */
   if (!reEncryptedNonce) {
+    /* istanbul ignore next */
     throw new Error('Error re-encrypting nonce');
   }
 

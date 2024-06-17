@@ -1,7 +1,7 @@
 import os from 'os';
 
 // Default to localhost if no valid IP is found
-let _ip: string = '127.0.0.1';
+let _ip = '127.0.0.1';
 
 const interfaces: NodeJS.Dict<os.NetworkInterfaceInfo[]> = os.networkInterfaces();
 // Common VPN interface names
@@ -15,6 +15,7 @@ for (const [key, value] of Object.entries(interfaces)) {
     !excludedInterfaces.includes(key) &&
     includedInterfaces.some(interfaceName => key.includes(interfaceName))
   ) {
+    // istanbul ignore next
     const validAddress = value?.find(alias => alias.family === 'IPv4' && !alias.internal);
     if (validAddress) {
       _ip = validAddress.address;

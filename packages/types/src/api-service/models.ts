@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/consistent-type-definitions */
 import {Model, Types} from 'mongoose';
 
 export enum ValidAccountTypes {
@@ -9,6 +10,9 @@ export enum ValidAccountTypes {
   TIERED_BUSINESS_3 = 'TIERED_BUSINESS_3'
 }
 
+export type UserRoles = 'Account Owner' | 'Sub User';
+
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type Timestamps = {
   createdAt: Date;
   updatedAt: Date;
@@ -43,9 +47,11 @@ export type IAccountTypeMap = Record<ValidAccountTypes, IAccountType>;
 export type IUser = {
   username: string;
   email: string;
+  userRole: UserRoles;
   publicKeys?: Types.ObjectId[];
   accountType?: ValidAccountTypes;
   subUsers?: Types.ObjectId[];
+  passwords?: Types.ObjectId[];
 };
 
 export type IUserModel = Model<IUser>;
@@ -56,6 +62,7 @@ export type IUserDocument = IUserModel &
     publicKeys: IPublicKeyDocument[];
     accountType: IAccountTypeDocument;
     subUsers: IUserDocument[];
+    passwords: IUserPasswordDocument[];
   };
 
 // _______ Account Completion Invites _______

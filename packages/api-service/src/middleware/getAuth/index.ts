@@ -1,9 +1,10 @@
-import logger from '../logger';
+import logger from '../../logger';
 import {Request} from 'express';
-import {AuthSessionModel} from '../db/Models';
-import {decryptAES} from '../utils/crypto/aes-256';
+import {AuthSessionModel} from '../../db/Models';
+import {decryptAES} from '../../utils/crypto/aes-256';
+import {findUsersPublicKey} from '../../graphql/controllers/helpers';
 import {IAuthSessionDocument, PrivateKey} from 'passwordkeeper.types';
-import {verifySignature, decryptWithPrivateKey, getPathToPrivateKey, getPrivateKey} from '../utils';
+import {verifySignature, getAppsPrivateKey, decryptWithPrivateKey} from '../../utils';
 
 /**
  * Retrieves the authenticated session from the request.
@@ -21,16 +22,14 @@ export const getAuth = async (req: Request): Promise<IAuthSessionDocument | unde
   // Look for the signature header
   const signatureHeader: string | string[] | undefined = req.headers.signature;
   // Look for an optional Key Index header, which is used to specify the public key to use for signature verification
-  const keyIndexHeader: string | string[] | undefined = req.headers['key-index'];
+  const publicKeyId: string | string[] | undefined = req.headers['key-id'];
 
   if (authHeader && signatureHeader) {
     // Get the private key for the app to decrypt the auth header to get the session ID
-    const appPrivateKey: PrivateKey | undefined = await getPrivateKey(
-      getPathToPrivateKey(),
-      process.env.PRIVATE_KEY_PASSPHRASE
-    );
-
+    const appPrivateKey: PrivateKey | undefined = await getAppsPrivateKey();
+    /* istanbul ignore next */
     if (!appPrivateKey) {
+      /* istanbul ignore next */
       return undefined;
     }
 
@@ -52,16 +51,23 @@ export const getAuth = async (req: Request): Promise<IAuthSessionDocument | unde
 
     // Verify the signature by decrypting the nonce from the database with the app's AES key
     const AES_KEY: string | undefined = process.env.SYMMETRIC_KEY_PASSPHRASE;
-
+    /* istanbul ignore next */
     if (!AES_KEY) {
+      /* istanbul ignore next */
       return undefined;
     }
 
     // Decrypt the nonce
     const decryptedNonce: string | undefined = await decryptAES(session.nonce, AES_KEY);
-    const userPublicKey =
-      session.user.publicKeys[keyIndexHeader ? parseInt(keyIndexHeader as string, 10) : 0].key;
+
+    const userPublicKey: string | undefined = await findUsersPublicKey(
+      session.user,
+      publicKeyId as string | undefined
+    );
+
+    /* istanbul ignore next */
     if (!decryptedNonce || !userPublicKey) {
+      /* istanbul ignore next */
       return undefined;
     }
 
@@ -73,7 +79,17 @@ export const getAuth = async (req: Request): Promise<IAuthSessionDocument | unde
       userPublicKey
     );
 
+    /* istanbul ignore next */
     if (!isSignatureValid) {
+      /* istanbul ignore next */
+      return undefined;
+    }
+
+    // ensure the session has not expired
+    if (session.expiresAt < new Date()) {
+      logger.warn(
+        `getAuth:: Session ${session._id} expired for user ${session.user._id}, expires at ${session.expiresAt}`
+      );
       return undefined;
     }
 
@@ -83,6 +99,6 @@ export const getAuth = async (req: Request): Promise<IAuthSessionDocument | unde
     );
     return session;
   }
-
+  /* istanbul ignore next */
   return undefined;
 };

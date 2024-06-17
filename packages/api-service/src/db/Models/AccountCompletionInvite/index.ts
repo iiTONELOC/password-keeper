@@ -24,7 +24,7 @@ const AccountCompletionInviteSchema = new Schema<IAccountCompletionInvite>(
     expiresAt: {
       type: Date,
       required: true,
-      // provide a default value of 24 hours from now
+      /* istanbul ignore next */
       default: () => new Date(new Date().getTime() + 24 * 60 * 60 * 1000),
 
       validate: {

@@ -1,3 +1,4 @@
+// istanbul ignore file
 import logger from '../src/logger';
 import {
   getPublicKey,

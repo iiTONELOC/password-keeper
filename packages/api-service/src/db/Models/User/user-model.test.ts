@@ -15,20 +15,25 @@ describe('User Model', () => {
     expect(User.modelName).toEqual('User');
   });
 
-  it('Should have a schema with 7 total properties', () => {
+  it('Should have a schema with 11 total properties', () => {
     const User: IUserModel = UserModel;
     const schemaPaths = Object.keys(User.schema.paths);
 
-    expect(schemaPaths).toHaveLength(9);
+    expect(schemaPaths).toHaveLength(10);
 
-    expect(schemaPaths).toContain('_id');
-    expect(schemaPaths).toContain('__v');
-    expect(schemaPaths).toContain('email');
-    expect(schemaPaths).toContain('username');
-    expect(schemaPaths).toContain('subUsers');
-    expect(schemaPaths).toContain('createdAt');
-    expect(schemaPaths).toContain('updatedAt');
-    expect(schemaPaths).toContain('publicKeys');
-    expect(schemaPaths).toContain('accountType');
+    const expectedPaths = [
+      'username',
+      'email',
+      'publicKeys',
+      'accountType',
+      'subUsers',
+      'passwords',
+      '_id',
+      'createdAt',
+      'updatedAt',
+      '__v'
+    ];
+
+    expect(schemaPaths).toEqual(expect.arrayContaining(expectedPaths));
   });
 });

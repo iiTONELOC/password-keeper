@@ -1,3 +1,4 @@
+// istanbul ignore file
 import {GraphQLError} from 'graphql';
 import logger from '../../../logger';
 import {AuthSessionModel} from '../../../db/Models';

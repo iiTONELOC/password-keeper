@@ -1,16 +1,25 @@
 import path from 'path';
+import {completeLogin} from '.';
 import {describe, expect, it, beforeAll, afterAll} from '@jest/globals';
 import dbConnection, {disconnectFromDB} from '../../../../db/connection';
-import {getPublicKey, getPathToKeyFolder, getPathToPublicKey} from '../../../../utils';
-import {createTestUser, requestLoginForTestUser, loginTestUser} from '../../testHelpers';
+import {getAppsPublicKey, getPathToKeyFolder} from '../../../../utils';
+import {
+  createTestUser,
+  requestLoginForTestUser,
+  getLoginMutationVariables,
+  TestUserCreationData
+} from '../../../../testHelpers';
 import type {
   IUser,
   DBConnection,
   IUserDocument,
   GeneratedRSAKeys,
   CreateUserMutationVariables,
-  GetLoginNonceMutationPayload
+  GetLoginNonceMutationPayload,
+  CompleteLoginMutationVariables,
+  CompleteLoginMutationPayload
 } from 'passwordkeeper.types';
+import {LoginInviteModel} from '../../../../db/Models';
 
 // store variables needed to test the login invite process
 let db: DBConnection;
@@ -27,7 +36,8 @@ const pathToKeys: string = path.join(
 // data to create a test user
 const testUserCreationData: IUser = {
   username: 'testCompleteLogin',
-  email: 'testCompleteLogin@test.com'
+  email: 'testCompleteLogin@test.com',
+  userRole: 'Account Owner'
 };
 
 // variables to create a test user using graphql mutation
@@ -42,7 +52,7 @@ beforeAll(async () => {
   db = await dbConnection('pwd-keeper-test');
 
   // get the app's public key to decrypt the nonce
-  const appPublicKey: string | undefined = await getPublicKey(getPathToPublicKey());
+  const appPublicKey: string | undefined = await getAppsPublicKey();
 
   if (!appPublicKey) {
     throw new Error('Error getting public key');
@@ -71,16 +81,134 @@ afterAll(async () => {
 });
 
 describe('completeLogin', () => {
-  it('should complete the login process and return an AuthSession', async () => {
-    const loginResult = await loginTestUser({
+  it('should throw an error if the nonce is missing', async () => {
+    const completeLoginVariables: CompleteLoginMutationVariables = await getLoginMutationVariables({
       testUser,
       testUserKeys,
       loginInvite
     });
 
-    expect(loginResult).toHaveProperty('_id');
-    expect(loginResult).toHaveProperty('nonce');
-    expect(loginResult).toHaveProperty('user');
-    expect(loginResult).toHaveProperty('expiresAt');
+    await completeLogin(
+      undefined,
+      {
+        // @ts-expect-error - checking for nonce error handling
+        completeLoginArgs: {
+          // @ts-expect-error - checking for nonce error handling
+          signature: completeLoginVariables.signature,
+          userId: testUser._id.toString()
+        }
+      },
+      undefined
+    ).catch(error => {
+      expect(error).toBeDefined();
+      expect(error.toString()).toBe('Nonce is required');
+    });
+
+    expect.assertions(2);
+  });
+
+  it('should throw an error if the signature is missing', async () => {
+    const completeLoginVariables: CompleteLoginMutationVariables = await getLoginMutationVariables({
+      testUser,
+      testUserKeys,
+      loginInvite
+    });
+
+    await completeLogin(
+      undefined,
+      {
+        // @ts-expect-error - checking for nonce error handling
+        completeLoginArgs: {
+          nonce: completeLoginVariables.completeLoginArgs.nonce,
+          userId: testUser._id.toString()
+        }
+      },
+      undefined
+    ).catch(error => {
+      expect(error).toBeDefined();
+      expect(error.toString()).toBe('Signature is required');
+    });
+
+    expect.assertions(2);
+  });
+
+  it('should throw an error if the nonce cannot be decrypted', async () => {
+    const completeLoginVariables: CompleteLoginMutationVariables = await getLoginMutationVariables({
+      testUser,
+      testUserKeys,
+      loginInvite
+    });
+
+    await completeLogin(
+      undefined,
+      {
+        completeLoginArgs: {
+          nonce: 'badNonce',
+          signature: completeLoginVariables.completeLoginArgs.signature,
+          userId: testUser._id.toString()
+        }
+      },
+      undefined
+    ).catch(error => {
+      expect(error).toBeDefined();
+      expect(error.toString()).toBe('Error decrypting nonce');
+    });
+
+    expect.assertions(2);
+  });
+
+  it('Should throw an error if the user invite is not found', async () => {
+    const completeLoginVariables: CompleteLoginMutationVariables = await getLoginMutationVariables({
+      testUser,
+      testUserKeys,
+      loginInvite
+    });
+
+    // delete the login invite from the DB
+    await LoginInviteModel.deleteOne({user: testUser._id});
+    await completeLogin(undefined, completeLoginVariables, undefined).catch(error => {
+      expect(error).toBeDefined();
+      expect(error.toString()).toBe('Login invite not found');
+    });
+
+    expect.assertions(2);
+  });
+
+  it('Should return an AuthSession if the login is successful', async () => {
+    testUserCreationData.username += '2';
+    testUserCreationData.email += '2';
+
+    const testUserCreationVariables2: CreateUserMutationVariables = {
+      createUserArgs: {username: testUserCreationData.username, email: testUserCreationData.email}
+    };
+
+    const createTestUserResult: TestUserCreationData = await createTestUser({
+      pathToKeys: pathToKeys,
+      userRSAKeyName: 'completeLogin2',
+      user: {...testUserCreationVariables2}
+    });
+
+    const testUser2LoginVariables: CompleteLoginMutationVariables = await getLoginMutationVariables(
+      {
+        testUser: createTestUserResult.createdAuthSession.user as IUserDocument,
+        testUserKeys: createTestUserResult.userKeys,
+        loginInvite: await requestLoginForTestUser({
+          testUser: createTestUserResult.createdAuthSession.user as IUserDocument,
+          testUserKeys: createTestUserResult.userKeys,
+          appPublicKey: (await getAppsPublicKey()) as string
+        })
+      }
+    );
+
+    const result: CompleteLoginMutationPayload = await completeLogin(
+      undefined,
+      testUser2LoginVariables,
+      undefined
+    );
+
+    expect(result).toBeDefined();
+    // remove the public keys from the user object - they are removed from the user object in the mutation
+    createTestUserResult.createdAuthSession.user.publicKeys = [];
+    expect(result.user).toEqual(createTestUserResult.createdAuthSession.user);
   });
 });

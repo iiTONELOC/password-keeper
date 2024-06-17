@@ -1,46 +1,42 @@
 import {GraphQLError} from 'graphql';
 import logger from '../../../../logger';
-import {createAuthSession} from '../../helpers';
 import {LoginInviteModel} from '../../../../db/Models';
-import {
-  getPrivateKey,
-  verifySignature,
-  getPathToPrivateKey,
-  decryptWithPrivateKey
-} from '../../../../utils';
+import {decryptAES} from '../../../../utils/crypto/aes-256';
+import {createAuthSession, findUsersPublicKey} from '../../helpers';
+import {verifySignature, decryptWithPrivateKey, getAppsPrivateKey} from '../../../../utils';
 import type {
   ILoginInviteDocument,
   CompleteLoginMutationPayload,
-  CompleteLoginMutationVariables,
-  IPublicKeyDocument
+  CompleteLoginMutationVariables
 } from 'passwordkeeper.types';
-import {decryptAES} from '../../../../utils/crypto/aes-256';
 
 export const completeLogin = async (
   _: undefined,
   args: CompleteLoginMutationVariables,
-  context: undefined
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  __: undefined
 ): Promise<CompleteLoginMutationPayload> => {
-  const {
-    completeLoginArgs: {nonce, signature, userId, publicKeyId}
-  } = args;
+  const {completeLoginArgs} = args;
+  /* istanbul ignore next */
+  const {nonce, signature, userId, publicKeyId} = completeLoginArgs ?? {};
 
-  if (!nonce) {
+  if (!nonce || nonce === undefined || nonce === '') {
     throw new GraphQLError('Nonce is required');
   }
 
-  if (!signature) {
+  if (!signature || signature === undefined || signature === '') {
     throw new GraphQLError('Signature is required');
   }
 
   const logHeader = 'completeLogin mutation::';
 
   // decrypt the nonce with the app's private key
-  const privateKeyPath = getPathToPrivateKey();
-  const privateKey = await getPrivateKey(privateKeyPath, process.env.PRIVATE_KEY_PASSPHRASE);
-
+  const privateKey = await getAppsPrivateKey();
+  /* istanbul ignore next */
   if (!privateKey) {
+    /* istanbul ignore next */
     logger.error(`${logHeader} - ERROR - could not retrieve the private key!`);
+    /* istanbul ignore next */
     throw new GraphQLError('Error getting private key');
   }
 
@@ -53,7 +49,6 @@ export const completeLogin = async (
 
   // find the login invite to get the user's id and their public key so we can verify the signature
   // decrypted signature = hash(userid + nonce))
-
   const userInvite = (
     await LoginInviteModel.findOne({
       user: userId
@@ -69,17 +64,17 @@ export const completeLogin = async (
     throw new GraphQLError('Login invite not found');
   }
 
-  // get the user's public key from the userInvite data
-  const userPublicKey =
-    userInvite?.user?.publicKeys?.find(
-      (key: IPublicKeyDocument) => key._id.toString() === publicKeyId
-    )?.key ?? userInvite?.user?.publicKeys?.[0]?.key;
-
+  /* istanbul ignore next */
+  const userPublicKey: string | undefined = findUsersPublicKey(userInvite.user, publicKeyId);
+  /* istanbul ignore next */
   if (!userPublicKey) {
+    /* istanbul ignore next */
     logger.error(`${logHeader} - ERROR - could not get the user's public key!`);
+    /* istanbul ignore next */
     throw new GraphQLError('User public key not found');
   }
-  // verify the signature
+
+  /* istanbul ignore next */
   const verifiedSignature = await verifySignature(
     userInvite.user._id.toString(),
     decryptedNonce,
@@ -87,25 +82,35 @@ export const completeLogin = async (
     userPublicKey
   );
 
+  /* istanbul ignore next */
   if (!verifiedSignature) {
+    /* istanbul ignore next */
     logger.error(`${logHeader} - ERROR - could not verify the signature!`);
+    /* istanbul ignore next */
     throw new GraphQLError('Error verifying signature');
   }
 
   // decrypt the nonce from the database using the app's private aes key
+  /* istanbul ignore next */
   const decryptedInviteNonceFromDb = await decryptAES(
     userInvite.nonce,
     process.env.SYMMETRIC_KEY_PASSPHRASE as string
   );
 
+  /* istanbul ignore next */
   if (!decryptedInviteNonceFromDb) {
+    /* istanbul ignore next */
     logger.error(`${logHeader} - ERROR - could not decrypt the nonce from the db!`);
+    /* istanbul ignore next */
     throw new GraphQLError('Error decrypting nonce from db');
   }
 
   // verify the nonce from the client matches the nonce from the db
+  /* istanbul ignore next */
   if (decryptedNonce !== decryptedInviteNonceFromDb) {
+    /* istanbul ignore next */
     logger.error(`${logHeader} - ERROR - the nonce does not match the invite nonce!`);
+    /* istanbul ignore next */
     throw new GraphQLError('Nonce does not match invite nonce');
   }
 

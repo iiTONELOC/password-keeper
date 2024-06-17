@@ -8,6 +8,7 @@ const myFormat = printf(({level, message, label, timestamp}) => {
   return `[${label}] ${timestamp} - ${level}: ${message}`;
 });
 
+// istanbul ignore next
 const ENVIRONMENT = process.env.NODE_ENV?.toUpperCase() ?? `DEVELOPMENT`;
 const ENVIRONMENT_LOWER = ENVIRONMENT.toLowerCase();
 
