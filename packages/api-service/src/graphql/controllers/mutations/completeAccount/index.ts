@@ -1,8 +1,7 @@
 import {GraphQLError} from 'graphql';
-import logger from '../../../../logger';
 import {createAuthSession, addPublicKey} from '../../helpers';
 import {AccountCompletionInviteModel} from '../../../../db/Models';
-import {decryptWithPrivateKey, getAppsPrivateKey} from '../../../../utils';
+import {decryptWithPrivateKey, getAppsPrivateKey, logger} from '../../../../utils';
 import type {
   PrivateKey,
   IUserDocument,

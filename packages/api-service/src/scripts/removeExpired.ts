@@ -1,3 +1,6 @@
+import {logger} from '../utils';
+import connectToDatabase, {disconnectFromDB} from '../db/connection';
+import {DBConnection, IAccountCompletionInviteDocument} from 'passwordkeeper.types';
 import {
   UserModel,
   PublicKeyModel,
@@ -5,9 +8,6 @@ import {
   LoginInviteModel,
   AccountCompletionInviteModel
 } from '../db/Models';
-import logger from '../logger';
-import connectToDatabase, {disconnectFromDB} from '../db/connection';
-import {DBConnection, IAccountCompletionInviteDocument} from 'passwordkeeper.types';
 
 const removedExpiredAccountCompletionInvites = async () => {
   const now = new Date();

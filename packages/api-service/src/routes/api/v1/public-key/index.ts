@@ -1,7 +1,6 @@
 /*istanbul ignore file */
-import logger from '../../../../logger';
 import {Router, Request, Response} from 'express';
-import {ensureRsaKeysExist, getPathToPublicKey} from '../../../../utils';
+import {ensureRsaKeysExist, getPathToPublicKey, logger} from '../../../../utils';
 
 const publicKeyRoutes = Router();
 

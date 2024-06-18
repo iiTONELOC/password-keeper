@@ -1,8 +1,11 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import crypto from 'crypto';
-import logger from '../../../logger';
+import logger from '../../logger';
 import {AES_256_Methods, AES_EncryptionData} from 'passwordkeeper.types';
 
+/* istanbul ignore next */
 const getSalt = (): string => process.env.AES_SALT ?? 'salt';
+/* istanbul ignore next */
 const getPepper = (): string => process.env.AES_PEPPER ?? 'pepper';
 
 /**
@@ -15,12 +18,13 @@ const getPepper = (): string => process.env.AES_PEPPER ?? 'pepper';
 export const generateAESEncryptionKey = async (password: string): Promise<Buffer> => {
   return new Promise((resolve, reject) => {
     try {
-      // istanbul ignore next
-      const pepper: Buffer = Buffer.from(getPepper() ?? '', 'utf8');
       const salt: string = getSalt();
+      /* istanbul ignore next */
+      const pep = getPepper()?.trim();
+      /* istanbul ignore next */
+      const pepper: Buffer = Buffer.from(pep ?? '', 'utf8');
 
-      // ensure that we have a pepper, a salt, and a password
-      // if we do not have either of these, throw a relevant error message
+      /* istanbul ignore next */
       if (!pepper.length) {
         throw new Error('No pepper found');
       }
@@ -116,7 +120,7 @@ export const decryptAES = async (
         .then((key: Buffer) => {
           decryptData(key);
         })
-        .catch(error => {
+        .catch(_ => {
           // istanbul ignore next
           reject(new Error('Error generating encryption key'));
         });

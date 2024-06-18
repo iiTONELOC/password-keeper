@@ -1,5 +1,5 @@
 import {GraphQLError} from 'graphql';
-import logger from '../../../../logger';
+import {logger} from '../../../../utils/';
 import {enforceUserSession} from '../../helpers/enforceUserSession';
 import type {AuthContext, QueryMeResponse} from 'passwordkeeper.types';
 

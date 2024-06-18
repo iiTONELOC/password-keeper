@@ -1,4 +1,4 @@
-import logger from './logger';
+import {logger} from './utils';
 import {createAppServer} from './server';
 import type {AppServer} from 'passwordkeeper.types';
 

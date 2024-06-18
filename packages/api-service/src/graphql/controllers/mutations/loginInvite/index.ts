@@ -1,5 +1,5 @@
 import {GraphQLError} from 'graphql';
-import logger from '../../../../logger';
+import {findUsersPublicKey} from '../../helpers';
 import {encryptAES} from '../../../../utils/crypto/aes-256';
 import {UserModel, LoginInviteModel} from '../../../../db/Models';
 import type {
@@ -11,15 +11,15 @@ import type {
   GetLoginNonceMutationVariables
 } from 'passwordkeeper.types';
 import {
+  logger,
   hashData,
   createNonce,
   verifySignature,
+  getAppsPrivateKey,
   encryptWithPublicKey,
   decryptWithPrivateKey,
-  encryptWithPrivateKey,
-  getAppsPrivateKey
+  encryptWithPrivateKey
 } from '../../../../utils';
-import {findUsersPublicKey} from '../../helpers';
 
 const GET_LOGIN_NONCE = 'getLoginNonce mutation::';
 

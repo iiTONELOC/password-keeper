@@ -1,3 +1,4 @@
+import logger from '../logger';
 import {createHash, randomBytes} from 'crypto';
 
 export * from './rsa-4096';
@@ -13,7 +14,7 @@ export const hashData = async (data: string): Promise<string | undefined> => {
     hash.update(data);
     return hash.digest('hex');
   } catch (error) {
-    console.error('Error hashing data:', error);
+    logger.error('Error hashing data:', error);
     return undefined;
   }
 };
@@ -27,7 +28,7 @@ export const generateRandomBytes = (length: number): string | undefined => {
   try {
     return randomBytes(length).toString('hex');
   } catch (error) {
-    console.error('Error generating random bytes:', error);
+    logger.error('Error generating random bytes:', error);
     return undefined;
   }
 };

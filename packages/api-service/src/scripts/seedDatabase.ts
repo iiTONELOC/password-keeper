@@ -1,8 +1,7 @@
-import {DBConnection, IAccountType} from 'passwordkeeper.types';
-
-import {AccountTypeModel, AccountTypeMap, DefaultAccountTypes} from '../db/Models';
+import {logger} from '../utils';
 import connectToDB, {disconnectFromDB} from '../db/connection';
-import logger from '../logger';
+import {DBConnection, IAccountType} from 'passwordkeeper.types';
+import {AccountTypeModel, AccountTypeMap, DefaultAccountTypes} from '../db/Models';
 
 // seed the AccountType collection with the default account types using the data from the AccountTypeMap
 export const createDefaultAccountTypes = async () => {

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
-/**istanbul ignore file */
+/* istanbul ignore file */
 import {createUser, completeAccount} from '../graphql/controllers/mutations';
 import type {
   GeneratedRSAKeys,

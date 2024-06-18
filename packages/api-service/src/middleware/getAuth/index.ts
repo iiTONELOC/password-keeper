@@ -1,10 +1,9 @@
-import logger from '../../logger';
 import {Request} from 'express';
 import {AuthSessionModel} from '../../db/Models';
 import {decryptAES} from '../../utils/crypto/aes-256';
 import {findUsersPublicKey} from '../../graphql/controllers/helpers';
 import {IAuthSessionDocument, PrivateKey} from 'passwordkeeper.types';
-import {verifySignature, getAppsPrivateKey, decryptWithPrivateKey} from '../../utils';
+import {verifySignature, getAppsPrivateKey, decryptWithPrivateKey, logger} from '../../utils';
 
 /**
  * Retrieves the authenticated session from the request.

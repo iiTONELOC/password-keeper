@@ -1,7 +1,6 @@
 import {GraphQLError} from 'graphql';
-import logger from '../../../../logger';
 import {UserModel, AccountCompletionInviteModel} from '../../../../db/Models';
-import {createNonce, getAppsPrivateKey, encryptWithPrivateKey} from '../../../../utils';
+import {createNonce, getAppsPrivateKey, encryptWithPrivateKey, logger} from '../../../../utils';
 import type {
   IUserDocument,
   CreateUserMutationPayload,

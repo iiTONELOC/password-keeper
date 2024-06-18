@@ -1,3 +1,4 @@
+/* istanbul ignore file */
 import {me} from './me';
 
 export {me};

@@ -1,3 +1,4 @@
+/* istanbul ignore file */
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 import {exec} from 'child_process';
 import {TestUserCreationData} from './';

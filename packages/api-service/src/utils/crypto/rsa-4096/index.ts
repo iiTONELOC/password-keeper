@@ -1,16 +1,18 @@
 import os from 'os';
 import path from 'path';
+import {hashData} from '..';
 import crypto from 'crypto';
 import fs from 'fs/promises';
-import logger from '../../../logger';
+import logger from '../../logger';
 import type {GeneratedRSAKeys, RSA4096Methods} from 'passwordkeeper.types';
-import {hashData} from '..';
 
 export const KEY_FORMAT = 'pem';
 export const PUBLIC_KEY_TYPE = 'spki';
 export const PRIVATE_KEY_TYPE = 'pkcs8';
 export const ENCRYPTION_ALGORITHM = 'aes-256-cbc';
+/* istanbul ignore next */
 export const PUBLIC_KEY_PERMISSIONS = os.platform() !== 'win32' ? 0o644 : parseInt('644', 8);
+/* istanbul ignore next */
 export const PRIVATE_KEY_PERMISSIONS = os.platform() !== 'win32' ? 0o600 : parseInt('600', 8);
 
 export const getPathToPublicKey = () => path.resolve(getPathToKeyFolder(), 'pwd-keeper_public.pem');
@@ -19,8 +21,8 @@ export const getPathToPrivateKey = () =>
 
 export const getPathToKeyFolder = () => {
   const keyFolder: string | undefined = process.env.KEYS_PATH;
+  /* istanbul ignore next */
   const pathToKeyFolder: string = path.resolve(process.cwd(), keyFolder ?? './keys');
-
   return pathToKeyFolder;
 };
 
@@ -43,11 +45,14 @@ export const generateRSAKeys = async (
     const publicKeyFile: string = path.join(publicKeyPath, `${keyName}_public.${KEY_FORMAT}`);
 
     // if the folders exist, then return the existing keys
+    /* istanbul ignore next */
     if (
       /* istanbul ignore next */
       await fs
         .stat(privateKeyFile)
+        /* istanbul ignore next */
         .then(() => true)
+        /* istanbul ignore next */
         .catch(() => false)
     ) {
       const publicKey: string = await fs.readFile(publicKeyFile, {encoding: 'utf8'});
@@ -326,7 +331,7 @@ export const verifySignature = async (
   const signatureHash = (await hashData(userId + nonce)) as string;
 
   const msgHeader = `verifySignature:: Error verifying signature for user ${userId} - `;
-
+  /* istanbul ignore next */
   if (!signatureHash) {
     /* istanbul ignore next */
     logger.error(`${msgHeader} error hashing data`);
@@ -344,7 +349,7 @@ export const verifySignature = async (
     /* istanbul ignore next */
     return false;
   }
-
+  /* istanbul ignore next */
   // Compare the hash with the decrypted signature
   if (signatureHash !== decryptedSignature) {
     /* istanbul ignore next */

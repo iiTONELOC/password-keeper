@@ -1,5 +1,5 @@
 /*istanbul ignore file */
-import logger from '../logger';
+import logger from './logger';
 import {RSA4096, getPathToKeyFolder, getPathToPrivateKey, getPathToPublicKey} from './crypto';
 
 export * from './crypto';
@@ -45,3 +45,6 @@ export const getAppsPrivateKey = async () => {
 export const getAppsPublicKey = async () => {
   return RSA4096.getPublicKey(getPathToPublicKey());
 };
+
+export {ip} from './ip';
+export {default as logger} from './logger';

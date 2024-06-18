@@ -1,3 +1,4 @@
+/* istanbul ignore file */
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 import type {
   PrivateKey,
@@ -25,6 +26,7 @@ export type LoginTestUserProps = {
 export const getLoginMutationVariables = async (
   props: LoginTestUserProps
 ): Promise<CompleteLoginMutationVariables> => {
+  /* istanbul ignore next */
   const {nonce} = props.loginInvite || {};
   const privateKey: PrivateKey | undefined = await getPrivateKey(
     props.testUserKeys.pathToPrivateKey

@@ -1,18 +1,15 @@
-import ip from '../ip';
 import cors from 'cors';
 import http from 'http';
-import logger from '../logger';
 import routes from '../routes';
 import {Mongoose} from 'mongoose';
 import bodyParser from 'body-parser';
 import {getAuth} from '../middleware';
 import express, {Express} from 'express';
-
-import {ensureRsaKeysExist} from '../utils';
 import createApolloServer from './apolloServer';
-import type {AppServer, IAuthSessionDocument} from 'passwordkeeper.types';
+import {ensureRsaKeysExist, ip, logger} from '../utils';
 import {expressMiddleware} from '@apollo/server/express4';
 import connectToDatabase, {disconnectFromDB} from '../db/connection';
+import type {AppServer, IAuthSessionDocument} from 'passwordkeeper.types';
 
 const corsOptions: cors.CorsOptions = {
   origin: []
