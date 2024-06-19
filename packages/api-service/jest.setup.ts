@@ -6,6 +6,7 @@ import {
   PublicKeyModel,
   AuthSessionModel,
   LoginInviteModel,
+  EncryptedUserPasswordModel,
   AccountCompletionInviteModel
 } from './src/db/Models';
 
@@ -20,6 +21,7 @@ const globalSetup = async () => {
     PublicKeyModel.deleteMany(),
     AuthSessionModel.deleteMany(),
     LoginInviteModel.deleteMany(),
+    EncryptedUserPasswordModel.deleteMany(),
     AccountCompletionInviteModel.deleteMany()
   ]);
 };

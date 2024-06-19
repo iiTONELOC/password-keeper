@@ -1,6 +1,6 @@
 import {Types} from 'mongoose';
 import type {IUserDocument, ValidAccountTypes} from 'passwordkeeper.types';
-import {AccountTypeMap, PublicKeyModel, UserModel} from '../../../../db/Models';
+import {AccountModel, AccountTypeMap, PublicKeyModel, UserModel} from '../../../../db/Models';
 
 /**
  * Adds a new public key to the user's account in accordance with their account type
@@ -14,7 +14,16 @@ export const addPublicKey = async (
   publicKey: string
 ): Promise<IUserDocument> => {
   // find the existing user in the database
-  const existingUser = await UserModel.findById(userId).select('_id publicKeys accountType');
+  const existingUser: IUserDocument | null = (
+    await UserModel.findById(userId)
+      .select('_id username email publicKeys account')
+      .populate({path: 'publicKeys'})
+      .populate({
+        path: 'account',
+        select: 'accountType publicKeys',
+        populate: {path: 'accountType'}
+      })
+  )?.toObject() as IUserDocument | null;
 
   if (!existingUser) {
     throw new Error('User not found');
@@ -22,12 +31,12 @@ export const addPublicKey = async (
 
   // determine how many public keys this user has
   /* istanbul ignore next */
-  const publicKeyCount = existingUser?.publicKeys?.length ?? 0;
+  const publicKeyCount = existingUser?.account.publicKeys?.length ?? 0;
 
   // determine the max number of public keys this user can have according to their type
   /* istanbul ignore next */
   const maxPublicKeys =
-    AccountTypeMap[existingUser?.accountType as ValidAccountTypes].maxPublicKeys;
+    AccountTypeMap[existingUser.account.accountType.type as ValidAccountTypes].maxPublicKeys;
 
   // if the user has reached the max number of public keys, throw an error
   if (publicKeyCount >= maxPublicKeys) {
@@ -40,14 +49,24 @@ export const addPublicKey = async (
     owner: userId
   });
 
+  // add the key to the user's account
+  await AccountModel.findOneAndUpdate({owner: userId}, {$addToSet: {publicKeys: newKey._id}});
+
   /* istanbul ignore next */
   // update the user's public keys
   const updated = (
-    await UserModel.findByIdAndUpdate(userId, {
-      $addToSet: {
-        publicKeys: newKey._id
-      }
-    }).select('_id username email')
+    await UserModel.findByIdAndUpdate(
+      userId,
+      {
+        $addToSet: {
+          publicKeys: newKey._id
+        }
+      },
+      {new: true, runValidators: true}
+    )
+      .select('_id username email publicKeys account')
+      .populate({path: 'publicKeys'})
+      .populate({path: 'account', select: 'accountType', populate: {path: 'accountType'}})
   )?.toObject() as IUserDocument;
 
   /* istanbul ignore next */
@@ -55,6 +74,8 @@ export const addPublicKey = async (
     // remove the newly created public key
     /* istanbul ignore next */
     await PublicKeyModel.deleteOne({_id: newKey._id});
+    /* istanbul ignore next */
+    await AccountModel.findOneAndUpdate({owner: userId}, {$pull: {publicKeys: newKey._id}});
     /* istanbul ignore next */
     throw new Error('Error updating user');
   }

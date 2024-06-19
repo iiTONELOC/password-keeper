@@ -1,10 +1,10 @@
 import path from 'path';
 import {getPathToKeyFolder} from '../../../../utils';
-import {createTestUser} from '../../../../testHelpers';
+import {createTestUser} from '../../../../utils/testHelpers';
+import {AccountCompletionInviteModel} from '../../../../db/Models';
 import {describe, expect, it, beforeAll, afterAll} from '@jest/globals';
 import dbConnection, {disconnectFromDB} from '../../../../db/connection';
 import {DBConnection, CreateUserMutationVariables} from 'passwordkeeper.types';
-import {AccountCompletionInviteModel} from '../../../../db/Models';
 
 const pathToKeys: string = path.join(
   getPathToKeyFolder()?.replace('.private', 'test-keys'),

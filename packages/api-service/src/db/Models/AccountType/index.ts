@@ -1,5 +1,5 @@
 import {Schema, model} from 'mongoose';
-import {DefaultAccountTypes, AccountTypeMap} from './account-details';
+import {DefaultAccountTypes, AccountTypeMap} from '../account-details';
 import {IAccountType, IAccountTypeModel, ValidAccountTypes} from 'passwordkeeper.types';
 
 // Define the AccountType Schema
@@ -16,6 +16,11 @@ const AccountTypeSchema = new Schema<IAccountType>(
       type: Number,
       required: true,
       default: AccountTypeMap[ValidAccountTypes.FREE].price
+    },
+    maxUsers: {
+      type: Number,
+      required: true,
+      default: AccountTypeMap[ValidAccountTypes.FREE].maxUsers
     },
     maxPublicKeys: {
       type: Number,

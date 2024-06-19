@@ -4,11 +4,29 @@ const typeDefs = `#graphql
     # >>MongoDB Models<<
     type User {
         _id: ID!
-        username: String!
         email: String!
-        publicKeys: [PublicKey!]!
-        accountType: String!
+        username: String!
         subUsers: [User!]!
+        account: Account!
+        publicKeys: [PublicKey!]!
+        passwords: [EncryptedUserPassword!]!
+    }
+
+    type AccountType {
+        type: String!
+        price: Float!
+        maxUsers: Int!
+        maxPublicKeys: Int!
+        maxPasswords: Int!
+    }
+
+    type Account {
+        _id: ID!
+        owner: User!
+        status: String!
+        subUsers: [User!]!
+        accountType: AccountType!
+        publicKeys: [PublicKey!]!
         passwords: [EncryptedUserPassword!]!
     }
 
@@ -19,12 +37,12 @@ const typeDefs = `#graphql
 
     type EncryptedUserPassword {
         _id: ID!
+        owner: User!
+        expiresAt: String
+        url: EncryptedData
         name: EncryptedData!
         username: EncryptedData!
         password: EncryptedData!
-        url: EncryptedData
-        owner: User!
-        expiresAt: String
     }
     
     type PublicKey {
@@ -43,16 +61,17 @@ const typeDefs = `#graphql
 
     type AuthSession {
         _id: ID!
-        nonce: String!
         user: ME!
+        nonce: String!
         expiresAt: String
     }
 
     # >> Query and Mutation Types <<
     type ME {
         _id: ID!
-        username: String!
         email: String!
+        username: String!
+        account: Account!
     }
 
     type inviteToken {
@@ -95,18 +114,33 @@ const typeDefs = `#graphql
         username: String!
         email: String!
     }
+    
+    input encryptedInput {
+        encryptedData: String!
+        iv: String!
+    }
+
+    input addPasswordArgs {
+        url: encryptedInput
+        name: encryptedInput!
+        username: encryptedInput!
+        password: encryptedInput!
+    }
 
     # _____Queries and Mutations _____
     
     type Query {        
         me: ME
+        myPublicKeys: [PublicKey!]!
+        myPasswords: [EncryptedUserPassword!]!
     }
 
     type Mutation {
-        getLoginNonce(getLoginNonceArgs:getLoginNonceArgs!): getLoginNoncePayload!
-        completeLogin(completeLoginArgs:completeLoginArgs!): AuthSession!
+        addPassword(addPasswordArgs:addPasswordArgs!): EncryptedUserPassword!
         createUser(createUserArgs:createUserArgs!): createdUserPayload!
+        completeLogin(completeLoginArgs:completeLoginArgs!): AuthSession!
         completeAccount(completeAccountArgs:completeAccountArgs!): AuthSession!
+        getLoginNonce(getLoginNonceArgs:getLoginNonceArgs!): getLoginNoncePayload!
     }
 `;
 

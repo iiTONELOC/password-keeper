@@ -1,13 +1,14 @@
 import {GraphQLError} from 'graphql';
 import {createAuthSession, addPublicKey} from '../../helpers';
-import {AccountCompletionInviteModel} from '../../../../db/Models';
+import {AccountCompletionInviteModel, AccountModel} from '../../../../db/Models';
 import {decryptWithPrivateKey, getAppsPrivateKey, logger} from '../../../../utils';
-import type {
-  PrivateKey,
-  IUserDocument,
-  CompleteAccountMutationPayload,
-  CompleteAccountMutationVariables,
-  IAccountCompletionInviteDocument
+import {
+  type PrivateKey,
+  type IUserDocument,
+  type CompleteAccountMutationPayload,
+  type CompleteAccountMutationVariables,
+  type IAccountCompletionInviteDocument,
+  AccountStatusTypes
 } from 'passwordkeeper.types';
 
 export const completeAccount = async (
@@ -74,11 +75,19 @@ export const completeAccount = async (
   try {
     // add the public key to the user
     const updatedUser = await addPublicKey(invite.user._id, publicKey);
+    // update the account status to active and add the public key
+    await AccountModel.findOneAndUpdate(
+      {owner: invite.user._id},
+      {status: AccountStatusTypes.ACTIVE, $addToSet: {publicKeys: updatedUser.publicKeys[0]}}
+    );
+
+    // fetch the user again so we can populate the account and public keys
 
     await AccountCompletionInviteModel.deleteOne({_id: invite._id});
 
     return createAuthSession({publicKey, user: updatedUser as Partial<IUserDocument>});
   } catch (error) {
+    console.error(error);
     logger.error('completeAccount:: mutationError - error adding public key!');
     // delete the invite
     /* istanbul ignore next */

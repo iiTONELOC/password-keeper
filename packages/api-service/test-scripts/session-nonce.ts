@@ -90,6 +90,7 @@ if (require.main === module) {
   const username = process.argv[3];
   const userId = process.argv[4];
   const sessionId = process.argv[5];
+  // not typically used, but can be used to override the key name - useful for testing
   const overrideKeyName = process.argv[6] || username;
 
   if (!nonce) {

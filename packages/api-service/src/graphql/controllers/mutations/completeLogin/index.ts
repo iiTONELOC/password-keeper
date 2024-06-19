@@ -53,8 +53,11 @@ export const completeLogin = async (
       user: userId
     }).populate({
       path: 'user',
-      select: '_id username email publicKeys',
-      populate: 'publicKeys'
+      select: '_id username email publicKeys account',
+      populate: [
+        {path: 'publicKeys'},
+        {path: 'account', select: 'accountType', populate: {path: 'accountType'}}
+      ]
     })
   )?.toObject() as ILoginInviteDocument;
 

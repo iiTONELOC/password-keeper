@@ -1,13 +1,13 @@
 import {findUsersPublicKey} from '.';
 import {expect, describe, it} from '@jest/globals';
-import {IPublicKeyDocument, IUserDocument} from 'passwordkeeper.types';
+import {IPublicKeyDocument, IUserDocument, UserRoles} from 'passwordkeeper.types';
 
 const testUser: IUserDocument = {
   // @ts-expect-error - testing the function
   _id: 'testUserId',
   username: 'testUser',
   email: 'testUser@test.com',
-  userRole: 'Account Owner',
+  userRole: UserRoles.ACCOUNT_OWNER,
   // @ts-expect-error - testing the function
   publicKeys: [
     {_id: 'testPublicKeyId_1', key: 'testPublicKey1'},

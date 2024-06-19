@@ -1,4 +1,9 @@
-import {IAccountTypeMap, ValidAccountTypes} from 'passwordkeeper.types';
+import {
+  UserRoles,
+  IAccountTypeMap,
+  ValidAccountTypes,
+  AccountStatusTypes
+} from 'passwordkeeper.types';
 
 export const DefaultAccountTypes: ValidAccountTypes[] = [
   ValidAccountTypes.FREE,
@@ -8,8 +13,6 @@ export const DefaultAccountTypes: ValidAccountTypes[] = [
   ValidAccountTypes.TIERED_BUSINESS_2,
   ValidAccountTypes.TIERED_BUSINESS_3
 ];
-// freeze the array so it cannot be modified
-Object.freeze(DefaultAccountTypes);
 
 export const AccountTypeMap: IAccountTypeMap = {
   [ValidAccountTypes.FREE]: {
@@ -56,5 +59,16 @@ export const AccountTypeMap: IAccountTypeMap = {
   }
 };
 
-// freeze the map so it cannot be modified
+export const DefaultUserRoles: UserRoles[] = [UserRoles.ACCOUNT_OWNER, UserRoles.SUB_USER];
+export const DefaultAccountStatusTypes: AccountStatusTypes[] = [
+  AccountStatusTypes.ACTIVE,
+  AccountStatusTypes.PENDING,
+  AccountStatusTypes.CANCELLED,
+  AccountStatusTypes.SUSPENDED,
+  AccountStatusTypes.DELINQUENT
+];
+
 Object.freeze(AccountTypeMap);
+Object.freeze(DefaultUserRoles);
+Object.freeze(DefaultAccountTypes);
+Object.freeze(DefaultAccountStatusTypes);

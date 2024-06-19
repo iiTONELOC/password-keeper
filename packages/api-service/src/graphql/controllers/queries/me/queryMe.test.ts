@@ -1,9 +1,9 @@
 import {me} from '.';
 import path from 'path';
 import {getPathToKeyFolder} from '../../../../utils';
-import dbConnection, {disconnectFromDB} from '../../../../db/connection';
 import {describe, expect, it, beforeAll, afterAll} from '@jest/globals';
-import {createTestUser, TestUserCreationData} from '../../../../testHelpers';
+import dbConnection, {disconnectFromDB} from '../../../../db/connection';
+import {createTestUser, TestUserCreationData} from '../../../../utils/testHelpers';
 import {
   DBConnection,
   CreateUserMutationVariables,
@@ -59,7 +59,12 @@ describe('queryMe', () => {
       _id: authSession.user._id,
       username: authSession.user.username,
       email: authSession.user.email,
-      userRole: authSession.user.userRole
+      account: {
+        _id: authSession?.user?.account?._id,
+        accountType: {
+          type: authSession?.user?.account?.accountType?.type
+        }
+      }
     });
   });
 
@@ -71,6 +76,20 @@ describe('queryMe', () => {
         //@ts-expect-error - mock data for testing purposes
         user: authSession.user,
         expiresAt: new Date(Date.now() - 1000)
+      }
+    };
+
+    await expect(me(undefined, undefined, authContext)).rejects.toThrowError('Error getting user');
+  });
+
+  it('Should throw an error if the user is not found', async () => {
+    const authContext: AuthContext = {
+      session: {
+        //@ts-expect-error - mock data for testing purposes
+        _id: 'sessionId',
+        //@ts-expect-error - mock data for testing purposes
+        user: {},
+        expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24)
       }
     };
 

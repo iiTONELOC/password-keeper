@@ -1,17 +1,18 @@
 import path from 'path';
 import {getLoginNonce} from './index';
-import {createTestUser} from '../../../../testHelpers';
+import {createTestUser} from '../../../../utils/testHelpers';
 import dbConnection, {disconnectFromDB} from '../../../../db/connection';
 import {describe, expect, it, beforeAll, afterAll} from '@jest/globals';
-import type {
-  IUser,
-  PrivateKey,
-  DBConnection,
-  IUserDocument,
-  GeneratedRSAKeys,
-  CreateUserMutationVariables,
-  GetLoginNonceMutationPayload,
-  GetLoginNonceMutationVariables
+import {
+  UserRoles,
+  type IUser,
+  type PrivateKey,
+  type DBConnection,
+  type IUserDocument,
+  type GeneratedRSAKeys,
+  type CreateUserMutationVariables,
+  type GetLoginNonceMutationPayload,
+  type GetLoginNonceMutationVariables
 } from 'passwordkeeper.types';
 import {
   hashData,
@@ -40,7 +41,7 @@ const pathToKeys: string = path.join(
 const testUserCreationData: IUser = {
   username: 'testLoginNonce',
   email: 'testloginnonce@test.com',
-  userRole: 'Account Owner'
+  userRole: UserRoles.ACCOUNT_OWNER
 };
 
 /**

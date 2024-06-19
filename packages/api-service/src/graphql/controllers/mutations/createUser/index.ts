@@ -1,11 +1,20 @@
 import {GraphQLError} from 'graphql';
-import {UserModel, AccountCompletionInviteModel} from '../../../../db/Models';
 import {createNonce, getAppsPrivateKey, encryptWithPrivateKey, logger} from '../../../../utils';
-import type {
-  IUserDocument,
-  CreateUserMutationPayload,
-  CreateUserMutationVariables,
-  IAccountCompletionInviteDocument
+import {
+  UserModel,
+  AccountModel,
+  AccountTypeModel,
+  AccountCompletionInviteModel
+} from '../../../../db/Models';
+import {
+  UserRoles,
+  IAccountDocument,
+  ValidAccountTypes,
+  type IUserDocument,
+  IAccountTypeDocument,
+  type CreateUserMutationPayload,
+  type CreateUserMutationVariables,
+  type IAccountCompletionInviteDocument
 } from 'passwordkeeper.types';
 
 export const createUser = async (
@@ -15,7 +24,7 @@ export const createUser = async (
   __: undefined
 ): Promise<CreateUserMutationPayload> => {
   const {
-    createUserArgs: {username, email}
+    createUserArgs: {username, email, accountType}
   } = args;
 
   const loggerHeader = 'createUser mutation::';
@@ -30,9 +39,35 @@ export const createUser = async (
 
   try {
     logger.warn(`${loggerHeader} User: ${username} requested to create an account`);
-    const user: IUserDocument = (
-      await UserModel.create({username, email, userRole: 'Account Owner'})
+    let user: IUserDocument = (
+      await UserModel.create({username, email, userRole: UserRoles.ACCOUNT_OWNER})
     )?.toObject();
+
+    const userAccountType: IAccountTypeDocument = (
+      await AccountTypeModel.findOne({
+        type: accountType || ValidAccountTypes.FREE
+      })
+    )?.toObject() as IAccountTypeDocument;
+
+    // create an Account for the user
+    const userAccount: IAccountDocument = (
+      await AccountModel.create({
+        owner: user._id,
+        accountType: userAccountType._id
+      })
+    ).toObject() as IAccountDocument;
+
+    // update the user with the account - everyone defaults to a free account with this createUser mutation
+    user = (
+      await UserModel.findByIdAndUpdate(
+        user._id,
+        {account: userAccount._id},
+        {new: true, runValidators: true}
+      )
+        .select('_id username email publicKeys account')
+        .populate({path: 'publicKeys'})
+        .populate({path: 'account', select: 'accountType', populate: {path: 'accountType'}})
+    )?.toObject() as IUserDocument;
 
     // create a random nonce
     const nonce = createNonce();
@@ -84,6 +119,7 @@ export const createUser = async (
       logger.error(`${loggerHeader} User: ${username} already exists!`);
       throw new GraphQLError('User already exists');
     } else {
+      console.error(error);
       /* istanbul ignore next */
       logger.error(`${loggerHeader} Error creating user: ${error}`);
       /* istanbul ignore next */

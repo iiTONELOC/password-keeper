@@ -5,5 +5,16 @@ export type QueryMeResponse = {
   _id: Types.ObjectId | string;
   username: string;
   email: string;
-  userRole?: string;
+  account: {
+    _id: Types.ObjectId | string;
+    accountType: {
+      type: string;
+    };
+  };
+};
+
+export type QueryMyPublicKeysResponse = {
+  _id: Types.ObjectId | string;
+  key: string;
+  expiresAt?: Date;
 };

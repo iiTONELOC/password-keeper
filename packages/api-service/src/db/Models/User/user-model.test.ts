@@ -19,16 +19,17 @@ describe('User Model', () => {
     const User: IUserModel = UserModel;
     const schemaPaths = Object.keys(User.schema.paths);
 
-    expect(schemaPaths).toHaveLength(10);
+    expect(schemaPaths).toHaveLength(11);
 
     const expectedPaths = [
       'username',
       'email',
       'publicKeys',
-      'accountType',
+      'account',
       'subUsers',
       'passwords',
       '_id',
+      'userRole',
       'createdAt',
       'updatedAt',
       '__v'

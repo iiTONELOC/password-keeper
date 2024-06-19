@@ -8,16 +8,17 @@ import {
   requestLoginForTestUser,
   getLoginMutationVariables,
   TestUserCreationData
-} from '../../../../testHelpers';
-import type {
-  IUser,
-  DBConnection,
-  IUserDocument,
-  GeneratedRSAKeys,
-  CreateUserMutationVariables,
-  GetLoginNonceMutationPayload,
-  CompleteLoginMutationVariables,
-  CompleteLoginMutationPayload
+} from '../../../../utils/testHelpers';
+import {
+  UserRoles,
+  type IUser,
+  type DBConnection,
+  type IUserDocument,
+  type GeneratedRSAKeys,
+  type CreateUserMutationVariables,
+  type GetLoginNonceMutationPayload,
+  type CompleteLoginMutationVariables,
+  type CompleteLoginMutationPayload
 } from 'passwordkeeper.types';
 import {LoginInviteModel} from '../../../../db/Models';
 
@@ -37,7 +38,7 @@ const pathToKeys: string = path.join(
 const testUserCreationData: IUser = {
   username: 'testCompleteLogin',
   email: 'testCompleteLogin@test.com',
-  userRole: 'Account Owner'
+  userRole: UserRoles.ACCOUNT_OWNER
 };
 
 // variables to create a test user using graphql mutation

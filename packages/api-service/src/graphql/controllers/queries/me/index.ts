@@ -3,7 +3,7 @@ import {logger} from '../../../../utils/';
 import {enforceUserSession} from '../../helpers/enforceUserSession';
 import type {AuthContext, QueryMeResponse} from 'passwordkeeper.types';
 
-const me = async (
+export const me = async (
   _: undefined,
   __: undefined,
   context: AuthContext | undefined
@@ -17,7 +17,12 @@ const me = async (
       _id: session.user._id,
       username: session.user.username,
       email: session.user.email,
-      userRole: session.user.userRole
+      account: {
+        _id: session.user.account._id,
+        accountType: {
+          type: session.user.account.accountType.type
+        }
+      }
     };
 
     return sanitizedUser;
@@ -26,5 +31,3 @@ const me = async (
     throw new GraphQLError('Error getting user');
   }
 };
-
-export {me};

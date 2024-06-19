@@ -2,7 +2,7 @@ import {Request} from 'express';
 import {AuthSessionModel} from '../../db/Models';
 import {decryptAES} from '../../utils/crypto/aes-256';
 import {findUsersPublicKey} from '../../graphql/controllers/helpers';
-import {IAuthSessionDocument, PrivateKey} from 'passwordkeeper.types';
+import {AccountStatusTypes, IAuthSessionDocument, PrivateKey} from 'passwordkeeper.types';
 import {verifySignature, getAppsPrivateKey, decryptWithPrivateKey, logger} from '../../utils';
 
 /**
@@ -39,12 +39,22 @@ export const getAuth = async (req: Request): Promise<IAuthSessionDocument | unde
     const session: IAuthSessionDocument | undefined = (
       await AuthSessionModel.findOne({_id: decryptedID}).populate({
         path: 'user',
-        select: '_id username email publicKeys',
-        populate: 'publicKeys'
+        select: '_id username email publicKeys account',
+        populate: [
+          {path: 'publicKeys'},
+          {path: 'account', select: 'status', populate: [{path: 'accountType'}]}
+        ]
       })
     )?.toObject();
 
-    if (!session) {
+    const invalidAccountStatusTypesForLogin: AccountStatusTypes[] = [
+      AccountStatusTypes.SUSPENDED,
+      AccountStatusTypes.DELINQUENT,
+      AccountStatusTypes.PENDING
+    ];
+
+    // if the session is not found or the account status is invalid, return undefined
+    if (!session || invalidAccountStatusTypesForLogin.includes(session.user.account.status)) {
       return undefined;
     }
 
@@ -59,7 +69,7 @@ export const getAuth = async (req: Request): Promise<IAuthSessionDocument | unde
     // Decrypt the nonce
     const decryptedNonce: string | undefined = await decryptAES(session.nonce, AES_KEY);
 
-    const userPublicKey: string | undefined = await findUsersPublicKey(
+    const userPublicKey: string | undefined = findUsersPublicKey(
       session.user,
       publicKeyId as string | undefined
     );

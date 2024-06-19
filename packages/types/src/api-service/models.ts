@@ -2,15 +2,18 @@
 import {Model, Types} from 'mongoose';
 
 export enum ValidAccountTypes {
-  FREE = 'FREE',
   PRO = 'PRO',
+  FREE = 'FREE',
   BUSINESS = 'BUSINESS',
   TIERED_BUSINESS_1 = 'TIERED_BUSINESS_1',
   TIERED_BUSINESS_2 = 'TIERED_BUSINESS_2',
   TIERED_BUSINESS_3 = 'TIERED_BUSINESS_3'
 }
 
-export type UserRoles = 'Account Owner' | 'Sub User';
+export enum UserRoles {
+  ACCOUNT_OWNER = 'Account Owner',
+  SUB_USER = 'Sub User'
+}
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type Timestamps = {
@@ -26,12 +29,12 @@ export type IEncryptedData = {
 
 //  _______ Account Type _______
 export type IAccountType = {
-  type: ValidAccountTypes;
   price: number;
   // -1 for unlimited
   maxUsers: number;
   maxPasswords: number;
   maxPublicKeys: number;
+  type: ValidAccountTypes;
 };
 
 export type IAccountTypeModel = Model<IAccountType>;
@@ -42,14 +45,48 @@ export type IAccountTypeDocument = IAccountTypeModel &
   };
 
 export type IAccountTypeMap = Record<ValidAccountTypes, IAccountType>;
-//  _______ Users _______
 
+// _______ Account _______
+export enum AccountStatusTypes {
+  ACTIVE = 'ACTIVE',
+  PENDING = 'PENDING',
+  CANCELLED = 'CANCELLED',
+  SUSPENDED = 'SUSPENDED',
+  DELINQUENT = 'DELINQUENT'
+}
+
+export type IAccount = {
+  owner: Types.ObjectId;
+  status: AccountStatusTypes;
+  subUsers: Types.ObjectId[];
+  passwords: Types.ObjectId[];
+  publicKeys: Types.ObjectId[];
+  accountType: Types.ObjectId;
+};
+
+export type IAccountModel = Model<IAccount>;
+export type IAccountDocument = IAccountModel &
+  IAccount &
+  Timestamps & {
+    userCount?: number;
+    _id: Types.ObjectId;
+    passwordCount?: number;
+    publicKeyCount?: number;
+    status: AccountStatusTypes;
+    accountType: IAccountTypeDocument;
+    owner: Types.ObjectId | IUserDocument;
+    subUsers?: Types.ObjectId[] | IUserDocument[];
+    publicKeys?: Types.ObjectId[] | IPublicKeyDocument[];
+    passwords?: Types.ObjectId[] | IUserPasswordDocument[];
+  };
+
+//  _______ Users _______
 export type IUser = {
   username: string;
   email: string;
   userRole: UserRoles;
   publicKeys?: Types.ObjectId[];
-  accountType?: ValidAccountTypes;
+  account?: Types.ObjectId;
   subUsers?: Types.ObjectId[];
   passwords?: Types.ObjectId[];
 };
@@ -60,7 +97,7 @@ export type IUserDocument = IUserModel &
   Timestamps & {
     _id: Types.ObjectId;
     publicKeys: IPublicKeyDocument[];
-    accountType: IAccountTypeDocument;
+    account: IAccountDocument;
     subUsers: IUserDocument[];
     passwords: IUserPasswordDocument[];
   };
@@ -111,12 +148,12 @@ export type IPublicKeyDocument = IPublicKeyModel &
  * key
  */
 export type IPassword = {
+  url?: string;
   name: string;
+  expiresAt?: Date;
   username: string;
   password: string;
-  url?: string;
   owner: string | Types.ObjectId;
-  expiresAt?: Date;
 };
 
 /**
@@ -124,12 +161,13 @@ export type IPassword = {
  * has been encrypted using their AES key
  */
 export type IPasswordEncrypted = {
+  expiresAt?: Date;
   name: IEncryptedData;
+  url?: IEncryptedData;
   username: IEncryptedData;
   password: IEncryptedData;
-  url?: IEncryptedData;
+  _id?: string | Types.ObjectId;
   owner: string | Types.ObjectId;
-  expiresAt?: Date;
 };
 
 /**

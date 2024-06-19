@@ -15,7 +15,7 @@ import {
   encryptWithPublicKey,
   decryptWithPrivateKey,
   encryptWithPrivateKey
-} from '../utils';
+} from '..';
 
 export type LoginTestUserProps = {
   testUser: IUserDocument;

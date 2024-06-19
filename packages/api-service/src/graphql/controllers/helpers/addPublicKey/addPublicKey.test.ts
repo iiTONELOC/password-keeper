@@ -1,16 +1,18 @@
 import path from 'path';
 import {addPublicKey} from '.';
-import {UserModel} from '../../../../db/Models';
 import {getPathToKeyFolder} from '../../../../utils';
-import {createTestUser} from '../../../../testHelpers';
+import {createTestUser} from '../../../../utils/testHelpers';
 import {beforeAll, afterAll, describe, it} from '@jest/globals';
 import dbConnection, {disconnectFromDB} from '../../../../db/connection';
-import type {
-  IUser,
-  DBConnection,
-  IUserDocument,
-  IPublicKeyDocument,
-  CreateUserMutationVariables
+import {AccountModel, AccountTypeModel, UserModel} from '../../../../db/Models';
+import {
+  UserRoles,
+  type IUser,
+  ValidAccountTypes,
+  type DBConnection,
+  type IUserDocument,
+  type IPublicKeyDocument,
+  type CreateUserMutationVariables
 } from 'passwordkeeper.types';
 import {Types} from 'mongoose';
 
@@ -28,7 +30,7 @@ const pathToKeys: string = path.join(
 const testUserCreationData: IUser = {
   username: 'testAddPublicKeyToUser',
   email: 'testAddPublicKeyToUser@test.com',
-  userRole: 'Account Owner'
+  userRole: UserRoles.ACCOUNT_OWNER
 };
 
 // variables to create a test user using graphql mutation
@@ -91,13 +93,25 @@ describe('addPublicKeyToUser', () => {
       expect(error).toBeDefined();
       expect(error?.toString()).toBe('Error: Max number of public keys reached');
     }
+
+    expect.assertions(3);
   });
 
   it('Should allow the user to add a new public key if they upgrade their account type', async () => {
-    await UserModel.findByIdAndUpdate(testUser._id, {
-      accountType: 'PRO'
-    }).select('accountType');
-
+    (
+      await AccountModel.findOneAndUpdate(
+        {
+          owner: testUser._id
+        },
+        {
+          accountType: await AccountTypeModel.findOne({type: ValidAccountTypes.PRO})
+        },
+        {
+          new: true,
+          runValidators: true
+        }
+      )
+    )?.toObject();
     const newPublicKey = 'newPublicKey';
     const updatedUser = await addPublicKey(testUser._id, newPublicKey);
 

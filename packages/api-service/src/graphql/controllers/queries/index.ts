@@ -1,10 +1,12 @@
 /* istanbul ignore file */
 import {me} from './me';
+import {myPublicKeys} from './myPublicKeys';
 
-export {me};
+export {me, myPublicKeys};
 
 const queries = {
-  me
+  me,
+  myPublicKeys
 };
 
 export default queries;

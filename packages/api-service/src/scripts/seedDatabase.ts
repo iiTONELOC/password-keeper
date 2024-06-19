@@ -8,12 +8,13 @@ export const createDefaultAccountTypes = async () => {
   const accountTypes: IAccountType[] = Object.values(AccountTypeMap).map(
     accountType => accountType
   );
-
-  await AccountTypeModel.insertMany(accountTypes);
+  for (const accountType of accountTypes) {
+    await AccountTypeModel.create(accountType);
+  }
 };
 
 export const hasPopulatedAccountTypes = async () => {
-  const accountTypes = await AccountTypeModel.find();
+  const accountTypes = await AccountTypeModel.find({});
   return accountTypes.length === DefaultAccountTypes.length;
 };
 

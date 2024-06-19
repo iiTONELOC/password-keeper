@@ -9,7 +9,7 @@ import {
   TestUserCreationData,
   createTestUser,
   getSessionReadyForAuthMiddleware
-} from '../../testHelpers';
+} from '../../utils/testHelpers';
 import {
   DBConnection,
   CreateUserMutationVariables,

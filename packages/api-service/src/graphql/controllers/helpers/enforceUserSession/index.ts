@@ -1,5 +1,7 @@
 import {AuthContext} from 'passwordkeeper.types';
 
+const NOT_AUTHENTICATED = 'Not Authenticated';
+
 export const enforceUserSession = (context: AuthContext) => {
   /* istanbul ignore next */
   const {session} = context ?? {
@@ -14,11 +16,15 @@ export const enforceUserSession = (context: AuthContext) => {
   }
 
   if (!session) {
-    throw new Error('Not Authenticated');
+    throw new Error(NOT_AUTHENTICATED);
   }
-  /* istanbul ignore next */
+
   if (!session?.user) {
-    throw new Error('Not Authenticated');
+    throw new Error(NOT_AUTHENTICATED);
+  }
+
+  if (!session.user || Object.keys(session.user).length === 0) {
+    throw new Error(NOT_AUTHENTICATED);
   }
 
   return session;

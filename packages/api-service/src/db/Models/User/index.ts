@@ -1,6 +1,6 @@
 import {Schema, model} from 'mongoose';
-import {DefaultAccountTypes} from '../AccountType';
-import {IUser, IUserModel, ValidAccountTypes} from 'passwordkeeper.types';
+import {DefaultUserRoles} from '../account-details';
+import {IUser, IUserModel, UserRoles} from 'passwordkeeper.types';
 
 // Define the User Schema
 const UserSchema = new Schema<IUser>(
@@ -34,12 +34,19 @@ const UserSchema = new Schema<IUser>(
         default: []
       }
     ],
-    accountType: {
+    account: {
+      type: Schema.Types.ObjectId,
+      ref: 'Account',
+      required: false,
+      default: undefined
+    },
+    userRole: {
       type: String,
       required: true,
-      enum: [...DefaultAccountTypes],
-      default: ValidAccountTypes.FREE
+      enum: [...DefaultUserRoles],
+      default: UserRoles.ACCOUNT_OWNER
     },
+    // TODO: Create a SubUser Model to replace the subUsers field
     subUsers: [
       {
         type: Schema.Types.ObjectId,

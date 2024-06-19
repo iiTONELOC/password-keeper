@@ -1,12 +1,13 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 import {Types} from 'mongoose';
-import {IUserDocument} from './models';
+import {IEncryptedData, IUserDocument, ValidAccountTypes} from './models';
 
 // ______________ Create User Mutation ______________
 export type CreateUserMutationVariables = {
   createUserArgs: {
     username: string;
     email: string;
+    accountType?: ValidAccountTypes;
   };
 };
 
@@ -73,4 +74,14 @@ export type CompleteLoginMutationPayload = {
   nonce: string;
   user: Partial<IUserDocument>;
   expiresAt: Date;
+};
+
+// ______________ Add Password Mutation ______________
+export type AddPasswordMutationVariables = {
+  addPasswordArgs: {
+    url?: IEncryptedData;
+    name: IEncryptedData;
+    username: IEncryptedData;
+    password: IEncryptedData;
+  };
 };

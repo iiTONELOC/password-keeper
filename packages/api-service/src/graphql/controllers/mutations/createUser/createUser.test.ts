@@ -1,18 +1,19 @@
 import {createUser} from '../index';
 import dbConnection, {disconnectFromDB} from '../../../../db/connection';
 import {describe, expect, it, beforeAll, afterAll} from '@jest/globals';
-import type {
-  IUser,
-  IUserDocument,
-  DBConnection,
-  CreateUserMutationPayload,
-  CreateUserMutationVariables
+import {
+  UserRoles,
+  type IUser,
+  type IUserDocument,
+  type DBConnection,
+  type CreateUserMutationPayload,
+  type CreateUserMutationVariables
 } from 'passwordkeeper.types';
 
 const testUserCreationData: IUser = {
   username: 'testCreateUser',
   email: 'testuser@test.com',
-  userRole: 'Account Owner'
+  userRole: UserRoles.ACCOUNT_OWNER
 };
 
 const testUserCreationVariables: CreateUserMutationVariables = {

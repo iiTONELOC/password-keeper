@@ -15,11 +15,12 @@
     "login-challenge": "node --env-file=./.env -r ts-node/register ./test-scripts/login-challenge.ts",
     "complete-account": "node --env-file=./.env -r ts-node/register ./test-scripts/complete-account.ts",
     "test": "npm run clean-logs-dev && node --env-file=./.env ./node_modules/.bin/jest --detectOpenHandles",
+    "encrypt-password-data": "node --env-file=./.env -r ts-node/register ./test-scripts/encrypt-password-data.ts",
     "build": "cd .. && cd types/ && npm run build && cd .. && cd api-service/ && npm run lint && rimraf ./dist && tsc",
     "test:dev": "npm run clean-logs-dev && node --env-file=./.env ./node_modules/.bin/jest --watch --detectOpenHandles",
     "remove-expired-db-entries-dev": "node --env-file=./.env -r ts-node/register ./src/scripts/removeExpired.ts 900000",
     "start": "npm run clean-logs && concurrently \"node --env-file=./.env  ./dist/index.js\" \"npm run remove-expired-db-entries\"",
-    "dev": "npm run clean-logs-dev && concurrently \"node --watch --env-file=./.env -r ts-node/register ./src/index.ts\" \"npm run remove-expired-db-entries-dev\""
+    "dev": "npm run clean-logs-dev && npm run seed-dev && concurrently \"node --watch --env-file=./.env -r ts-node/register ./src/index.ts\" \"npm run remove-expired-db-entries-dev\""
   },
   "author": "Anthony Tropeano",
   "license": "ISC",

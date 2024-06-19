@@ -1,6 +1,6 @@
 import AccountType from './index';
 import {describe, expect, it} from '@jest/globals';
-import {AccountTypeMap, DefaultAccountTypes} from './account-details';
+import {AccountTypeMap, DefaultAccountTypes} from '../account-details';
 import {IAccountTypeModel, ValidAccountTypes} from 'passwordkeeper.types';
 
 describe('AccountType Model', () => {
@@ -16,17 +16,18 @@ describe('AccountType Model', () => {
     expect(AccountTypeModel.modelName).toEqual('AccountType');
   });
 
-  it('Should have a schema with 6 total properties', () => {
+  it('Should have a schema with 7 total properties', () => {
     const AccountTypeModel: IAccountTypeModel = AccountType;
     const schemaPaths = Object.keys(AccountTypeModel.schema.paths);
 
-    expect(schemaPaths).toHaveLength(6);
+    expect(schemaPaths).toHaveLength(7);
     expect(schemaPaths).toContain('_id');
     expect(schemaPaths).toContain('__v');
     expect(schemaPaths).toContain('type');
     expect(schemaPaths).toContain('price');
-    expect(schemaPaths).toContain('maxPublicKeys');
+    expect(schemaPaths).toContain('maxUsers');
     expect(schemaPaths).toContain('maxPasswords');
+    expect(schemaPaths).toContain('maxPublicKeys');
   });
 });
 
