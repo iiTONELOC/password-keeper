@@ -1,13 +1,13 @@
 import path from 'path';
-import {getPathToKeyFolder} from '../../../../utils';
+import {getPathToKeyFolder} from '../../../../../utils';
 import {beforeAll, afterAll, describe, it} from '@jest/globals';
-import dbConnection, {disconnectFromDB} from '../../../../db/connection';
+import dbConnection, {disconnectFromDB} from '../../../../../db/connection';
 import {
   normalizeKey,
   createTestUser,
   TestUserCreationData,
   getSessionReadyForAuthMiddleware
-} from '../../../../utils/testHelpers';
+} from '../../../../../utils/testHelpers';
 import {
   UserRoles,
   type IUser,
@@ -24,8 +24,8 @@ import {
 } from 'passwordkeeper.types';
 
 import {addPublicKeyMutation} from '.';
-import {getAuth} from '../../../../middleware';
-import {AccountModel} from '../../../../db/Models';
+import {getAuth} from '../../../../../middleware';
+import {AccountModel} from '../../../../../db/Models';
 
 // store variables needed to test the login invite process
 let db: DBConnection;

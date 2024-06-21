@@ -1,7 +1,8 @@
 import {GraphQLError} from 'graphql';
-import {logger} from '../../../../utils/';
-import {enforceUserSession} from '../../helpers/enforceUserSession';
+import {logger} from '../../../../../utils/';
+import {enforceUserSession} from '../../../helpers/enforceUserSession';
 import type {AuthContext, QueryMeResponse} from 'passwordkeeper.types';
+import {handleErrorMessages} from '../../../helpers';
 
 export const me = async (
   _: undefined,
@@ -23,6 +24,6 @@ export const me = async (
     return sanitizedUser;
   } catch (error) {
     logger.error('Query Me:: error -', error);
-    throw new GraphQLError('Error getting user');
+    throw new GraphQLError(handleErrorMessages(error as Error));
   }
 };

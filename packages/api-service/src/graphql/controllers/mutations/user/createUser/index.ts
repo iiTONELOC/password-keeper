@@ -1,17 +1,17 @@
 import {GraphQLError} from 'graphql';
-import {createNonce, getAppsPrivateKey, encryptWithPrivateKey, logger} from '../../../../utils';
+import {createNonce, getAppsPrivateKey, encryptWithPrivateKey, logger} from '../../../../../utils';
 import {
   UserModel,
   AccountModel,
   AccountTypeModel,
   AccountCompletionInviteModel
-} from '../../../../db/Models';
+} from '../../../../../db/Models';
 import {
   UserRoles,
-  IAccountDocument,
   ValidAccountTypes,
   type IUserDocument,
-  IAccountTypeDocument,
+  type IAccountDocument,
+  type IAccountTypeDocument,
   type CreateUserMutationPayload,
   type CreateUserMutationVariables,
   type IAccountCompletionInviteDocument

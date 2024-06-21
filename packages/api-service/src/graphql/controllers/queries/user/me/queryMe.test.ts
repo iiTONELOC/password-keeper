@@ -1,9 +1,9 @@
 import {me} from '.';
 import path from 'path';
-import {getPathToKeyFolder} from '../../../../utils';
+import {getPathToKeyFolder} from '../../../../../utils';
 import {describe, expect, it, beforeAll, afterAll} from '@jest/globals';
-import dbConnection, {disconnectFromDB} from '../../../../db/connection';
-import {createTestUser, TestUserCreationData} from '../../../../utils/testHelpers';
+import dbConnection, {disconnectFromDB} from '../../../../../db/connection';
+import {createTestUser, TestUserCreationData} from '../../../../../utils/testHelpers';
 import {
   DBConnection,
   CreateUserMutationVariables,
@@ -74,7 +74,9 @@ describe('queryMe', () => {
       }
     };
 
-    await expect(me(undefined, undefined, authContext)).rejects.toThrowError('Error getting user');
+    await expect(me(undefined, undefined, authContext)).rejects.toThrowError(
+      'Error: Session Expired'
+    );
   });
 
   it('Should throw an error if the user is not found', async () => {
@@ -88,6 +90,8 @@ describe('queryMe', () => {
       }
     };
 
-    await expect(me(undefined, undefined, authContext)).rejects.toThrowError('Error getting user');
+    await expect(me(undefined, undefined, authContext)).rejects.toThrowError(
+      'Error: Not Authenticated'
+    );
   });
 });

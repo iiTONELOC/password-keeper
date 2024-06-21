@@ -1,6 +1,6 @@
-import {createUser} from '../index';
-import dbConnection, {disconnectFromDB} from '../../../../db/connection';
+import {createUser} from '../../index';
 import {describe, expect, it, beforeAll, afterAll} from '@jest/globals';
+import dbConnection, {disconnectFromDB} from '../../../../../db/connection';
 import {
   UserRoles,
   type IUser,

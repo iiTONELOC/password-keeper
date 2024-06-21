@@ -1,8 +1,8 @@
 import path from 'path';
 import {getLoginNonce} from './index';
-import {createTestUser} from '../../../../utils/testHelpers';
-import dbConnection, {disconnectFromDB} from '../../../../db/connection';
+import {createTestUser} from '../../../../../utils/testHelpers';
 import {describe, expect, it, beforeAll, afterAll} from '@jest/globals';
+import dbConnection, {disconnectFromDB} from '../../../../../db/connection';
 import {
   UserRoles,
   type IUser,
@@ -24,7 +24,7 @@ import {
   decryptWithPrivateKey,
   encryptWithPrivateKey,
   getAppsPublicKey
-} from '../../../../utils';
+} from '../../../../../utils';
 
 // store variables needed to test the login process
 let db: DBConnection;

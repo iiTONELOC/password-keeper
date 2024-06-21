@@ -1,6 +1,7 @@
 import {GraphQLError} from 'graphql';
-import {logger} from '../../../../utils/';
-import {enforceUserSession} from '../../helpers/enforceUserSession';
+import {logger} from '../../../../../utils/';
+import {handleErrorMessages} from '../../../helpers';
+import {enforceUserSession} from '../../../helpers/enforceUserSession';
 import type {
   AuthContext,
   IPublicKeyDocument,
@@ -27,6 +28,6 @@ export const myPublicKeys = async (
     return sanitizedPublicKeys;
   } catch (error) {
     logger.error('Query MyPublicKeys:: error -', error);
-    throw new GraphQLError('Error getting public keys');
+    throw new GraphQLError(handleErrorMessages(error as Error));
   }
 };

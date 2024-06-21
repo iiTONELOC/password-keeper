@@ -1,26 +1,24 @@
-import {createUser} from './createUser';
-import {addPassword} from './addPassword';
-import {getLoginNonce} from './loginInvite';
-import {completeLogin} from './completeLogin';
-import {completeAccount} from './completeAccount';
-import {addPublicKeyMutation} from './addPublicKey';
+import {getLoginNonce, completeLogin} from './login';
+import {createUser, addPassword, completeAccount, addPublicKeyMutation, updateUser} from './user';
 
 const mutations = {
   createUser,
+  updateUser,
+  addPassword,
   getLoginNonce,
   completeLogin,
   completeAccount,
-  addPublicKey: addPublicKeyMutation,
-  addPassword
+  addPublicKey: addPublicKeyMutation
 };
 
 export default mutations;
 
 export {
   createUser,
-  completeAccount,
+  updateUser,
+  addPassword,
   getLoginNonce,
   completeLogin,
-  addPassword,
+  completeAccount,
   addPublicKeyMutation
 };

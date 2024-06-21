@@ -1,16 +1,16 @@
 import path from 'path';
 import {addPassword} from '.';
 import {Types} from 'mongoose';
-import {getAuth} from '../../../../middleware';
-import {getPathToKeyFolder} from '../../../../utils';
-import {encryptAES} from '../../../../utils/crypto/aes-256';
+import {getAuth} from '../../../../../middleware';
+import {getPathToKeyFolder} from '../../../../../utils';
+import {encryptAES} from '../../../../../utils/crypto/aes-256';
 import {describe, expect, it, beforeAll, afterAll} from '@jest/globals';
-import dbConnection, {disconnectFromDB} from '../../../../db/connection';
+import dbConnection, {disconnectFromDB} from '../../../../../db/connection';
 import {
   createTestUser,
   TestUserCreationData,
   getSessionReadyForAuthMiddleware
-} from '../../../../utils/testHelpers';
+} from '../../../../../utils/testHelpers';
 import {
   IPassword,
   DBConnection,
@@ -21,7 +21,7 @@ import {
   AddPasswordMutationVariables,
   CompleteAccountMutationPayload
 } from 'passwordkeeper.types';
-import {AccountTypeMap, AccountTypeModel, UserModel} from '../../../../db/Models';
+import {AccountTypeMap, AccountTypeModel, UserModel} from '../../../../../db/Models';
 
 const pathToKeys: string = path.normalize(
   getPathToKeyFolder()?.replace('.private', '.addPassWordMutation')

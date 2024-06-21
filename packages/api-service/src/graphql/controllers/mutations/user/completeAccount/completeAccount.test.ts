@@ -1,9 +1,9 @@
 import path from 'path';
-import {getPathToKeyFolder} from '../../../../utils';
-import {createTestUser} from '../../../../utils/testHelpers';
-import {AccountCompletionInviteModel} from '../../../../db/Models';
+import {getPathToKeyFolder} from '../../../../../utils';
+import {createTestUser} from '../../../../../utils/testHelpers';
+import {AccountCompletionInviteModel} from '../../../../../db/Models';
 import {describe, expect, it, beforeAll, afterAll} from '@jest/globals';
-import dbConnection, {disconnectFromDB} from '../../../../db/connection';
+import dbConnection, {disconnectFromDB} from '../../../../../db/connection';
 import {DBConnection, CreateUserMutationVariables} from 'passwordkeeper.types';
 
 const pathToKeys: string = path.join(

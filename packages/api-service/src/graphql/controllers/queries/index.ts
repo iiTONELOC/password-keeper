@@ -1,6 +1,5 @@
 /* istanbul ignore file */
-import {me} from './me';
-import {myPublicKeys} from './myPublicKeys';
+import {me, myPublicKeys} from './user';
 
 export {me, myPublicKeys};
 

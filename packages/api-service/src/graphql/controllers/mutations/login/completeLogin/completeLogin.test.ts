@@ -1,14 +1,14 @@
 import path from 'path';
 import {completeLogin} from '.';
 import {describe, expect, it, beforeAll, afterAll} from '@jest/globals';
-import dbConnection, {disconnectFromDB} from '../../../../db/connection';
-import {getAppsPublicKey, getPathToKeyFolder} from '../../../../utils';
+import dbConnection, {disconnectFromDB} from '../../../../../db/connection';
+import {getAppsPublicKey, getPathToKeyFolder} from '../../../../../utils';
 import {
   createTestUser,
   requestLoginForTestUser,
   getLoginMutationVariables,
   TestUserCreationData
-} from '../../../../utils/testHelpers';
+} from '../../../../../utils/testHelpers';
 import {
   UserRoles,
   type IUser,
@@ -20,7 +20,7 @@ import {
   type CompleteLoginMutationVariables,
   type CompleteLoginMutationPayload
 } from 'passwordkeeper.types';
-import {LoginInviteModel} from '../../../../db/Models';
+import {LoginInviteModel} from '../../../../../db/Models';
 
 // store variables needed to test the login invite process
 let db: DBConnection;

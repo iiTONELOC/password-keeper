@@ -1,8 +1,8 @@
 import {GraphQLError} from 'graphql';
-import {logger} from '../../../../utils';
-import {enforceUserSession} from '../../helpers';
-import {encryptAES} from '../../../../utils/crypto/aes-256';
-import {UserModel, EncryptedUserPasswordModel, AccountModel} from '../../../../db/Models';
+import {logger} from '../../../../../utils';
+import {enforceUserSession} from '../../../helpers';
+import {encryptAES} from '../../../../../utils/crypto/aes-256';
+import {UserModel, EncryptedUserPasswordModel, AccountModel} from '../../../../../db/Models';
 import {
   AuthContext,
   IUserDocument,

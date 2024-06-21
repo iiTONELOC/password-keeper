@@ -1,7 +1,7 @@
 import {GraphQLError} from 'graphql';
-import {findUsersPublicKey} from '../../helpers';
-import {encryptAES} from '../../../../utils/crypto/aes-256';
-import {UserModel, LoginInviteModel} from '../../../../db/Models';
+import {findUsersPublicKey} from '../../../helpers';
+import {encryptAES} from '../../../../../utils/crypto/aes-256';
+import {UserModel, LoginInviteModel} from '../../../../../db/Models';
 import type {
   PrivateKey,
   IUserDocument,
@@ -19,7 +19,7 @@ import {
   encryptWithPublicKey,
   decryptWithPrivateKey,
   encryptWithPrivateKey
-} from '../../../../utils';
+} from '../../../../../utils';
 
 const GET_LOGIN_NONCE = 'getLoginNonce mutation::';
 

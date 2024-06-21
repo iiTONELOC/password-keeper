@@ -1,8 +1,13 @@
 import {GraphQLError} from 'graphql';
-import {LoginInviteModel} from '../../../../db/Models';
-import {decryptAES} from '../../../../utils/crypto/aes-256';
-import {createAuthSession, findUsersPublicKey} from '../../helpers';
-import {verifySignature, decryptWithPrivateKey, getAppsPrivateKey, logger} from '../../../../utils';
+import {LoginInviteModel} from '../../../../../db/Models';
+import {decryptAES} from '../../../../../utils/crypto/aes-256';
+import {createAuthSession, findUsersPublicKey} from '../../../helpers';
+import {
+  verifySignature,
+  decryptWithPrivateKey,
+  getAppsPrivateKey,
+  logger
+} from '../../../../../utils';
 import type {
   ILoginInviteDocument,
   CompleteLoginMutationPayload,

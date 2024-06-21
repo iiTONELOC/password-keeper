@@ -3,6 +3,7 @@ import {DBConnection} from 'passwordkeeper.types';
 import {seedAccountTypes} from './src/scripts/seedDatabase';
 import {
   UserModel,
+  AccountModel,
   PublicKeyModel,
   AuthSessionModel,
   LoginInviteModel,
@@ -18,6 +19,7 @@ const globalSetup = async () => {
   await Promise.all([
     seedAccountTypes(),
     UserModel.deleteMany(),
+    AccountModel.deleteMany(),
     PublicKeyModel.deleteMany(),
     AuthSessionModel.deleteMany(),
     LoginInviteModel.deleteMany(),

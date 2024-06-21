@@ -1,6 +1,6 @@
 import {GraphQLError} from 'graphql';
-import {logger} from '../../../../utils';
-import {addPublicKey, enforceUserSession} from '../../helpers';
+import {logger} from '../../../../../utils';
+import {addPublicKey, enforceUserSession} from '../../../helpers';
 import {
   AuthContext,
   IAuthSessionDocument,

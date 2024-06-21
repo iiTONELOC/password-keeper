@@ -141,6 +141,11 @@ const typeDefs = `#graphql
         expiresAt: String
         description: String
     }
+    
+    input updateUserArgs {
+        username: String
+        email: String
+    }
 
     # >> Query and Mutation Definition Types <<
     type Query {        
@@ -149,15 +154,17 @@ const typeDefs = `#graphql
         myPasswords: [EncryptedUserPassword!]!
     }
 
-    type Mutation {    
+    type Mutation {
+        updateUser(updateUserArgs:updateUserArgs!): User!
         createUser(createUserArgs:createUserArgs!): createdUserPayload!
         completeLogin(completeLoginArgs:completeLoginArgs!): AuthSession!
         addPassword(addPasswordArgs:addPasswordArgs!): EncryptedUserPassword!
         completeAccount(completeAccountArgs:completeAccountArgs!): AuthSession!
         getLoginNonce(getLoginNonceArgs:getLoginNonceArgs!): getLoginNoncePayload!
         addPublicKey(addPublicKeyArgs:addPublicKeyArgs!): addPublicKeyMutationPayload!
+      
         # TODO: Finish CRUD operations for users, public keys, and passwords
-        # updateUser - update user info like username and email
+        
         # deleteUser - delete user account and all associated data
         #              (account, public keys, passwords, authSessions, session invites, etc.)
         # updatePassword - update password info like url, name, username, expiresAt

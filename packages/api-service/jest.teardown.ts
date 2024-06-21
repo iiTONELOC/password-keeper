@@ -2,6 +2,7 @@ import {db} from './jest.setup';
 import {disconnectFromDB} from './src/db/connection';
 import {
   UserModel,
+  AccountModel,
   PublicKeyModel,
   AuthSessionModel,
   LoginInviteModel,
@@ -12,6 +13,7 @@ import {
 const globalTeardown = async () => {
   await Promise.all([
     UserModel.deleteMany(),
+    AccountModel.deleteMany(),
     PublicKeyModel.deleteMany(),
     AuthSessionModel.deleteMany(),
     LoginInviteModel.deleteMany(),
