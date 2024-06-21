@@ -1,20 +1,21 @@
 import path from 'path';
 import {getAuth} from '.';
 import {getPathToKeyFolder} from '../../utils';
-import {AuthSessionModel} from '../../db/Models';
+import {AccountModel, AuthSessionModel} from '../../db/Models';
 import dbConnection, {disconnectFromDB} from '../../db/connection';
 import {describe, expect, it, beforeAll, afterAll} from '@jest/globals';
 import {decryptNonceWithUsersPrivateKey} from '../../../test-scripts/session-nonce';
 import {
-  TestUserCreationData,
   createTestUser,
+  TestUserCreationData,
   getSessionReadyForAuthMiddleware
 } from '../../utils/testHelpers';
 import {
   DBConnection,
+  AccountStatusTypes,
+  IAuthSessionDocument,
   CreateUserMutationVariables,
-  CompleteAccountMutationPayload,
-  IAuthSessionDocument
+  CompleteAccountMutationPayload
 } from 'passwordkeeper.types';
 
 const pathToKeys: string = path.normalize(
@@ -96,6 +97,69 @@ describe('getAuthMiddleware', () => {
 
     // set the session to expire in the past
     await AuthSessionModel.updateOne({_id: decryptedID}, {expiresAt: new Date('2021-01-01')});
+
+    const reqData = {
+      headers: {
+        authorization: sessionId,
+        signature: signature
+      }
+    };
+
+    // @ts-expect-error - we are testing the middleware and don't need to pass in a real request
+    expect(await getAuth(reqData)).toBeUndefined();
+  });
+
+  it('should return undefined if the headers are missing', async () => {
+    const reqData = {
+      headers: {}
+    };
+
+    // @ts-expect-error - we are testing the middleware and don't need to pass in a real request
+    expect(await getAuth(reqData)).toBeUndefined();
+  });
+
+  it('should return undefined if the account status is suspended', async () => {
+    // update the account status to suspended
+    await AccountModel.updateOne(
+      {owner: testUserData.createdAuthSession.user._id},
+      {status: AccountStatusTypes.SUSPENDED}
+    );
+
+    const reqData = {
+      headers: {
+        authorization: sessionId,
+        signature: signature
+      }
+    };
+
+    // @ts-expect-error - we are testing the middleware and don't need to pass in a real request
+    expect(await getAuth(reqData)).toBeUndefined();
+  });
+
+  it('should return undefined if the account status is delinquent', async () => {
+    // update the account status to delinquent
+    await AccountModel.updateOne(
+      {owner: testUserData.createdAuthSession.user._id},
+      {status: AccountStatusTypes.DELINQUENT}
+    );
+
+    const reqData = {
+      headers: {
+        authorization: sessionId,
+        signature: signature
+      }
+    };
+
+    // @ts-expect-error - we are testing the middleware and don't need to pass in a real request
+    expect(await getAuth(reqData)).toBeUndefined();
+  });
+
+  it('should return undefined if the account status is pending', async () => {
+    // update the account status to pending
+    await AccountModel.updateOne(
+      {owner: testUserData.createdAuthSession.user._id},
+      {status: AccountStatusTypes.PENDING}
+    );
 
     const reqData = {
       headers: {

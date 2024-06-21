@@ -13,7 +13,9 @@ export const findUsersPublicKey = (
   usingId?: string
 ): string | undefined => {
   return (
-    forUser.publicKeys.find((key: IPublicKeyDocument) => key._id.toString() === usingId)?.key ??
+    forUser.publicKeys.find((key: IPublicKeyDocument) => key._id.toString() === usingId?.toString())
+      ?.key ??
+    forUser.publicKeys.find((key: IPublicKeyDocument) => key.default)?.key ??
     forUser.publicKeys[0]?.key
   );
 };

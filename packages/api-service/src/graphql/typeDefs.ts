@@ -49,7 +49,10 @@ const typeDefs = `#graphql
         _id: ID!
         key: String!
         owner: User!
+        label: String
+        default: Boolean
         expiresAt: String
+        description: String
     }
 
     type AccountCompletionInvite {
@@ -127,6 +130,14 @@ const typeDefs = `#graphql
         password: encryptedInput!
     }
 
+    input addPublicKeyArgs {
+        key: String!
+        label: String
+        default: Boolean
+        expiresAt: String
+        description: String
+    }
+
     # _____Queries and Mutations _____
     
     type Query {        
@@ -136,9 +147,10 @@ const typeDefs = `#graphql
     }
 
     type Mutation {
-        addPassword(addPasswordArgs:addPasswordArgs!): EncryptedUserPassword!
+        addPublicKey(addPublicKeyArgs:addPublicKeyArgs!): PublicKey!
         createUser(createUserArgs:createUserArgs!): createdUserPayload!
         completeLogin(completeLoginArgs:completeLoginArgs!): AuthSession!
+        addPassword(addPasswordArgs:addPasswordArgs!): EncryptedUserPassword!
         completeAccount(completeAccountArgs:completeAccountArgs!): AuthSession!
         getLoginNonce(getLoginNonceArgs:getLoginNonceArgs!): getLoginNoncePayload!
     }

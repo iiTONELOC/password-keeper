@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 import {Types} from 'mongoose';
+import {AddPublicKeyProps, AddPublicKeyReturns} from './helpers';
 import {IEncryptedData, IUserDocument, ValidAccountTypes} from './models';
 
 // ______________ Create User Mutation ______________
@@ -85,3 +86,10 @@ export type AddPasswordMutationVariables = {
     password: IEncryptedData;
   };
 };
+
+// ______________ Add Public Key Mutation ______________
+export type AddPublicKeyMutationVariables = {
+  addPublicKeyArgs: AddPublicKeyProps;
+};
+
+export type AddPublicKeyMutationPayload = AddPublicKeyReturns;

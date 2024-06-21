@@ -14,12 +14,14 @@ import {
 import {
   IPassword,
   DBConnection,
+  ValidAccountTypes,
   IPasswordEncrypted,
   IAuthSessionDocument,
   CreateUserMutationVariables,
-  CompleteAccountMutationPayload,
-  AddPasswordMutationVariables
+  AddPasswordMutationVariables,
+  CompleteAccountMutationPayload
 } from 'passwordkeeper.types';
+import {AccountTypeMap, AccountTypeModel, UserModel} from '../../../../db/Models';
 
 const pathToKeys: string = path.normalize(
   getPathToKeyFolder()?.replace('.private', '.addPassWordMutation')
@@ -248,9 +250,10 @@ describe('addPassWordMutation', () => {
   });
 
   it('should not allow a user to add a password if they have reached the max number of passwords', async () => {
+    // set the max number of passwords to 10 from 100 on the FREE account
+    await AccountTypeModel.findOneAndUpdate({type: ValidAccountTypes.FREE}, {maxPasswords: 10});
     // create and add the max number of passwords - 1
-    const maxPasswords =
-      testUserData?.createdAuthSession?.user?.account?.accountType?.maxPasswords ?? 9;
+    const maxPasswords = 10;
 
     const passwordData: IPassword = {
       url: 'https://www.test.com',
@@ -259,31 +262,36 @@ describe('addPassWordMutation', () => {
       password: 'test',
       owner: testUserData.createdAuthSession.user._id as Types.ObjectId
     };
+    // @ts-expect-error - we are testing the middleware and don't need to pass in a real request
+    const validSession: IAuthSessionDocument = await getAuth({
+      headers: {authorization: sessionId, signature}
+    });
+    const currentNumberOfPasswords: number =
+      (
+        await UserModel.findById(testUserData.createdAuthSession.user._id).select('passwords')
+      )?.toObject().passwords?.length ?? 0;
 
-    for (let i = 0; i < maxPasswords - 1; i++) {
-      const [encryptedUrl, encryptedName, encryptedUsername, encryptedPassword] = await Promise.all(
-        [
-          encryptAES(passwordData.url as string, testAESKey),
-          encryptAES(`${passwordData.name}${i}`, testAESKey),
-          encryptAES(`${passwordData.username}${i}`, testAESKey),
-          encryptAES(`${passwordData.password}${i}`, testAESKey)
-        ]
-      );
-      const addPasswordData: AddPasswordMutationVariables = {
-        addPasswordArgs: {
-          url: {encryptedData: encryptedUrl.encryptedData, iv: encryptedUrl.iv},
-          name: {encryptedData: encryptedName.encryptedData, iv: encryptedName.iv},
-          username: {encryptedData: encryptedUsername.encryptedData, iv: encryptedUsername.iv},
-          password: {encryptedData: encryptedPassword.encryptedData, iv: encryptedPassword.iv}
-        }
-      };
+    for (let i = currentNumberOfPasswords; i < maxPasswords; i++) {
+      await Promise.all([
+        encryptAES(passwordData.url as string, testAESKey),
+        encryptAES(`${passwordData.name}${i}`, testAESKey),
+        encryptAES(`${passwordData.username}${i}`, testAESKey),
+        encryptAES(`${passwordData.password}${i}`, testAESKey)
+      ]).then(async ([encryptedUrl, encryptedName, encryptedUsername, encryptedPassword]) => {
+        const addPasswordData: AddPasswordMutationVariables = {
+          addPasswordArgs: {
+            url: {encryptedData: encryptedUrl.encryptedData, iv: encryptedUrl.iv},
+            name: {encryptedData: encryptedName.encryptedData, iv: encryptedName.iv},
+            username: {encryptedData: encryptedUsername.encryptedData, iv: encryptedUsername.iv},
+            password: {encryptedData: encryptedPassword.encryptedData, iv: encryptedPassword.iv}
+          }
+        };
 
-      // @ts-expect-error - we are testing the middleware and don't need to pass in a real request
-      const validSession: IAuthSessionDocument = await getAuth({
-        headers: {authorization: sessionId, signature}
+        currentNumberOfPasswords < maxPasswords &&
+          (await addPassword(undefined, addPasswordData, {session: validSession}).catch(e => {
+            expect(e.toString()).toContain('Max number of passwords reached');
+          }));
       });
-
-      await addPassword(undefined, addPasswordData, {session: validSession});
     }
 
     // add the last password - should fail
@@ -303,13 +311,14 @@ describe('addPassWordMutation', () => {
       }
     };
 
-    // @ts-expect-error - we are testing the middleware and don't need to pass in a real request
-    const validSession: IAuthSessionDocument = await getAuth({
-      headers: {authorization: sessionId, signature}
-    });
-
     await expect(addPassword(undefined, addPasswordData, {session: validSession})).rejects.toThrow(
       'Max number of passwords reached'
+    );
+
+    // set the max number of passwords back to the default
+    await AccountTypeModel.findOneAndUpdate(
+      {type: ValidAccountTypes.FREE},
+      {maxPasswords: AccountTypeMap[ValidAccountTypes.FREE].maxPasswords}
     );
   }, 30000);
 });

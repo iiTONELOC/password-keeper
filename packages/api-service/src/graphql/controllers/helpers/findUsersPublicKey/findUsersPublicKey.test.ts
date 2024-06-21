@@ -16,7 +16,7 @@ const testUser: IUserDocument = {
 };
 
 describe('findUsersPublicKey', () => {
-  it('should return the first public key if no id is provided', () => {
+  it('should return the default public key if no id is provided', () => {
     const result = findUsersPublicKey(testUser);
     expect(result).toBe('testPublicKey1');
   });
@@ -26,7 +26,7 @@ describe('findUsersPublicKey', () => {
     expect(result).toBe('testPublicKey2');
   });
 
-  it('should return the first public key if the id is not found', () => {
+  it('should return the default public key if the id is not found', () => {
     const result = findUsersPublicKey(testUser, 'testPublicKeyId_3');
     expect(result).toBe('testPublicKey1');
   });

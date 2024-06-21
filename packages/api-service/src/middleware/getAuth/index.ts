@@ -11,6 +11,7 @@ import {verifySignature, getAppsPrivateKey, decryptWithPrivateKey, logger} from 
  *
  * The `Authorization` header contains the encrypted session ID
  * The `Signature` header contains the signature of the user id and the session nonce.
+ * The `Key-Id` header is an optional header that specifies the public key to use for signature verification rather than the default key.
  *
  * @param req Express request object
  * @returns  The authenticated session or `undefined` if the user is not authenticated.
@@ -23,6 +24,7 @@ export const getAuth = async (req: Request): Promise<IAuthSessionDocument | unde
   // Look for an optional Key Index header, which is used to specify the public key to use for signature verification
   const publicKeyId: string | string[] | undefined = req.headers['key-id'];
 
+  // need both headers to authenticate
   if (authHeader && signatureHeader) {
     // Get the private key for the app to decrypt the auth header to get the session ID
     const appPrivateKey: PrivateKey | undefined = await getAppsPrivateKey();
@@ -39,8 +41,9 @@ export const getAuth = async (req: Request): Promise<IAuthSessionDocument | unde
     const session: IAuthSessionDocument | undefined = (
       await AuthSessionModel.findOne({_id: decryptedID}).populate({
         path: 'user',
-        select: '_id username email publicKeys account',
+        select: '_id username email publicKeys account passwords',
         populate: [
+          {path: 'passwords'},
           {path: 'publicKeys'},
           {path: 'account', select: 'status', populate: [{path: 'accountType'}]}
         ]
@@ -108,6 +111,6 @@ export const getAuth = async (req: Request): Promise<IAuthSessionDocument | unde
     );
     return session;
   }
-  /* istanbul ignore next */
+  // headers not found , return undefined
   return undefined;
 };

@@ -5,6 +5,7 @@ export * from './db';
 export * from './crypto';
 export * from './models';
 export * from './queries';
+export * from './helpers';
 export * from './resolvers';
 export * from './api-service';
 

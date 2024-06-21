@@ -5,10 +5,10 @@ import {decryptWithPrivateKey, getAppsPrivateKey, logger} from '../../../../util
 import {
   type PrivateKey,
   type IUserDocument,
+  AccountStatusTypes,
   type CompleteAccountMutationPayload,
   type CompleteAccountMutationVariables,
-  type IAccountCompletionInviteDocument,
-  AccountStatusTypes
+  type IAccountCompletionInviteDocument
 } from 'passwordkeeper.types';
 
 export const completeAccount = async (
@@ -74,18 +74,19 @@ export const completeAccount = async (
 
   try {
     // add the public key to the user
-    const updatedUser = await addPublicKey(invite.user._id, publicKey);
+    const updatedUserData = await addPublicKey({userId: invite.user._id, publicKey});
     // update the account status to active and add the public key
     await AccountModel.findOneAndUpdate(
       {owner: invite.user._id},
-      {status: AccountStatusTypes.ACTIVE, $addToSet: {publicKeys: updatedUser.publicKeys[0]}}
+      {
+        status: AccountStatusTypes.ACTIVE,
+        $addToSet: {publicKeys: updatedUserData.user.publicKeys[0]}
+      }
     );
-
-    // fetch the user again so we can populate the account and public keys
 
     await AccountCompletionInviteModel.deleteOne({_id: invite._id});
 
-    return createAuthSession({publicKey, user: updatedUser as Partial<IUserDocument>});
+    return createAuthSession({publicKey, user: updatedUserData.user as Partial<IUserDocument>});
   } catch (error) {
     console.error(error);
     logger.error('completeAccount:: mutationError - error adding public key!');

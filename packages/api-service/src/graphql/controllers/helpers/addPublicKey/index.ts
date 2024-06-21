@@ -1,6 +1,5 @@
-import {Types} from 'mongoose';
-import type {IUserDocument, ValidAccountTypes} from 'passwordkeeper.types';
 import {AccountModel, AccountTypeMap, PublicKeyModel, UserModel} from '../../../../db/Models';
+import type {IUserDocument, AddPublicKeyProps, AddPublicKeyReturns} from 'passwordkeeper.types';
 
 /**
  * Adds a new public key to the user's account in accordance with their account type
@@ -9,10 +8,9 @@ import {AccountModel, AccountTypeMap, PublicKeyModel, UserModel} from '../../../
  * @param publicKey - the public key to add as a string
  * @returns
  */
-export const addPublicKey = async (
-  userId: Types.ObjectId,
-  publicKey: string
-): Promise<IUserDocument> => {
+export const addPublicKey = async (props: AddPublicKeyProps): Promise<AddPublicKeyReturns> => {
+  const {userId, publicKey, label, description, expiresAt, defaultKey} = props;
+
   // find the existing user in the database
   const existingUser: IUserDocument | null = (
     await UserModel.findById(userId)
@@ -29,24 +27,30 @@ export const addPublicKey = async (
     throw new Error('User not found');
   }
 
-  // determine how many public keys this user has
+  // determine how many public keys the account has
   /* istanbul ignore next */
   const publicKeyCount = existingUser?.account.publicKeys?.length ?? 0;
 
-  // determine the max number of public keys this user can have according to their type
+  // determine the max number of public keys this user can have according to their account type
   /* istanbul ignore next */
-  const maxPublicKeys =
-    AccountTypeMap[existingUser.account.accountType.type as ValidAccountTypes].maxPublicKeys;
+  const maxPublicKeys = AccountTypeMap[existingUser.account.accountType.type].maxPublicKeys;
 
   // if the user has reached the max number of public keys, throw an error
   if (publicKeyCount >= maxPublicKeys) {
     throw new Error('Max number of public keys reached');
   }
 
+  // if this is the user's first public key, make it the default key
+  const setDefault = publicKeyCount === 0;
+
   // create a new public key
   const newKey = await PublicKeyModel.create({
+    label,
+    expiresAt,
+    description,
     key: publicKey,
-    owner: userId
+    owner: userId,
+    default: defaultKey ?? setDefault ?? false
   });
 
   // add the key to the user's account
@@ -80,5 +84,5 @@ export const addPublicKey = async (
     throw new Error('Error updating user');
   }
 
-  return updated;
+  return {user: updated, addedKeyId: newKey._id};
 };

@@ -122,8 +122,11 @@ export type IAccountCompletionInviteDocument = IAccountCompletionInviteModel &
 
 export type IPublicKey = {
   key: string;
-  owner: string | Types.ObjectId;
+  label?: string;
+  default: boolean;
   expiresAt?: Date;
+  description?: string;
+  owner: string | Types.ObjectId;
 };
 
 export type IPublicKeyModel = Model<IPublicKey>;

@@ -64,9 +64,14 @@ const UserSchema = new Schema<IUser>(
       }
     ]
   },
-  {id: false, timestamps: true}
+  {id: false, timestamps: true, toJSON: {virtuals: true}}
 );
 
 const User: IUserModel = model<IUser>('User', UserSchema);
+
+// create a virtual property to get the total number of user passwords
+UserSchema.virtual('passwordCount').get(function (this: IUser) {
+  return this?.passwords?.length ?? 0;
+});
 
 export default User;
