@@ -17,6 +17,18 @@ export type CreateUserMutationPayload = {
   inviteToken: {token: string; expiresAt: Date};
 };
 
+// ______________ Update User Mutation ______________
+export type UpdateUserMutationVariables = {
+  updateUserArgs: {
+    username?: string;
+    email?: string;
+  };
+};
+
+export type UpdateUserMutationPayload = {
+  user: IUserDocument;
+};
+
 // ______________ Complete Account Mutation ______________
 export type CompleteAccountMutationVariables = {
   completeAccountArgs: {
