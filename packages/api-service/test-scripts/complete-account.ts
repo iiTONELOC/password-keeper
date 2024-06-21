@@ -34,13 +34,16 @@ const decryptTokenAndReEncrypt = async (token: string): Promise<void> => {
   console.log(reEncryptedToken);
 };
 
-const generateRSAKeysForUser = async (username: string): Promise<void> => {
+export const generateRSAKeysForUser = async (
+  username: string,
+  increment: number | undefined = undefined
+): Promise<void> => {
   const keyPath = getPathToKeyFolder().replace('.private', `.${username}`);
 
   logger.warn(`Generating keys for ${username} at ${keyPath}`);
 
   const userKeys: GeneratedRSAKeys | undefined = await generateRSAKeys(
-    username,
+    increment ? `${username}_${increment}` : username,
     {
       privateKeyPath: keyPath,
       publicKeyPath: keyPath

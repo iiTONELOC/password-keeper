@@ -17,12 +17,7 @@ export const me = async (
       _id: session.user._id,
       username: session.user.username,
       email: session.user.email,
-      account: {
-        _id: session.user.account._id,
-        accountType: {
-          type: session.user.account.accountType.type
-        }
-      }
+      account: {...session.user.account}
     };
 
     return sanitizedUser;

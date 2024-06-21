@@ -2,7 +2,7 @@ import {GraphQLError} from 'graphql';
 import {logger} from '../../../../utils';
 import {enforceUserSession} from '../../helpers';
 import {encryptAES} from '../../../../utils/crypto/aes-256';
-import {UserModel, AccountTypeModel, EncryptedUserPasswordModel} from '../../../../db/Models';
+import {UserModel, EncryptedUserPasswordModel, AccountModel} from '../../../../db/Models';
 import {
   AuthContext,
   IUserDocument,
@@ -30,11 +30,11 @@ export const addPassword = async (
 
   const user: IUserDocument | null = (
     await UserModel.findById(userID)
-      .select('_id username email publicKeys account passwords')
+      .select('_id username email publicKeys account')
       .populate({path: 'publicKeys'})
       .populate({
         path: 'account',
-        select: 'accountType publicKeys',
+        select: 'accountType publicKeys passwords',
         populate: {path: 'accountType'}
       })
   )?.toObject() as IUserDocument | null;
@@ -43,10 +43,8 @@ export const addPassword = async (
     throw new GraphQLError('Unauthorized');
   }
 
-  const currentNumberOfPasswords: number = user?.passwords?.length;
-  const maxNumberOfPasswords: number =
-    (await AccountTypeModel.findOne({type: user.account.accountType.type}))?.toObject()
-      .maxPasswords ?? 0;
+  const currentNumberOfPasswords: number = user?.account?.passwords?.length;
+  const maxNumberOfPasswords: number = user?.account?.accountType?.maxPasswords;
 
   if (currentNumberOfPasswords < maxNumberOfPasswords) {
     try {
@@ -91,6 +89,11 @@ export const addPassword = async (
 
       // create the password object in the database
       const newEncryptedAtRestUserPassword = await EncryptedUserPasswordModel.create(creationData);
+
+      // add the password to the user's account
+      await AccountModel.findByIdAndUpdate(user.account._id, {
+        $addToSet: {passwords: newEncryptedAtRestUserPassword._id}
+      });
 
       // add the password to the user's password list
       await UserModel.findByIdAndUpdate(

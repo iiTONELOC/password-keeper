@@ -266,7 +266,7 @@ describe('addPassWordMutation', () => {
     const validSession: IAuthSessionDocument = await getAuth({
       headers: {authorization: sessionId, signature}
     });
-    const currentNumberOfPasswords: number =
+    let currentNumberOfPasswords: number =
       (
         await UserModel.findById(testUserData.createdAuthSession.user._id).select('passwords')
       )?.toObject().passwords?.length ?? 0;
@@ -287,10 +287,8 @@ describe('addPassWordMutation', () => {
           }
         };
 
-        currentNumberOfPasswords < maxPasswords &&
-          (await addPassword(undefined, addPasswordData, {session: validSession}).catch(e => {
-            expect(e.toString()).toContain('Max number of passwords reached');
-          }));
+        await addPassword(undefined, addPasswordData, {session: validSession});
+        currentNumberOfPasswords++;
       });
     }
 

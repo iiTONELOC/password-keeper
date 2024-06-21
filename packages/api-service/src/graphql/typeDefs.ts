@@ -1,6 +1,12 @@
 const typeDefs = `#graphql
     # _____Data Types_____
 
+    # >>MongoDB Schemas<<
+    type EncryptedData {
+        encryptedData: String!  
+        iv: String!
+    }
+
     # >>MongoDB Models<<
     type User {
         _id: ID!
@@ -28,11 +34,6 @@ const typeDefs = `#graphql
         accountType: AccountType!
         publicKeys: [PublicKey!]!
         passwords: [EncryptedUserPassword!]!
-    }
-
-    type EncryptedData {
-        encryptedData: String!  
-        iv: String!
     }
 
     type EncryptedUserPassword {
@@ -82,8 +83,7 @@ const typeDefs = `#graphql
         expiresAt: String!
     } 
 
-    # >> Payload Types <<
-
+    # >> Payload (Return) Types <<
     type createdUserPayload {
         user: User!
         inviteToken: inviteToken!
@@ -93,9 +93,13 @@ const typeDefs = `#graphql
         nonce: String!
         challengeResponse: String!
     }
-    
-    # _____Input Types_____
 
+    type addPublicKeyMutationPayload {
+        user: User!
+        addedKeyId: ID!
+    }
+    
+    # >> Input (Args) Types <<
     input completeAccountArgs {
         nonce: String!
         publicKey: String!
@@ -138,21 +142,38 @@ const typeDefs = `#graphql
         description: String
     }
 
-    # _____Queries and Mutations _____
-    
+    # >> Query and Mutation Definition Types <<
     type Query {        
         me: ME
         myPublicKeys: [PublicKey!]!
         myPasswords: [EncryptedUserPassword!]!
     }
 
-    type Mutation {
-        addPublicKey(addPublicKeyArgs:addPublicKeyArgs!): PublicKey!
+    type Mutation {    
         createUser(createUserArgs:createUserArgs!): createdUserPayload!
         completeLogin(completeLoginArgs:completeLoginArgs!): AuthSession!
         addPassword(addPasswordArgs:addPasswordArgs!): EncryptedUserPassword!
         completeAccount(completeAccountArgs:completeAccountArgs!): AuthSession!
         getLoginNonce(getLoginNonceArgs:getLoginNonceArgs!): getLoginNoncePayload!
+        addPublicKey(addPublicKeyArgs:addPublicKeyArgs!): addPublicKeyMutationPayload!
+        # TODO: Finish CRUD operations for users, public keys, and passwords
+        # updateUser - update user info like username and email
+        # deleteUser - delete user account and all associated data
+        #              (account, public keys, passwords, authSessions, session invites, etc.)
+        # updatePassword - update password info like url, name, username, expiresAt
+        # changePassword - change the password and reset the expiresAt date
+        # deletePassword - delete a password (remove from user and the associated account)
+        # updatePublicKey - update public key info like label, description, expiresAt
+        # changePublicKey - change the public key and reset the expiresAt date
+        # deletePublicKey - delete a public key (remove from user and the associated account)
+        #
+        # After the CRUD operations are complete, add the following:
+        #
+        # addSubUser - add a sub user to the account if supported by the account type
+        # removeSubUser - remove a sub user from the account
+        # upgradeAccount - upgrade the account to a higher account type
+        # downgradeAccount - downgrade the account to a lower account type
+        # viewAccount - view the account details
     }
 `;
 

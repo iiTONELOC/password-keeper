@@ -16,7 +16,7 @@ export const getSessionReadyForAuthMiddleware = async (
 ): Promise<{sessionId: string | undefined; signature: string | undefined}> => {
   // Use the session-nonce script to get the sessionId and signature
   // This script can only be run in test and development environments
-  const command = `npm run session-nonce -- ${props.authSession.nonce} ${
+  const command = `npm run ts ./test-scripts/session-nonce.ts ${props.authSession.nonce} ${
     props.testUserData.createdAuthSession.user.username
   } ${props.testUserData.createdAuthSession.user._id?.toString()} ${props.authSession._id} ${
     props.keyName

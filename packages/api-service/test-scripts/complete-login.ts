@@ -87,6 +87,12 @@ if (require.main === module) {
   const userId = process.argv[3];
   const username = process.argv[4];
 
+  console.log({
+    nonce,
+    userId,
+    username
+  });
+
   if (!nonce || !userId || !username) {
     throw new Error('Nonce, userId, and username are required');
   }

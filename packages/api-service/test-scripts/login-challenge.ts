@@ -60,6 +60,8 @@ if (require.main === module) {
   const challenge = process.argv[2];
   const username = process.argv[3];
 
+  console.log({challenge, username});
+
   if (!challenge) {
     throw new Error('Challenge is required');
   }

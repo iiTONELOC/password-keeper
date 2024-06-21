@@ -59,12 +59,7 @@ describe('queryMe', () => {
       _id: authSession.user._id,
       username: authSession.user.username,
       email: authSession.user.email,
-      account: {
-        _id: authSession?.user?.account?._id,
-        accountType: {
-          type: authSession?.user?.account?.accountType?.type
-        }
-      }
+      account: {...authSession.user.account}
     });
   });
 

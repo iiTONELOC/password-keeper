@@ -3,7 +3,6 @@ import {logger} from '../../../../utils';
 import {addPublicKey, enforceUserSession} from '../../helpers';
 import {
   AuthContext,
-  AddPublicKeyProps,
   IAuthSessionDocument,
   AddPublicKeyMutationPayload,
   AddPublicKeyMutationVariables
@@ -20,21 +19,15 @@ export const addPublicKeyMutation = async (
     // get the current user's ID from the session
     const userID = session.user._id;
 
-    const {publicKey, userId, label, defaultKey, description}: AddPublicKeyProps =
-      args.addPublicKeyArgs ?? {};
+    const {key, label, defaultKey, description} = args.addPublicKeyArgs ?? {};
 
-    if (!publicKey) {
+    if (!key) {
       throw new GraphQLError('Missing required fields');
     }
 
-    // ensure the user is adding the key to their own account
-    if (userId?.toString() !== userID?.toString()) {
-      throw new GraphQLError('Unauthorized');
-    }
-
     return await addPublicKey({
-      publicKey,
-      userId,
+      publicKey: key,
+      userId: userID,
       label,
       defaultKey,
       description

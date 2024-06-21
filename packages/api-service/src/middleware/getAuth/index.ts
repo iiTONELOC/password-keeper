@@ -45,7 +45,11 @@ export const getAuth = async (req: Request): Promise<IAuthSessionDocument | unde
         populate: [
           {path: 'passwords'},
           {path: 'publicKeys'},
-          {path: 'account', select: 'status', populate: [{path: 'accountType'}]}
+          {
+            path: 'account',
+            select: 'status accountType',
+            populate: [{path: 'accountType'}]
+          }
         ]
       })
     )?.toObject();
@@ -53,6 +57,7 @@ export const getAuth = async (req: Request): Promise<IAuthSessionDocument | unde
     const invalidAccountStatusTypesForLogin: AccountStatusTypes[] = [
       AccountStatusTypes.SUSPENDED,
       AccountStatusTypes.DELINQUENT,
+      AccountStatusTypes.CANCELLED,
       AccountStatusTypes.PENDING
     ];
 

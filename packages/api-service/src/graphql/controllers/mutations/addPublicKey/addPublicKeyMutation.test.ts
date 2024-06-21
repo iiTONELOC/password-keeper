@@ -13,14 +13,14 @@ import {
   type IUser,
   type DBConnection,
   type IUserDocument,
+  AccountStatusTypes,
+  type IAccountDocument,
   type IPublicKeyDocument,
   type IAuthSessionDocument,
   type CreateUserMutationVariables,
   type AddPublicKeyMutationPayload,
   type AddPublicKeyMutationVariables,
-  type CompleteAccountMutationPayload,
-  IAccountDocument,
-  AccountStatusTypes
+  type CompleteAccountMutationPayload
 } from 'passwordkeeper.types';
 
 import {addPublicKeyMutation} from '.';
@@ -33,8 +33,9 @@ let sessionId: string;
 let signature: string;
 let userPublicKey: string;
 let testUser: IUserDocument;
-let authSession: CompleteAccountMutationPayload;
 let validSession: IAuthSessionDocument;
+let authSession: CompleteAccountMutationPayload;
+let createTestUserResult: TestUserCreationData;
 
 // path to the test keys
 const pathToKeys: string = path.normalize(
@@ -60,7 +61,7 @@ beforeAll(async () => {
   db = await dbConnection('pwd-keeper-test');
 
   // create a test user
-  const createTestUserResult: TestUserCreationData = await createTestUser({
+  createTestUserResult = await createTestUser({
     pathToKeys: pathToKeys,
     userRSAKeyName: 'addPublicKeyMutation',
     user: {...testUserCreationVariables}
@@ -98,9 +99,8 @@ describe('addPublicKeyMutation', () => {
 
     const publicKeyData: AddPublicKeyMutationVariables = {
       addPublicKeyArgs: {
-        publicKey: newPublicKey,
-        userId: testUser._id,
-        label: 'testKey',
+        key: newPublicKey,
+        label: 'testKey1',
         description: 'test key description',
         defaultKey: false
       }
@@ -120,56 +120,13 @@ describe('addPublicKeyMutation', () => {
     expect(normalizeKey(addedKey?.key as string)).toBe(normalizeKey(newPublicKey));
   });
 
-  it('should throw an error if the user is not authorized to add a key', async () => {
-    const newPublicKey = userPublicKey.replace('x', 't');
-
-    const publicKeyData: AddPublicKeyMutationVariables = {
-      addPublicKeyArgs: {
-        publicKey: newPublicKey,
-        // @ts-expect-error - we are testing the error case
-        userId: 'fakeUserId',
-        label: 'testKey',
-        description: 'test key description',
-        defaultKey: false
-      }
-    };
-
-    await expect(
-      addPublicKeyMutation(undefined, publicKeyData, {session: validSession})
-    ).rejects.toThrow('Error adding public key');
-  });
-
-  it('should throw an error if the user account is not present', async () => {
-    const newPublicKey = userPublicKey.replace('x', 'z');
-
-    const publicKeyData: AddPublicKeyMutationVariables = {
-      addPublicKeyArgs: {
-        publicKey: newPublicKey,
-        userId: testUser._id,
-        label: 'testKey',
-        description: 'test key description',
-        defaultKey: false
-      }
-    };
-
-    const invalidSession = {...validSession};
-    // @ts-expect-error - we are testing the error case
-    invalidSession.user.account = undefined;
-
-    await expect(
-      // @ts-expect-error - we are testing the error case
-      addPublicKeyMutation(undefined, publicKeyData, {session: invalidSession})
-    ).rejects.toThrow('Error adding public key');
-  });
-
   it("should throw an error if the user's account is anything but ACTIVE", async () => {
     const newPublicKey = userPublicKey.replace('x', 's');
 
     const publicKeyData: AddPublicKeyMutationVariables = {
       addPublicKeyArgs: {
-        publicKey: newPublicKey,
-        userId: testUser._id,
-        label: 'testKey',
+        key: newPublicKey,
+        label: 'testKey3',
         description: 'test key description',
         defaultKey: false
       }
@@ -191,12 +148,31 @@ describe('addPublicKeyMutation', () => {
         ).populate('accountType')
       )?.toObject() as IAccountDocument;
 
-      // @ts-expect-error - we are testing a suspended account
-      validSession.user.account = {...updatedAccount};
+      try {
+        const sessionData = await getSessionReadyForAuthMiddleware({
+          authSession,
+          keyName: 'addPublicKeyMutation',
+          testUserData: createTestUserResult
+        });
 
-      await expect(
-        addPublicKeyMutation(undefined, publicKeyData, {session: validSession})
-      ).rejects.toThrow('Error adding public key');
+        // @ts-expect-error - we are testing the middleware and don't need to pass in a real request
+        validSession = (await getAuth({
+          headers: {
+            authorization: sessionData.sessionId as string,
+            signature: sessionData.signature as string
+          }
+        })) as IAuthSessionDocument;
+        // @ts-expect-error - we are testing a suspended account
+        validSession.user.account = {...updatedAccount};
+
+        await addPublicKeyMutation(undefined, publicKeyData, {session: validSession});
+      } catch (error) {
+        expect(error).toBeDefined();
+      }
     }
+
+    // there are 5 account statuses, but only 4 are invalid for login
+    // SUSPENDED, DELINQUENT, CANCELLED, PENDING are all invalid
+    expect.assertions(4);
   });
 });

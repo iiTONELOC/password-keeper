@@ -1,5 +1,10 @@
 import {AccountModel, AccountTypeMap, PublicKeyModel, UserModel} from '../../../../db/Models';
-import type {IUserDocument, AddPublicKeyProps, AddPublicKeyReturns} from 'passwordkeeper.types';
+import {
+  type IUserDocument,
+  ValidAccountTypes,
+  type AddPublicKeyProps,
+  type AddPublicKeyReturns
+} from 'passwordkeeper.types';
 
 /**
  * Adds a new public key to the user's account in accordance with their account type
@@ -33,7 +38,9 @@ export const addPublicKey = async (props: AddPublicKeyProps): Promise<AddPublicK
 
   // determine the max number of public keys this user can have according to their account type
   /* istanbul ignore next */
-  const maxPublicKeys = AccountTypeMap[existingUser.account.accountType.type].maxPublicKeys;
+  const maxPublicKeys =
+    existingUser?.account.accountType?.maxPublicKeys ??
+    AccountTypeMap[ValidAccountTypes.FREE].maxPublicKeys;
 
   // if the user has reached the max number of public keys, throw an error
   if (publicKeyCount >= maxPublicKeys) {
