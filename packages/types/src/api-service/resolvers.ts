@@ -99,6 +99,18 @@ export type AddPasswordMutationVariables = {
   };
 };
 
+// ______________ Update Password Mutation ______________
+export type UpdatePasswordMutationVariables = {
+  updatePasswordArgs: {
+    id: string;
+    expiresAt?: Date;
+    url?: IEncryptedData;
+    name?: IEncryptedData;
+    username?: IEncryptedData;
+    password?: IEncryptedData;
+  };
+};
+
 // ______________ Add Public Key Mutation ______________
 export type AddPublicKeyMutationVariables = {
   addPublicKeyArgs: {

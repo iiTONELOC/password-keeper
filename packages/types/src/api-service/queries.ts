@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 import {Types} from 'mongoose';
+import {IPasswordEncrypted} from './models';
 
 export type QueryMeResponse = {
   _id: Types.ObjectId | string;
@@ -17,4 +18,8 @@ export type QueryMyPublicKeysResponse = {
   _id: Types.ObjectId | string;
   key: string;
   expiresAt?: Date;
+};
+
+export type QueryMyPasswordsResponse = {
+  passwords: IPasswordEncrypted[];
 };

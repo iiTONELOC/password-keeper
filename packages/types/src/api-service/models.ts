@@ -57,6 +57,7 @@ export enum AccountStatusTypes {
 }
 
 export type IAccount = {
+  deletedAt?: Date;
   owner: Types.ObjectId;
   status: AccountStatusTypes;
   subUsers: Types.ObjectId[];
@@ -182,19 +183,15 @@ export type IPasswordEncrypted = {
 export type IPasswordEncryptedAtRest = {
   name: {
     encryptedData: IEncryptedData;
-    iv: string;
   };
   username: {
     encryptedData: IEncryptedData;
-    iv: string;
   };
   password: {
     encryptedData: IEncryptedData;
-    iv: string;
   };
   url?: {
     encryptedData: IEncryptedData;
-    iv: string;
   };
   expiresAt?: Date;
   owner: Types.ObjectId;
