@@ -52,7 +52,8 @@ export enum AccountStatusTypes {
   PENDING = 'PENDING',
   CANCELLED = 'CANCELLED',
   SUSPENDED = 'SUSPENDED',
-  DELINQUENT = 'DELINQUENT'
+  DELINQUENT = 'DELINQUENT',
+  DELETED = 'DELETED'
 }
 
 export type IAccount = {
@@ -85,6 +86,7 @@ export type IUser = {
   username: string;
   email: string;
   userRole: UserRoles;
+  owner?: Types.ObjectId | null;
   publicKeys?: Types.ObjectId[];
   account?: Types.ObjectId;
   subUsers?: Types.ObjectId[];
