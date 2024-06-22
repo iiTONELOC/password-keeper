@@ -16,12 +16,12 @@ import {
   CompleteAccountMutationPayload
 } from 'passwordkeeper.types';
 import {
-  AccountCompletionInviteModel,
+  UserModel,
   AccountModel,
+  PublicKeyModel,
   AuthSessionModel,
   EncryptedUserPasswordModel,
-  PublicKeyModel,
-  UserModel
+  AccountCompletionInviteModel
 } from '../../../../../db/Models';
 import LoginInvite from '../../../../../db/Models/LoginInvite';
 
@@ -124,45 +124,53 @@ describe('deleteUser', () => {
     });
     const result = await deleteUser(undefined, undefined, {session: validSession});
 
+    const usersSubUsersPromise = UserModel.find({owner: result._id});
+    const accountPromise = AccountModel.findOne({owner: result._id});
+    const usersLoginInvitesPromise = LoginInvite.find({user: result._id});
+    const usersPublicKeysPromise = PublicKeyModel.find({owner: result._id});
+    const usersAuthSessionsPromise = AuthSessionModel.find({user: result._id});
+    const usersPasswordsPromise = EncryptedUserPasswordModel.find({owner: result._id});
+    const usersAccountCompletionInvitesPromise = AccountCompletionInviteModel.find({
+      user: result._id
+    });
+
+    const [
+      usersPasswords,
+      usersPublicKeys,
+      usersAuthSessions,
+      usersLoginInvites,
+      usersAccountCompletionInvites,
+      usersSubUsers,
+      account
+    ] = await Promise.all([
+      usersPasswordsPromise,
+      usersPublicKeysPromise,
+      usersAuthSessionsPromise,
+      usersLoginInvitesPromise,
+      usersAccountCompletionInvitesPromise,
+      usersSubUsersPromise,
+      accountPromise
+    ]);
+
     expect(result).toBeDefined();
     expect(result.username).toBe(testUser2Data.createdAuthSession.user.username);
 
-    // all their passwords should be deleted
-    const usersPasswords = await EncryptedUserPasswordModel.find({owner: result._id});
     expect(usersPasswords).toHaveLength(0);
-
-    // all their public keys should be deleted
-    const usersPublicKeys = await PublicKeyModel.find({owner: result._id});
     expect(usersPublicKeys).toHaveLength(0);
-
-    // all their auth sessions should be deleted
-    const usersAuthSessions = await AuthSessionModel.find({user: result._id});
     expect(usersAuthSessions).toHaveLength(0);
-
-    // all their login invites should be deleted
-    const usersLoginInvites = await LoginInvite.find({user: result._id});
     expect(usersLoginInvites).toHaveLength(0);
-
-    // all their account completion invites should be deleted
-    const usersAccountCompletionInvites = await AccountCompletionInviteModel.find({
-      user: result._id
-    });
     expect(usersAccountCompletionInvites).toHaveLength(0);
-
-    // all their sub-users should be deleted
-    const usersSubUsers = await UserModel.find({owner: result._id});
     expect(usersSubUsers).toHaveLength(0);
-
-    // the account should remain, it should be set to DELETED
-    // and its sub-users, passwords, and public keys should all have a length of 0
-    const account = await AccountModel.findOne({owner: result._id});
 
     expect(account).toBeDefined();
     expect(account?.status).toBe('DELETED');
     expect(account?.subUsers).toHaveLength(0);
     expect(account?.passwords).toHaveLength(0);
     expect(account?.publicKeys).toHaveLength(0);
+    expect(account?.deletedAt).toBeDefined();
+    expect(account?.deletedAt).toBeInstanceOf(Date);
+    expect(account?.deletedAt?.getUTCDate()).toBeLessThanOrEqual(new Date().getUTCDate());
 
-    expect.assertions(13);
+    expect.assertions(16);
   });
 });

@@ -47,23 +47,15 @@ export const getAuth = async (req: Request): Promise<IAuthSessionDocument | unde
           {path: 'publicKeys'},
           {
             path: 'account',
-            select: 'status accountType',
+            select: 'status accountType publicKeys passwords passwordCount',
             populate: [{path: 'accountType'}]
           }
         ]
       })
     )?.toObject();
 
-    const invalidAccountStatusTypesForLogin: AccountStatusTypes[] = [
-      AccountStatusTypes.SUSPENDED,
-      AccountStatusTypes.DELINQUENT,
-      AccountStatusTypes.CANCELLED,
-      AccountStatusTypes.PENDING,
-      AccountStatusTypes.DELETED
-    ];
-
     // if the session is not found or the account status is invalid, return undefined
-    if (!session || invalidAccountStatusTypesForLogin.includes(session.user.account.status)) {
+    if (!session || session.user.account.status !== AccountStatusTypes.ACTIVE) {
       return undefined;
     }
 

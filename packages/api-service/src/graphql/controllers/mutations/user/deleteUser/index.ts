@@ -27,47 +27,54 @@ export const deleteUser = async (
     const user = await UserModel.deleteOne({_id: session.user._id});
     // if the user is an account owner, delete the passwords and sub-users and public keys
     // from the account and set the account to DELETED
-    console.log('session.user.userRole', session.user.userRole);
     if (session.user.userRole === UserRoles.ACCOUNT_OWNER) {
       // remove the sub-users
-      await UserModel.deleteMany({_id: {$in: session.user.subUsers}});
+      const removeSubUsersPromise = UserModel.deleteMany({_id: {$in: session.user.subUsers}});
 
-      // remove the data from the account and set it to DELETED
-      // TODO: maybe this should be a soft delete for a certain period of time?
-      //       so users can recover their account if they accidentally delete it
-      await AccountModel.findOneAndUpdate(
+      const updateAccountPromise = AccountModel.findOneAndUpdate(
         {owner: session.user._id},
         {
           $set: {
-            status: AccountStatusTypes.DELETED,
+            subUsers: [],
             passwords: [],
             publicKeys: [],
-            subUsers: []
+            deletedAt: new Date(),
+            status: AccountStatusTypes.DELETED
           }
         }
       );
+
+      await Promise.all([removeSubUsersPromise, updateAccountPromise]);
     }
 
     // remove everyone's passwords
-    await EncryptedUserPasswordModel.deleteMany({
+    const removePasswordsPromise = EncryptedUserPasswordModel.deleteMany({
       _id: {$in: [...(session?.user?.subUsers ?? []), session.user._id]}
     });
     // remove everyone's public keys
-    await PublicKeyModel.deleteMany({
+    const removePublicKeysPromise = PublicKeyModel.deleteMany({
       owner: {$in: [...(session?.user?.subUsers ?? []), session.user._id]}
     });
     // remove everyone's auth sessions
-    await AuthSessionModel.deleteMany({
+    const removeAuthSessionsPromise = AuthSessionModel.deleteMany({
       user: {$in: [...(session?.user?.subUsers ?? []), session.user._id]}
     });
     // remove everyone's login invites
-    await LoginInviteModel.deleteMany({
+    const removeLoginInvitesPromise = LoginInviteModel.deleteMany({
       user: {$in: [...(session?.user?.subUsers ?? []), session.user._id]}
     });
     // remove any pending account completion invites
-    await AccountCompletionInviteModel.deleteMany({
+    const removeAccountCompletionInvitesPromise = AccountCompletionInviteModel.deleteMany({
       user: {$in: [...(session?.user?.subUsers ?? []), session.user._id]}
     });
+
+    await Promise.all([
+      removePasswordsPromise,
+      removePublicKeysPromise,
+      removeAuthSessionsPromise,
+      removeLoginInvitesPromise,
+      removeAccountCompletionInvitesPromise
+    ]);
 
     if (!user) {
       throw new GraphQLError('User not found');

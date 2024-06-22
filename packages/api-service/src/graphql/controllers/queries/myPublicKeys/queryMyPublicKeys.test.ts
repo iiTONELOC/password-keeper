@@ -1,9 +1,9 @@
 import path from 'path';
 import {myPublicKeys} from '.';
-import {getPathToKeyFolder, getPublicKey} from '../../../../../utils';
+import {getPathToKeyFolder, getPublicKey} from '../../../../utils';
 import {describe, expect, it, beforeAll, afterAll} from '@jest/globals';
-import dbConnection, {disconnectFromDB} from '../../../../../db/connection';
-import {createTestUser, TestUserCreationData} from '../../../../../utils/testHelpers';
+import dbConnection, {disconnectFromDB} from '../../../../db/connection';
+import {createTestUser, TestUserCreationData} from '../../../../utils/testHelpers';
 import {
   AuthContext,
   DBConnection,

@@ -4,6 +4,7 @@ import {publicKeyRegex} from '../../db/Models';
 export * from './createTestUser';
 export * from './requestLogin';
 export * from './loginTestUser';
+export * from './decryptPasswordToOriginalData';
 export * from './getSessionReadyForAuthMiddleware';
 
 /**

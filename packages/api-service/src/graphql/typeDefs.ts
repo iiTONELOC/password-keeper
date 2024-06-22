@@ -8,6 +8,9 @@ const typeDefs = `#graphql
     }
 
     # >>MongoDB Models<<
+    #--------------------------------
+
+    # _____ USER _____
     type User {
         _id: ID!
         email: String!
@@ -16,6 +19,14 @@ const typeDefs = `#graphql
         account: Account!
         publicKeys: [PublicKey!]!
         passwords: [EncryptedUserPassword!]!
+    }
+
+    # _____ ACCOUNT _____
+     type AccountCompletionInvite {
+        _id: ID!
+        nonce: String!
+        user: User!
+        expiresAt: String
     }
 
     type AccountType {
@@ -36,6 +47,7 @@ const typeDefs = `#graphql
         passwords: [EncryptedUserPassword!]!
     }
 
+    # _____ PASSWORD _____
     type EncryptedUserPassword {
         _id: ID!
         owner: User!
@@ -45,7 +57,18 @@ const typeDefs = `#graphql
         username: EncryptedData!
         password: EncryptedData!
     }
+
+     type UpdatedEncryptedUserPassword {
+        _id: ID!
+        owner: User
+        expiresAt: String
+        url: EncryptedData
+        name: EncryptedData
+        username: EncryptedData
+        password: EncryptedData
+    }
     
+    # _____ PUBLIC KEY _____
     type PublicKey {
         _id: ID!
         key: String!
@@ -56,13 +79,7 @@ const typeDefs = `#graphql
         description: String
     }
 
-    type AccountCompletionInvite {
-        _id: ID!
-        nonce: String!
-        user: User!
-        expiresAt: String
-    }
-
+    # _____ AUTH SESSION _____
     type AuthSession {
         _id: ID!
         user: ME!
@@ -71,6 +88,9 @@ const typeDefs = `#graphql
     }
 
     # >> Query and Mutation Types <<
+    #--------------------------------  
+
+    # _____ USER _____
     type ME {
         _id: ID!
         email: String!
@@ -78,33 +98,53 @@ const typeDefs = `#graphql
         account: Account!
     }
 
+
     type inviteToken {
         token: String!
         expiresAt: String!
     } 
 
     # >> Payload (Return) Types <<
+    #--------------------------------
+
+    # _____ CREATE USER _____
     type createdUserPayload {
         user: User!
         inviteToken: inviteToken!
     }
 
+    # _____ GET LOGIN NONCE _____
     type getLoginNoncePayload {
         nonce: String!
         challengeResponse: String!
     }
 
+    # _____ ADD PUBLIC KEY _____
     type addPublicKeyMutationPayload {
         user: User!
         addedKeyId: ID!
     }
     
     # >> Input (Args) Types <<
+    #--------------------------------
+
+    # _____ USER _____
+    input createUserArgs {
+        username: String!
+        email: String!
+    }
+    
     input completeAccountArgs {
         nonce: String!
         publicKey: String!
     }
 
+    input updateUserArgs {
+        username: String
+        email: String
+    }
+
+    # _____ AUTH SESSION _____
     input getLoginNonceArgs {
         username: String!,
         challenge: String!
@@ -117,11 +157,7 @@ const typeDefs = `#graphql
         signature: String!
     }
     
-     input createUserArgs {
-        username: String!
-        email: String!
-    }
-    
+    # _____ PASSWORD _____
     input encryptedInput {
         encryptedData: String!
         iv: String!
@@ -133,7 +169,19 @@ const typeDefs = `#graphql
         username: encryptedInput!
         password: encryptedInput!
     }
+    
+    input updatePasswordArgs {
+        owner: ID!
+        passwordId: ID!
+        expiresAt: String
+        url: encryptedInput
+        name: encryptedInput
+        username: encryptedInput
+        password: encryptedInput
+    }
 
+
+    # _____ PUBLIC KEY _____
     input addPublicKeyArgs {
         key: String!
         label: String
@@ -142,11 +190,6 @@ const typeDefs = `#graphql
         description: String
     }
     
-    input updateUserArgs {
-        username: String
-        email: String
-    }
-
     # >> Query and Mutation Definition Types <<
     type Query {        
         me: ME
@@ -157,17 +200,19 @@ const typeDefs = `#graphql
     type Mutation {
         deleteUser: User!
         updateUser(updateUserArgs:updateUserArgs!): User!
+        getPassword(passwordId: ID!): EncryptedUserPassword!
+        deletePassword(passwordId: ID!): EncryptedUserPassword!
         createUser(createUserArgs:createUserArgs!): createdUserPayload!
         completeLogin(completeLoginArgs:completeLoginArgs!): AuthSession!
         addPassword(addPasswordArgs:addPasswordArgs!): EncryptedUserPassword!
         completeAccount(completeAccountArgs:completeAccountArgs!): AuthSession!
         getLoginNonce(getLoginNonceArgs:getLoginNonceArgs!): getLoginNoncePayload!
         addPublicKey(addPublicKeyArgs:addPublicKeyArgs!): addPublicKeyMutationPayload!
+        updatePassword(updatePasswordArgs:updatePasswordArgs!): UpdatedEncryptedUserPassword!
+        
+
       
         # TODO: Finish CRUD operations for users, public keys, and passwords
-        # updatePassword - update password info like url, name, username, expiresAt
-        # changePassword - change the password and reset the expiresAt date
-        # deletePassword - delete a password (remove from user and the associated account)
         # updatePublicKey - update public key info like label, description, expiresAt
         # changePublicKey - change the public key and reset the expiresAt date
         # deletePublicKey - delete a public key (remove from user and the associated account)

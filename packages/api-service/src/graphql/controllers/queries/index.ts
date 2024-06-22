@@ -1,10 +1,13 @@
 /* istanbul ignore file */
-import {me, myPublicKeys} from './user';
+import {me} from './me';
+import {myPasswords} from './myPasswords';
+import {myPublicKeys} from './myPublicKeys';
 
-export {me, myPublicKeys};
+export {me, myPublicKeys, myPasswords};
 
 const queries = {
   me,
+  myPasswords,
   myPublicKeys
 };
 

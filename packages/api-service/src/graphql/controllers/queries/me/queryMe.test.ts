@@ -1,9 +1,9 @@
 import {me} from '.';
 import path from 'path';
-import {getPathToKeyFolder} from '../../../../../utils';
+import {getPathToKeyFolder} from '../../../../utils';
 import {describe, expect, it, beforeAll, afterAll} from '@jest/globals';
-import dbConnection, {disconnectFromDB} from '../../../../../db/connection';
-import {createTestUser, TestUserCreationData} from '../../../../../utils/testHelpers';
+import dbConnection, {disconnectFromDB} from '../../../../db/connection';
+import {createTestUser, TestUserCreationData} from '../../../../utils/testHelpers';
 import {
   DBConnection,
   CreateUserMutationVariables,

@@ -1,8 +1,8 @@
 import {GraphQLError} from 'graphql';
-import {logger} from '../../../../../utils/';
-import {enforceUserSession} from '../../../helpers/enforceUserSession';
+import {logger} from '../../../../utils/';
+import {enforceUserSession} from '../../helpers/enforceUserSession';
 import type {AuthContext, QueryMeResponse} from 'passwordkeeper.types';
-import {handleErrorMessages} from '../../../helpers';
+import {handleErrorMessages} from '../../helpers';
 
 export const me = async (
   _: undefined,

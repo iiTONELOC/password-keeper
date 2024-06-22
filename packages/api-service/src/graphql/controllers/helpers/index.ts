@@ -2,6 +2,7 @@ export * from './addPublicKey';
 export * from './createAuthSession';
 export * from './enforceUserSession';
 export * from './findUsersPublicKey';
+export * from './encryptPwdDataForEncryption';
 
 export const handleErrorMessages = (
   error: Error,

@@ -19,12 +19,13 @@ describe('Account Model', () => {
     const Account: IAccountModel = AccountModel;
     const schemaPaths = Object.keys(Account.schema.paths);
 
-    expect(schemaPaths).toHaveLength(10);
+    expect(schemaPaths).toHaveLength(11);
     expect(schemaPaths).toContain('_id');
     expect(schemaPaths).toContain('owner');
     expect(schemaPaths).toContain('status');
     expect(schemaPaths).toContain('subUsers');
     expect(schemaPaths).toContain('passwords');
+    expect(schemaPaths).toContain('deletedAt');
     expect(schemaPaths).toContain('publicKeys');
     expect(schemaPaths).toContain('accountType');
   });

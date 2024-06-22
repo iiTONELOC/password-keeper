@@ -9,6 +9,11 @@ const AccountSchema = new Schema<IAccount>(
       ref: 'User',
       required: true
     },
+    deletedAt: {
+      type: Date,
+      required: false,
+      default: undefined
+    },
     status: {
       type: String,
       enum: [...DefaultAccountStatusTypes],

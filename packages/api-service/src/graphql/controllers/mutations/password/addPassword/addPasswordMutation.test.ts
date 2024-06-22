@@ -9,7 +9,9 @@ import dbConnection, {disconnectFromDB} from '../../../../../db/connection';
 import {
   createTestUser,
   TestUserCreationData,
-  getSessionReadyForAuthMiddleware
+  getSessionReadyForAuthMiddleware,
+  PlainTextPassword,
+  decryptPasswordToOriginalData
 } from '../../../../../utils/testHelpers';
 import {
   IPassword,
@@ -19,9 +21,17 @@ import {
   IAuthSessionDocument,
   CreateUserMutationVariables,
   AddPasswordMutationVariables,
-  CompleteAccountMutationPayload
+  CompleteAccountMutationPayload,
+  IUserPasswordDocument,
+  IAccountDocument
 } from 'passwordkeeper.types';
-import {AccountTypeMap, AccountTypeModel, UserModel} from '../../../../../db/Models';
+import {
+  UserModel,
+  AccountTypeMap,
+  AccountTypeModel,
+  EncryptedUserPasswordModel,
+  AccountModel
+} from '../../../../../db/Models';
 
 const pathToKeys: string = path.normalize(
   getPathToKeyFolder()?.replace('.private', '.addPassWordMutation')
@@ -39,6 +49,7 @@ let testUserData: TestUserCreationData;
 let authSession: CompleteAccountMutationPayload;
 let sessionId: string;
 let signature: string;
+let addedPasswordData: IPasswordEncrypted;
 
 const testAESKey = 'addPassWordMutationTestAESKey';
 
@@ -84,10 +95,10 @@ describe('addPassWordMutation', () => {
 
     const addPasswordData: AddPasswordMutationVariables = {
       addPasswordArgs: {
-        url: {encryptedData: encryptedUrl.encryptedData, iv: encryptedUrl.iv},
-        name: {encryptedData: encryptedName.encryptedData, iv: encryptedName.iv},
-        username: {encryptedData: encryptedUsername.encryptedData, iv: encryptedUsername.iv},
-        password: {encryptedData: encryptedPassword.encryptedData, iv: encryptedPassword.iv}
+        url: {...encryptedUrl},
+        name: {...encryptedName},
+        username: {...encryptedUsername},
+        password: {...encryptedPassword}
       }
     };
     // @ts-expect-error - we are testing the middleware and don't need to pass in a real request
@@ -99,6 +110,8 @@ describe('addPassWordMutation', () => {
       session: validSession
     });
 
+    addedPasswordData = result;
+
     expect(result).toBeDefined();
     expect(result.url).toBeDefined();
     expect(result.name).toBeDefined();
@@ -107,6 +120,23 @@ describe('addPassWordMutation', () => {
     expect(result.owner).toBeDefined();
     expect(result.expiresAt).toBeUndefined();
     expect(result.owner.toString()).toBe(testUserData.createdAuthSession.user._id?.toString());
+
+    // get the updated password and decrypt it ensuring it was added correctly
+    let addedPassword: IUserPasswordDocument | PlainTextPassword | undefined = (
+      await EncryptedUserPasswordModel.findById(result._id)
+    )?.toObject();
+
+    // decrypt back to plain text
+    addedPassword = await decryptPasswordToOriginalData(
+      testAESKey,
+      addedPassword as IUserPasswordDocument
+    );
+
+    expect(addedPassword).toBeDefined();
+    expect(addedPassword.url).toBe(passwordData.url);
+    expect(addedPassword.name).toBe(passwordData.name);
+    expect(addedPassword.username).toBe(passwordData.username);
+    expect(addedPassword.password).toBe(passwordData.password);
   });
 
   it('should throw an error if name is missing', async () => {
@@ -127,11 +157,11 @@ describe('addPassWordMutation', () => {
 
     const addPasswordData: AddPasswordMutationVariables = {
       addPasswordArgs: {
-        url: {encryptedData: encryptedUrl.encryptedData, iv: encryptedUrl.iv},
+        url: {...encryptedUrl},
         // @ts-expect-error - we are testing bad inputWS
         name: undefined,
-        username: {encryptedData: encryptedUsername.encryptedData, iv: encryptedUsername.iv},
-        password: {encryptedData: encryptedPassword.encryptedData, iv: encryptedPassword.iv}
+        username: {...encryptedUsername},
+        password: {...encryptedPassword}
       }
     };
 
@@ -163,11 +193,11 @@ describe('addPassWordMutation', () => {
 
     const addPasswordData: AddPasswordMutationVariables = {
       addPasswordArgs: {
-        url: {encryptedData: encryptedUrl.encryptedData, iv: encryptedUrl.iv},
-        name: {encryptedData: encryptedName.encryptedData, iv: encryptedName.iv},
+        url: {...encryptedUrl},
+        name: {...encryptedName},
         // @ts-expect-error - we are testing bad input
         username: undefined,
-        password: {encryptedData: encryptedPassword.encryptedData, iv: encryptedPassword.iv}
+        password: {...encryptedPassword}
       }
     };
 
@@ -199,9 +229,9 @@ describe('addPassWordMutation', () => {
 
     const addPasswordData: AddPasswordMutationVariables = {
       addPasswordArgs: {
-        url: {encryptedData: encryptedUrl.encryptedData, iv: encryptedUrl.iv},
-        name: {encryptedData: encryptedName.encryptedData, iv: encryptedName.iv},
-        username: {encryptedData: encryptedUsername.encryptedData, iv: encryptedUsername.iv},
+        url: {...encryptedUrl},
+        name: {...encryptedName},
+        username: {...encryptedUsername},
         // @ts-expect-error - we are testing bad input
         password: undefined
       }
@@ -235,10 +265,10 @@ describe('addPassWordMutation', () => {
 
     const addPasswordData: AddPasswordMutationVariables = {
       addPasswordArgs: {
-        url: {encryptedData: encryptedUrl.encryptedData, iv: encryptedUrl.iv},
-        name: {encryptedData: encryptedName.encryptedData, iv: encryptedName.iv},
-        username: {encryptedData: encryptedUsername.encryptedData, iv: encryptedUsername.iv},
-        password: {encryptedData: encryptedPassword.encryptedData, iv: encryptedPassword.iv}
+        url: {...encryptedUrl},
+        name: {...encryptedName},
+        username: {...encryptedUsername},
+        password: {...encryptedPassword}
       }
     };
 
@@ -262,10 +292,7 @@ describe('addPassWordMutation', () => {
       password: 'test',
       owner: testUserData.createdAuthSession.user._id as Types.ObjectId
     };
-    // @ts-expect-error - we are testing the middleware and don't need to pass in a real request
-    const validSession: IAuthSessionDocument = await getAuth({
-      headers: {authorization: sessionId, signature}
-    });
+
     let currentNumberOfPasswords: number =
       (
         await UserModel.findById(testUserData.createdAuthSession.user._id).select('passwords')
@@ -280,12 +307,16 @@ describe('addPassWordMutation', () => {
       ]).then(async ([encryptedUrl, encryptedName, encryptedUsername, encryptedPassword]) => {
         const addPasswordData: AddPasswordMutationVariables = {
           addPasswordArgs: {
-            url: {encryptedData: encryptedUrl.encryptedData, iv: encryptedUrl.iv},
-            name: {encryptedData: encryptedName.encryptedData, iv: encryptedName.iv},
-            username: {encryptedData: encryptedUsername.encryptedData, iv: encryptedUsername.iv},
-            password: {encryptedData: encryptedPassword.encryptedData, iv: encryptedPassword.iv}
+            url: {...encryptedUrl},
+            name: {...encryptedName},
+            username: {...encryptedUsername},
+            password: {...encryptedPassword}
           }
         };
+        // @ts-expect-error - we are testing the middleware and don't need to pass in a real request
+        const validSession: IAuthSessionDocument = await getAuth({
+          headers: {authorization: sessionId, signature}
+        });
 
         await addPassword(undefined, addPasswordData, {session: validSession});
         currentNumberOfPasswords++;
@@ -302,13 +333,16 @@ describe('addPassWordMutation', () => {
 
     const addPasswordData: AddPasswordMutationVariables = {
       addPasswordArgs: {
-        url: {encryptedData: encryptedUrl.encryptedData, iv: encryptedUrl.iv},
-        name: {encryptedData: encryptedName.encryptedData, iv: encryptedName.iv},
-        username: {encryptedData: encryptedUsername.encryptedData, iv: encryptedUsername.iv},
-        password: {encryptedData: encryptedPassword.encryptedData, iv: encryptedPassword.iv}
+        url: {...encryptedUrl},
+        name: {...encryptedName},
+        username: {...encryptedUsername},
+        password: {...encryptedPassword}
       }
     };
-
+    // @ts-expect-error - we are testing the middleware and don't need to pass in a real request
+    const validSession: IAuthSessionDocument = await getAuth({
+      headers: {authorization: sessionId, signature}
+    });
     await expect(addPassword(undefined, addPasswordData, {session: validSession})).rejects.toThrow(
       'Max number of passwords reached'
     );
@@ -319,4 +353,14 @@ describe('addPassWordMutation', () => {
       {maxPasswords: AccountTypeMap[ValidAccountTypes.FREE].maxPasswords}
     );
   }, 30000);
+
+  it('should add the password to the user account', async () => {
+    const userAccount: IAccountDocument | null = await AccountModel.findById(
+      testUserData?.createdAuthSession?.user?.account?._id
+    );
+
+    expect(userAccount).toBeDefined();
+    //expect the password to be in the account passwords array
+    expect(userAccount?.passwords.includes(addedPasswordData._id as Types.ObjectId)).toBe(true);
+  });
 });

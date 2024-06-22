@@ -1,11 +1,10 @@
 import {GraphQLError} from 'graphql';
 import {logger} from '../../../../../utils';
-import {enforceUserSession} from '../../../helpers';
-import {encryptAES} from '../../../../../utils/crypto/aes-256';
+import {encryptPwdDataForStorage, enforceUserSession} from '../../../helpers';
 import {UserModel, EncryptedUserPasswordModel, AccountModel} from '../../../../../db/Models';
 import {
   AuthContext,
-  IUserDocument,
+  IEncryptedData,
   IPasswordEncrypted,
   IAuthSessionDocument,
   IPasswordEncryptedAtRest,
@@ -28,59 +27,28 @@ export const addPassword = async (
     throw new GraphQLError('Missing required fields');
   }
 
-  const user: IUserDocument | null = (
-    await UserModel.findById(userID)
-      .select('_id username email publicKeys account')
-      .populate({path: 'publicKeys'})
-      .populate({
-        path: 'account',
-        select: 'accountType publicKeys passwords',
-        populate: {path: 'accountType'}
-      })
-  )?.toObject() as IUserDocument | null;
-
-  if (!user) {
-    throw new GraphQLError('Unauthorized');
-  }
-
-  const currentNumberOfPasswords: number = user?.account?.passwords?.length;
-  const maxNumberOfPasswords: number = user?.account?.accountType?.maxPasswords;
+  const currentNumberOfPasswords: number = session?.user?.account?.passwords?.length;
+  const maxNumberOfPasswords: number = session?.user?.account?.accountType?.maxPasswords;
 
   if (currentNumberOfPasswords < maxNumberOfPasswords) {
     try {
-      // encrypt the data for storage at rest
-      const [encryptedName, encryptedUsername, encryptedPassword, encryptedURL] = await Promise.all(
-        [
-          encryptAES(JSON.stringify(name), process.env.SYMMETRIC_KEY_PASSPHRASE as string),
-          encryptAES(JSON.stringify(username), process.env.SYMMETRIC_KEY_PASSPHRASE as string),
-          encryptAES(JSON.stringify(password), process.env.SYMMETRIC_KEY_PASSPHRASE as string),
-          /* istanbul ignore next */
-          url
-            ? /* istanbul ignore next */
-              encryptAES(JSON.stringify(url), process.env.SYMMETRIC_KEY_PASSPHRASE as string)
-            : /* istanbul ignore next */
-              Promise.resolve(undefined)
-        ]
-      );
+      const [encryptedURL, encryptedName, encryptedUsername, encryptedPassword] =
+        (await encryptPwdDataForStorage([url, name, username, password])) as IEncryptedData[];
 
-      const creationData: IPasswordEncryptedAtRest = {
+      const pwdCreationData: IPasswordEncryptedAtRest = {
         name: {
-          encryptedData: encryptedName,
-          iv: encryptedName.iv
+          encryptedData: encryptedName
         },
         username: {
-          encryptedData: encryptedUsername,
-          iv: encryptedUsername.iv
+          encryptedData: encryptedUsername
         },
         password: {
-          encryptedData: encryptedPassword,
-          iv: encryptedPassword.iv
+          encryptedData: encryptedPassword
         },
         url: encryptedURL
           ? /* istanbul ignore next */
             {
-              encryptedData: encryptedURL,
-              iv: encryptedURL.iv
+              encryptedData: encryptedURL
             }
           : /* istanbul ignore next */
             undefined,
@@ -88,10 +56,12 @@ export const addPassword = async (
       };
 
       // create the password object in the database
-      const newEncryptedAtRestUserPassword = await EncryptedUserPasswordModel.create(creationData);
+      const newEncryptedAtRestUserPassword = await EncryptedUserPasswordModel.create(
+        pwdCreationData
+      );
 
       // add the password to the user's account
-      await AccountModel.findByIdAndUpdate(user.account._id, {
+      await AccountModel.findByIdAndUpdate(session?.user?.account._id, {
         $addToSet: {passwords: newEncryptedAtRestUserPassword._id}
       });
 

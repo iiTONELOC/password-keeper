@@ -1,6 +1,13 @@
 /*istanbul ignore file */
 import logger from './logger';
-import {RSA4096, getPathToKeyFolder, getPathToPrivateKey, getPathToPublicKey} from './crypto';
+import {
+  generateRSAKeys,
+  getPrivateKey,
+  getPublicKey,
+  getPathToKeyFolder,
+  getPathToPrivateKey,
+  getPathToPublicKey
+} from './crypto';
 
 export * from './crypto';
 
@@ -13,7 +20,7 @@ export const ensureRsaKeysExist = async () => {
   const privateKeyPassphrase = process.env.PRIVATE_KEY_PASSPHRASE;
 
   logger.warn('Generating RSA keys for the server...');
-  const keys = await RSA4096.generateRSAKeys(
+  const keys = await generateRSAKeys(
     'pwd-keeper',
     {
       privateKeyPath: pathToKeyFolder,
@@ -35,7 +42,7 @@ export const ensureRsaKeysExist = async () => {
 export const getAppsPrivateKey = async () => {
   const privateKeyPassphrase = process.env.PRIVATE_KEY_PASSPHRASE;
 
-  return RSA4096.getPrivateKey(getPathToPrivateKey(), privateKeyPassphrase);
+  return getPrivateKey(getPathToPrivateKey(), privateKeyPassphrase);
 };
 
 /**
@@ -43,7 +50,7 @@ export const getAppsPrivateKey = async () => {
  * @returns the app's public key
  */
 export const getAppsPublicKey = async () => {
-  return RSA4096.getPublicKey(getPathToPublicKey());
+  return getPublicKey(getPathToPublicKey());
 };
 
 export {ip} from './ip';

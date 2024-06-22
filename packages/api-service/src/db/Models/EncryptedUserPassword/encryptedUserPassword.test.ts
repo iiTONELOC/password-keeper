@@ -15,26 +15,22 @@ describe('UserPassword Model', () => {
     expect(UserPassword.modelName).toEqual('EncryptedUserPassword');
   });
 
-  it('Should have a schema with 12 total properties', () => {
+  it('Should have a schema with 8 total properties', () => {
     const UserPassword: IUserPasswordModel = UserPasswordModel;
     const schemaPaths = Object.keys(UserPassword.schema.paths);
 
     const expectedPaths = [
       'name.encryptedData',
-      'name.iv',
       'username.encryptedData',
-      'username.iv',
       'password.encryptedData',
-      'password.iv',
       'url.encryptedData',
-      'url.iv',
       'owner',
       'expiresAt',
       '_id',
       '__v'
     ];
 
-    expect(schemaPaths).toHaveLength(12);
+    expect(schemaPaths).toHaveLength(8);
     expect(schemaPaths).toEqual(expect.arrayContaining(expectedPaths));
   });
 });

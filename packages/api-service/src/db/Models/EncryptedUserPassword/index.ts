@@ -9,19 +9,11 @@ const EncryptedUserPasswordSchema = new Schema<IPasswordEncryptedAtRest>(
       encryptedData: {
         type: EncryptedDataSchema,
         required: true
-      },
-      iv: {
-        type: String,
-        required: true
       }
     },
     username: {
       encryptedData: {
         type: EncryptedDataSchema,
-        required: true
-      },
-      iv: {
-        type: String,
         required: true
       }
     },
@@ -29,20 +21,11 @@ const EncryptedUserPasswordSchema = new Schema<IPasswordEncryptedAtRest>(
       encryptedData: {
         type: EncryptedDataSchema,
         required: true
-      },
-      iv: {
-        type: String,
-        required: true
       }
     },
     url: {
       encryptedData: {
         type: EncryptedDataSchema,
-        required: false,
-        default: undefined
-      },
-      iv: {
-        type: String,
         required: false,
         default: undefined
       }
