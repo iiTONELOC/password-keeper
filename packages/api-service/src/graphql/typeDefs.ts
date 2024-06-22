@@ -155,6 +155,7 @@ const typeDefs = `#graphql
     }
 
     type Mutation {
+        deleteUser: User!
         updateUser(updateUserArgs:updateUserArgs!): User!
         createUser(createUserArgs:createUserArgs!): createdUserPayload!
         completeLogin(completeLoginArgs:completeLoginArgs!): AuthSession!
@@ -164,9 +165,6 @@ const typeDefs = `#graphql
         addPublicKey(addPublicKeyArgs:addPublicKeyArgs!): addPublicKeyMutationPayload!
       
         # TODO: Finish CRUD operations for users, public keys, and passwords
-        
-        # deleteUser - delete user account and all associated data
-        #              (account, public keys, passwords, authSessions, session invites, etc.)
         # updatePassword - update password info like url, name, username, expiresAt
         # changePassword - change the password and reset the expiresAt date
         # deletePassword - delete a password (remove from user and the associated account)

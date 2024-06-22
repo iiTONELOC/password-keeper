@@ -41,7 +41,7 @@ export const getAuth = async (req: Request): Promise<IAuthSessionDocument | unde
     const session: IAuthSessionDocument | undefined = (
       await AuthSessionModel.findOne({_id: decryptedID}).populate({
         path: 'user',
-        select: '_id username email publicKeys account passwords',
+        select: '_id username email publicKeys account passwords userRole',
         populate: [
           {path: 'passwords'},
           {path: 'publicKeys'},
@@ -58,7 +58,8 @@ export const getAuth = async (req: Request): Promise<IAuthSessionDocument | unde
       AccountStatusTypes.SUSPENDED,
       AccountStatusTypes.DELINQUENT,
       AccountStatusTypes.CANCELLED,
-      AccountStatusTypes.PENDING
+      AccountStatusTypes.PENDING,
+      AccountStatusTypes.DELETED
     ];
 
     // if the session is not found or the account status is invalid, return undefined

@@ -172,7 +172,7 @@ describe('addPublicKeyMutation', () => {
     }
 
     // there are 5 account statuses, but only 4 are invalid for login
-    // SUSPENDED, DELINQUENT, CANCELLED, PENDING are all invalid
-    expect.assertions(4);
+    // SUSPENDED, DELINQUENT, CANCELLED, PENDING, DELETED are all invalid
+    expect.assertions(5);
   });
 });

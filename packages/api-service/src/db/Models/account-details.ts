@@ -63,6 +63,7 @@ export const DefaultUserRoles: UserRoles[] = [UserRoles.ACCOUNT_OWNER, UserRoles
 export const DefaultAccountStatusTypes: AccountStatusTypes[] = [
   AccountStatusTypes.ACTIVE,
   AccountStatusTypes.PENDING,
+  AccountStatusTypes.DELETED,
   AccountStatusTypes.CANCELLED,
   AccountStatusTypes.SUSPENDED,
   AccountStatusTypes.DELINQUENT

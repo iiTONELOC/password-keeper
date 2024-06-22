@@ -62,7 +62,13 @@ const UserSchema = new Schema<IUser>(
         required: false,
         default: []
       }
-    ]
+    ],
+    owner: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      required: false,
+      default: null
+    }
   },
   {id: false, timestamps: true, toJSON: {virtuals: true}}
 );
