@@ -1,5 +1,6 @@
 import {enforceUserSession} from './';
 import {describe, it} from '@jest/globals';
+import {AUTH_SESSION_ERROR_MESSAGES} from '../../../errors/messages';
 import {AuthContext, IAuthSessionDocument} from 'passwordkeeper.types';
 
 const fakeAuthSession: IAuthSessionDocument = {
@@ -24,7 +25,7 @@ describe('enforceUserSession', () => {
       }
     };
 
-    expect(() => enforceUserSession(context)).toThrow('Session Expired');
+    expect(() => enforceUserSession(context)).toThrow(AUTH_SESSION_ERROR_MESSAGES.SESSION_EXPIRED);
   });
 
   it('should throw an error if the session is not authenticated', () => {
@@ -33,7 +34,9 @@ describe('enforceUserSession', () => {
       session: undefined
     };
 
-    expect(() => enforceUserSession(context)).toThrow('Not Authenticated');
+    expect(() => enforceUserSession(context)).toThrow(
+      AUTH_SESSION_ERROR_MESSAGES.NOT_AUTHENTICATED
+    );
   });
 
   it('should throw an error if the session does not have a user but is not expired', () => {
@@ -47,14 +50,25 @@ describe('enforceUserSession', () => {
       }
     };
 
-    expect(() => enforceUserSession(context)).toThrow('Not Authenticated');
+    expect(() => enforceUserSession(context)).toThrow(
+      AUTH_SESSION_ERROR_MESSAGES.NOT_AUTHENTICATED
+    );
   });
 
   it('should return the session if it is not expired and has a user', () => {
     const context: AuthContext = {
-      // @ts-expect-error - testing purposes only
       session: {
-        ...fakeAuthSession,
+        user: {
+          // @ts-expect-error - testing purposes only
+          _id: 'fakeUserId',
+          username: 'fakeUsername',
+          account: {
+            // @ts-expect-error - testing purposes only
+            accountType: 'fakeAccountType',
+            // @ts-expect-error - testing purposes only
+            status: 'ACTIVE'
+          }
+        },
         // 10 minutes from now
         expiresAt: new Date(Date.now() + 600000)
       }

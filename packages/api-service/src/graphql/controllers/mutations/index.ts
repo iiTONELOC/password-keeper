@@ -1,8 +1,8 @@
 import {completeAccount} from './account';
 import {createUser, updateUser} from './user';
-import {addPublicKeyMutation} from './publicKey';
 import {getLoginNonce, completeLogin} from './login';
 import {addPassword, updatePassword, deletePassword} from './password';
+import {addPublicKeyMutation, updatePublicKey, deletePublicKey} from './publicKey';
 
 const mutations = {
   createUser,
@@ -13,6 +13,8 @@ const mutations = {
   updatePassword,
   deletePassword,
   completeAccount,
+  updatePublicKey,
+  deletePublicKey,
   addPublicKey: addPublicKeyMutation
 };
 
@@ -27,5 +29,7 @@ export {
   updatePassword,
   deletePassword,
   completeAccount,
+  updatePublicKey,
+  deletePublicKey,
   addPublicKeyMutation
 };

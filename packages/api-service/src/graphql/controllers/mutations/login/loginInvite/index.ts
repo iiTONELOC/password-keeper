@@ -2,6 +2,7 @@ import {GraphQLError} from 'graphql';
 import {findUsersPublicKey} from '../../../helpers';
 import {encryptAES} from '../../../../../utils/crypto/aes-256';
 import {UserModel, LoginInviteModel} from '../../../../../db/Models';
+import {GET_LOGIN_NONCE_ERROR_MESSAGES} from '../../../../errors/messages';
 import type {
   PrivateKey,
   IUserDocument,
@@ -34,15 +35,15 @@ export const getLoginNonce = async (
   } = args;
 
   if (!username) {
-    throw new GraphQLError('Username is required');
+    throw new GraphQLError(GET_LOGIN_NONCE_ERROR_MESSAGES.USERNAME_REQUIRED);
   }
 
   if (!challenge) {
-    throw new GraphQLError('Challenge is required');
+    throw new GraphQLError(GET_LOGIN_NONCE_ERROR_MESSAGES.CHALLENGE_REQUIRED);
   }
 
   if (!signature) {
-    throw new GraphQLError('Signature is required');
+    throw new GraphQLError(GET_LOGIN_NONCE_ERROR_MESSAGES.SIGNATURE_REQUIRED);
   }
 
   // 1. look up the user by username
@@ -52,7 +53,7 @@ export const getLoginNonce = async (
 
   if (!user) {
     logger.error(`${GET_LOGIN_NONCE} User: ${username} - ERROR -  User: ${username} was not found`);
-    throw new GraphQLError('User not found');
+    throw new GraphQLError(GET_LOGIN_NONCE_ERROR_MESSAGES.USER_NOT_FOUND);
   }
 
   // Create a uniform log header for this mutation
@@ -69,7 +70,7 @@ export const getLoginNonce = async (
     /* istanbul ignore next */
     logger.error(`${logHeader} - ERROR -  no public key found for user`);
     /* istanbul ignore next */
-    throw new GraphQLError('User public key not found');
+    throw new GraphQLError(GET_LOGIN_NONCE_ERROR_MESSAGES.PUBLIC_KEY_NOT_FOUND);
   }
 
   // 3. decrypt the challenge with the app's private key
@@ -82,7 +83,7 @@ export const getLoginNonce = async (
     /* istanbul ignore next */
     logger.error(`${logHeader} - ERROR - no private key found for app`);
     /* istanbul ignore next */
-    throw new GraphQLError('Error getting private key');
+    throw new GraphQLError(GET_LOGIN_NONCE_ERROR_MESSAGES.PRIVATE_KEY_ERROR);
   }
 
   // decrypt the challenge with the app's private key
@@ -92,7 +93,7 @@ export const getLoginNonce = async (
     /* istanbul ignore next */
     logger.error(`${logHeader} - ERROR - could not decrypt challenge`);
     /* istanbul ignore next */
-    throw new GraphQLError('Error decrypting challenge');
+    throw new GraphQLError(GET_LOGIN_NONCE_ERROR_MESSAGES.CHALLENGE_DECRYPT_ERROR);
   }
 
   // 4. Verify the signature which is the hash of the username + challenge signed with the user's private key
@@ -108,7 +109,7 @@ export const getLoginNonce = async (
     /* istanbul ignore next */
     logger.error(`${logHeader} - ERROR - could not verify signature`);
     /* istanbul ignore next */
-    throw new GraphQLError('Error verifying signature');
+    throw new GraphQLError(GET_LOGIN_NONCE_ERROR_MESSAGES.SIGNATURE_VERIFICATION_FAILED);
   }
 
   // 5. re-encrypt the challenge with the user's public key - for transport
@@ -121,7 +122,7 @@ export const getLoginNonce = async (
     /* istanbul ignore next */
     logger.error(`${logHeader} - ERROR - could not re-encrypt challenge`);
     /* istanbul ignore next */
-    throw new GraphQLError('Error re-encrypting challenge');
+    throw new GraphQLError(GET_LOGIN_NONCE_ERROR_MESSAGES.RE_ENCRYPT_CHALLENGE_ERROR);
   }
 
   // 6. create a nonce, encrypt it with the user's public key
@@ -131,7 +132,7 @@ export const getLoginNonce = async (
     /* istanbul ignore next */
     logger.error(`${logHeader} - ERROR - there was an error creating a nonce`);
     /* istanbul ignore next */
-    throw new GraphQLError('Error creating nonce');
+    throw new GraphQLError(GET_LOGIN_NONCE_ERROR_MESSAGES.NONCE_CREATION_ERROR);
   }
 
   // encrypt the nonce with the user's public key - for transport
@@ -141,7 +142,7 @@ export const getLoginNonce = async (
     /* istanbul ignore next */
     logger.error(`${logHeader} - ERROR - there was an error signing the nonce`);
     /* istanbul ignore next */
-    throw new GraphQLError('Error signing nonce');
+    throw new GraphQLError(GET_LOGIN_NONCE_ERROR_MESSAGES.NONCE_SIGNING_ERROR);
   }
 
   // 7. Create the login invite in the db but encrypt the nonce
@@ -155,7 +156,7 @@ export const getLoginNonce = async (
     /* istanbul ignore next */
     logger.error(`${logHeader} - ERROR - there was an error encrypting the nonce`);
     /* istanbul ignore next */
-    throw new GraphQLError('Error encrypting nonce');
+    throw new GraphQLError(GET_LOGIN_NONCE_ERROR_MESSAGES.NONCE_ENCRYPTION_AT_REST_ERROR);
   }
 
   // create the safe at rest challenge
@@ -168,7 +169,7 @@ export const getLoginNonce = async (
     /* istanbul ignore next */
     logger.error(`${logHeader} - ERROR - there was an error encrypting the challenge`);
     /* istanbul ignore next */
-    throw new GraphQLError('Error encrypting challenge');
+    throw new GraphQLError(GET_LOGIN_NONCE_ERROR_MESSAGES.CHALLENGE_ENCRYPTION_AT_REST_ERROR);
   }
 
   // create the login invite in the db
@@ -184,7 +185,7 @@ export const getLoginNonce = async (
     /* istanbul ignore next */
     logger.error(`${logHeader} - ERROR - there was an error creating the login invite`);
     /* istanbul ignore next */
-    throw new GraphQLError('Error creating login invite');
+    throw new GraphQLError(GET_LOGIN_NONCE_ERROR_MESSAGES.CREATE_INVITE_ERROR);
   }
 
   logger.warn(`${logHeader} - SUCCESS - login nonce and challenge created`);

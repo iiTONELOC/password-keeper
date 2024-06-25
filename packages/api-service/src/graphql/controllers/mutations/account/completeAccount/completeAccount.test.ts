@@ -4,7 +4,7 @@ import {createTestUser} from '../../../../../utils/testHelpers';
 import {AccountCompletionInviteModel} from '../../../../../db/Models';
 import {describe, expect, it, beforeAll, afterAll} from '@jest/globals';
 import dbConnection, {disconnectFromDB} from '../../../../../db/connection';
-import {DBConnection, CreateUserMutationVariables} from 'passwordkeeper.types';
+import {DBConnection, CreateUserMutationVariables, AccountStatusTypes} from 'passwordkeeper.types';
 
 const pathToKeys: string = path.join(
   getPathToKeyFolder()?.replace('.private', 'test-keys'),
@@ -60,6 +60,9 @@ describe('completeAccount', () => {
       await AccountCompletionInviteModel.find({user: newUser.createdAuthSession.user._id})
     ).toHaveLength(0);
 
-    expect.assertions(10);
+    // the account should have been created and marked as active
+    expect(newUser.createdAuthSession.user?.account?.status).toBe(AccountStatusTypes.ACTIVE);
+
+    expect.assertions(11);
   });
 });

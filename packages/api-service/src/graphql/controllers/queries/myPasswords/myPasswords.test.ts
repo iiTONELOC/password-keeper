@@ -104,7 +104,7 @@ describe('queryMyPasswords', () => {
       headers: {authorization: sessionId, signature}
     });
 
-    const {passwords}: QueryMyPasswordsResponse = await myPasswords(undefined, undefined, {
+    const passwords: QueryMyPasswordsResponse = await myPasswords(undefined, undefined, {
       session: validSession
     });
 

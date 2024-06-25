@@ -1,4 +1,5 @@
 import {GraphQLError} from 'graphql';
+import {USER_ERROR_MESSAGES} from '../../../../errors/messages';
 import {createNonce, getAppsPrivateKey, encryptWithPrivateKey, logger} from '../../../../../utils';
 import {
   UserModel,
@@ -16,6 +17,7 @@ import {
   type CreateUserMutationVariables,
   type IAccountCompletionInviteDocument
 } from 'passwordkeeper.types';
+import {handleErrorMessages} from '../../../helpers';
 
 export const createUser = async (
   _: undefined,
@@ -30,11 +32,11 @@ export const createUser = async (
   const loggerHeader = 'createUser mutation::';
 
   if (!username) {
-    throw new GraphQLError('Username is required');
+    throw new GraphQLError(USER_ERROR_MESSAGES.USERNAME_REQUIRED);
   }
 
   if (!email) {
-    throw new GraphQLError('Email is required');
+    throw new GraphQLError(USER_ERROR_MESSAGES.EMAIL_REQUIRED);
   }
 
   try {
@@ -76,7 +78,7 @@ export const createUser = async (
       /* istanbul ignore next */
       logger.error(`${loggerHeader} Error creating nonce for user: ${username}`);
       /* istanbul ignore next */
-      throw new GraphQLError('Error creating nonce');
+      throw new GraphQLError(USER_ERROR_MESSAGES.NONCE_ERROR);
     }
 
     logger.warn(`${loggerHeader} accessing private key for user creation: ${username}`);
@@ -88,7 +90,7 @@ export const createUser = async (
       /* istanbul ignore next */
       logger.error(`${loggerHeader} Error getting private key for user: ${username}`);
       /* istanbul ignore next */
-      throw new GraphQLError('Error getting private key');
+      throw new GraphQLError(USER_ERROR_MESSAGES.FETCH_PRIVATE_KEY_ERROR);
     }
 
     // sign the nonce with the private key
@@ -99,7 +101,7 @@ export const createUser = async (
       /* istanbul ignore next */
       logger.error(`${loggerHeader} Error signing nonce for user: ${username}`);
       /* istanbul ignore next */
-      throw new GraphQLError('Error signing nonce');
+      throw new GraphQLError(USER_ERROR_MESSAGES.SIGNING_NONCE_ERROR);
     }
 
     logger.warn(`${loggerHeader} User: ${username} created successfully. Generating invite token.`);
@@ -117,13 +119,14 @@ export const createUser = async (
     /* istanbul ignore next */
     if (error?.toString()?.includes('E11000 duplicate key error')) {
       logger.error(`${loggerHeader} User: ${username} already exists!`);
-      throw new GraphQLError('User already exists');
+      throw new GraphQLError(USER_ERROR_MESSAGES.ALREADY_EXISTS);
     } else {
-      console.error(error);
       /* istanbul ignore next */
       logger.error(`${loggerHeader} Error creating user: ${error}`);
       /* istanbul ignore next */
-      throw new GraphQLError('Error creating user');
+      throw new GraphQLError(
+        handleErrorMessages(error as Error, USER_ERROR_MESSAGES.CREATE_USER_ERROR)
+      );
     }
   }
 };

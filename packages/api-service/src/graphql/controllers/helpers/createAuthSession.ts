@@ -1,13 +1,14 @@
 // istanbul ignore file
 import {GraphQLError} from 'graphql';
 import {AuthSessionModel} from '../../../db/Models';
+import {AUTH_SESSION_ERROR_MESSAGES} from '../../errors/messages';
 import {createNonce, encryptWithPublicKey, logger} from '../../../utils';
 import {generateAESEncryptionKey, encryptAES} from '../../../utils/crypto/aes-256';
 import type {
   IUserDocument,
   AES_EncryptionData,
-  CompleteAccountMutationPayload,
-  IAuthSessionDocument
+  IAuthSessionDocument,
+  CompleteAccountMutationPayload
 } from 'passwordkeeper.types';
 
 const thirtyMinutes = 30 * 60 * 1000;
@@ -32,7 +33,7 @@ export const createAuthSession = async ({
 
   if (!authSessionNonce) {
     logger.error('completeAccount mutationError - error creating auth session nonce!');
-    throw new GraphQLError('Error creating auth session nonce');
+    throw new GraphQLError(AUTH_SESSION_ERROR_MESSAGES.NONCE_CREATION_ERROR);
   }
 
   // encrypt the nonce for storage using the aes key
@@ -43,7 +44,7 @@ export const createAuthSession = async ({
 
   if (!aesEncryptionKey) {
     logger.error('completeAccount mutationError - error creating encryption key!');
-    throw new GraphQLError('Error creating encryption key');
+    throw new GraphQLError(AUTH_SESSION_ERROR_MESSAGES.AES_KEY_CREATION_ERROR);
   }
 
   // encrypt the nonce for storage in the db
@@ -83,7 +84,7 @@ export const createAuthSession = async ({
 
   if (!authSession) {
     logger.error('completeAccount mutationError - error creating auth session!');
-    throw new GraphQLError('Error creating auth session');
+    throw new GraphQLError(AUTH_SESSION_ERROR_MESSAGES.CREATE_SESSION_ERROR);
   }
 
   // encrypt the nonce with the user's public key - for transmission
@@ -94,7 +95,7 @@ export const createAuthSession = async ({
 
   if (!pkiEncryptedNonceWUsersPubKey) {
     logger.error('completeAccount mutationError - error encrypting nonce with public key!');
-    throw new GraphQLError('Error encrypting nonce with public key');
+    throw new GraphQLError(AUTH_SESSION_ERROR_MESSAGES.PUBLIC_KEY_NONCE_ENCRYPTION_ERROR);
   }
 
   // encrypt the session id with the user's public key for transmission
@@ -105,7 +106,7 @@ export const createAuthSession = async ({
 
   if (!pkiEncryptedSessionIdWUsersPubKey) {
     logger.error('completeAccount mutationError - error encrypting session id with public key!');
-    throw new GraphQLError('Error encrypting session id with public key');
+    throw new GraphQLError(AUTH_SESSION_ERROR_MESSAGES.PUBLIC_KEY_SESSION_ID_ENCRYPTION_ERROR);
   }
 
   logger.warn(

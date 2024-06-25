@@ -2,6 +2,7 @@ import path from 'path';
 import {getLoginNonce} from './index';
 import {createTestUser} from '../../../../../utils/testHelpers';
 import {describe, expect, it, beforeAll, afterAll} from '@jest/globals';
+import {GET_LOGIN_NONCE_ERROR_MESSAGES} from '../../../../errors/messages';
 import dbConnection, {disconnectFromDB} from '../../../../../db/connection';
 import {
   UserRoles,
@@ -83,13 +84,9 @@ describe('getLoginNonce', () => {
       signatureHash as string
     );
 
-    if (!userSignature || !appsPublicKey) {
-      throw new Error('Error getting keys');
-    }
-
     // encrypt the challenge with the apps public key
     const encryptedChallenge: string | undefined = await encryptWithPublicKey(
-      appsPublicKey,
+      appsPublicKey as string,
       loginChallenge
     );
 
@@ -97,7 +94,7 @@ describe('getLoginNonce', () => {
       getLoginNonceArgs: {
         username: testUser.username,
         challenge: encryptedChallenge as string,
-        signature: userSignature
+        signature: userSignature as string
       }
     };
 
@@ -118,10 +115,6 @@ describe('getLoginNonce', () => {
       nonce
     );
 
-    if (!decryptedNonce) {
-      throw new Error('Error decrypting nonce');
-    }
-
     // decrypt the challenge response with the users private key
     const decryptedChallengeResponse: string | undefined = await decryptWithPrivateKey(
       usersPrivateKey as PrivateKey,
@@ -140,13 +133,9 @@ describe('getLoginNonce', () => {
     // verify the signature
     const hash: string | undefined = await hashData(decryptedNonce + loginChallenge);
     const decryptedSignature: string | undefined = await decryptWithPublicKey(
-      appsPublicKey,
+      appsPublicKey as string,
       signature
     );
-
-    if (!decryptedSignature) {
-      throw new Error('Error decrypting signature');
-    }
 
     const signatureMatch: boolean = hash === decryptedSignature;
 
@@ -168,7 +157,7 @@ describe('getLoginNonce', () => {
       undefined
     ).catch(error => {
       expect(error).toBeDefined();
-      expect(error.toString()).toBe('Username is required');
+      expect(error.toString()).toBe(GET_LOGIN_NONCE_ERROR_MESSAGES.USERNAME_REQUIRED);
     });
 
     expect.assertions(2);
@@ -187,7 +176,7 @@ describe('getLoginNonce', () => {
       undefined
     ).catch(error => {
       expect(error).toBeDefined();
-      expect(error.toString()).toBe('Challenge is required');
+      expect(error.toString()).toBe(GET_LOGIN_NONCE_ERROR_MESSAGES.CHALLENGE_REQUIRED);
     });
   });
 
@@ -204,7 +193,7 @@ describe('getLoginNonce', () => {
       undefined
     ).catch(error => {
       expect(error).toBeDefined();
-      expect(error.toString()).toBe('Signature is required');
+      expect(error.toString()).toBe(GET_LOGIN_NONCE_ERROR_MESSAGES.SIGNATURE_REQUIRED);
     });
   });
 
@@ -221,7 +210,7 @@ describe('getLoginNonce', () => {
       undefined
     ).catch(error => {
       expect(error).toBeDefined();
-      expect(error.toString()).toBe('User not found');
+      expect(error.toString()).toBe(GET_LOGIN_NONCE_ERROR_MESSAGES.USER_NOT_FOUND);
     });
   });
 });

@@ -1,6 +1,7 @@
 import {me} from '.';
 import path from 'path';
 import {getPathToKeyFolder} from '../../../../utils';
+import {AUTH_SESSION_ERROR_MESSAGES} from '../../../errors/messages';
 import {describe, expect, it, beforeAll, afterAll} from '@jest/globals';
 import dbConnection, {disconnectFromDB} from '../../../../db/connection';
 import {createTestUser, TestUserCreationData} from '../../../../utils/testHelpers';
@@ -75,7 +76,7 @@ describe('queryMe', () => {
     };
 
     await expect(me(undefined, undefined, authContext)).rejects.toThrowError(
-      'Error: Session Expired'
+      AUTH_SESSION_ERROR_MESSAGES.SESSION_EXPIRED
     );
   });
 
@@ -91,7 +92,7 @@ describe('queryMe', () => {
     };
 
     await expect(me(undefined, undefined, authContext)).rejects.toThrowError(
-      'Error: Not Authenticated'
+      AUTH_SESSION_ERROR_MESSAGES.NOT_AUTHENTICATED
     );
   });
 });

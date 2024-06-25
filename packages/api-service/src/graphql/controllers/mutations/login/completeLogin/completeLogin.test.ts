@@ -1,13 +1,15 @@
 import path from 'path';
 import {completeLogin} from '.';
+import {LoginInviteModel} from '../../../../../db/Models';
+import {LOGIN_ERROR_MESSAGES} from '../../../../errors/messages';
 import {describe, expect, it, beforeAll, afterAll} from '@jest/globals';
-import dbConnection, {disconnectFromDB} from '../../../../../db/connection';
 import {getAppsPublicKey, getPathToKeyFolder} from '../../../../../utils';
+import dbConnection, {disconnectFromDB} from '../../../../../db/connection';
 import {
   createTestUser,
+  TestUserCreationData,
   requestLoginForTestUser,
-  getLoginMutationVariables,
-  TestUserCreationData
+  getLoginMutationVariables
 } from '../../../../../utils/testHelpers';
 import {
   UserRoles,
@@ -17,10 +19,9 @@ import {
   type GeneratedRSAKeys,
   type CreateUserMutationVariables,
   type GetLoginNonceMutationPayload,
-  type CompleteLoginMutationVariables,
-  type CompleteLoginMutationPayload
+  type CompleteLoginMutationPayload,
+  type CompleteLoginMutationVariables
 } from 'passwordkeeper.types';
-import {LoginInviteModel} from '../../../../../db/Models';
 
 // store variables needed to test the login invite process
 let db: DBConnection;
@@ -56,7 +57,7 @@ beforeAll(async () => {
   const appPublicKey: string | undefined = await getAppsPublicKey();
 
   if (!appPublicKey) {
-    throw new Error('Error getting public key');
+    throw new Error(LOGIN_ERROR_MESSAGES.PUBLIC_KEY_NOT_FOUND);
   }
 
   // create a test user
@@ -102,7 +103,7 @@ describe('completeLogin', () => {
       undefined
     ).catch(error => {
       expect(error).toBeDefined();
-      expect(error.toString()).toBe('Nonce is required');
+      expect(error.toString()).toBe(LOGIN_ERROR_MESSAGES.NONCE_REQUIRED);
     });
 
     expect.assertions(2);
@@ -127,7 +128,7 @@ describe('completeLogin', () => {
       undefined
     ).catch(error => {
       expect(error).toBeDefined();
-      expect(error.toString()).toBe('Signature is required');
+      expect(error.toString()).toBe(LOGIN_ERROR_MESSAGES.SIGNATURE_REQUIRED);
     });
 
     expect.assertions(2);
@@ -152,7 +153,7 @@ describe('completeLogin', () => {
       undefined
     ).catch(error => {
       expect(error).toBeDefined();
-      expect(error.toString()).toBe('Error decrypting nonce');
+      expect(error.toString()).toBe(LOGIN_ERROR_MESSAGES.ERROR_DECRYPTING_NONCE);
     });
 
     expect.assertions(2);
@@ -169,7 +170,7 @@ describe('completeLogin', () => {
     await LoginInviteModel.deleteOne({user: testUser._id});
     await completeLogin(undefined, completeLoginVariables, undefined).catch(error => {
       expect(error).toBeDefined();
-      expect(error.toString()).toBe('Login invite not found');
+      expect(error.toString()).toBe(LOGIN_ERROR_MESSAGES.LOGIN_INVITE_NOT_FOUND);
     });
 
     expect.assertions(2);
@@ -210,6 +211,6 @@ describe('completeLogin', () => {
     expect(result).toBeDefined();
     // remove the public keys from the user object - they are removed from the user object in the mutation
     createTestUserResult.createdAuthSession.user.publicKeys = [];
-    expect(result.user).toEqual(createTestUserResult.createdAuthSession.user);
+    expect(result.user).toEqual({...createTestUserResult.createdAuthSession.user});
   });
 });

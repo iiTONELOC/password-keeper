@@ -1,3 +1,4 @@
+import {USER_ERROR_MESSAGES, PUBLIC_KEY_ERROR_MESSAGES} from '../../../errors/messages';
 import {AccountModel, AccountTypeMap, PublicKeyModel, UserModel} from '../../../../db/Models';
 import {
   type IUserDocument,
@@ -23,13 +24,13 @@ export const addPublicKey = async (props: AddPublicKeyProps): Promise<AddPublicK
       .populate({path: 'publicKeys'})
       .populate({
         path: 'account',
-        select: 'accountType publicKeys',
+        select: 'accountType publicKeys status maxPublicKeys',
         populate: {path: 'accountType'}
       })
   )?.toObject() as IUserDocument | null;
 
   if (!existingUser) {
-    throw new Error('User not found');
+    throw new Error(USER_ERROR_MESSAGES.NOT_FOUND);
   }
 
   // determine how many public keys the account has
@@ -44,7 +45,7 @@ export const addPublicKey = async (props: AddPublicKeyProps): Promise<AddPublicK
 
   // if the user has reached the max number of public keys, throw an error
   if (publicKeyCount >= maxPublicKeys) {
-    throw new Error('Max number of public keys reached');
+    throw new Error(PUBLIC_KEY_ERROR_MESSAGES.MAX_KEYS_REACHED);
   }
 
   // if this is the user's first public key, make it the default key
@@ -77,7 +78,7 @@ export const addPublicKey = async (props: AddPublicKeyProps): Promise<AddPublicK
     )
       .select('_id username email publicKeys account')
       .populate({path: 'publicKeys'})
-      .populate({path: 'account', select: 'accountType', populate: {path: 'accountType'}})
+      .populate({path: 'account', select: 'accountType status', populate: {path: 'accountType'}})
   )?.toObject() as IUserDocument;
 
   /* istanbul ignore next */
@@ -88,7 +89,7 @@ export const addPublicKey = async (props: AddPublicKeyProps): Promise<AddPublicK
     /* istanbul ignore next */
     await AccountModel.findOneAndUpdate({owner: userId}, {$pull: {publicKeys: newKey._id}});
     /* istanbul ignore next */
-    throw new Error('Error updating user');
+    throw new Error(USER_ERROR_MESSAGES.UPDATE_ERROR);
   }
 
   return {user: updated, addedKeyId: newKey._id};

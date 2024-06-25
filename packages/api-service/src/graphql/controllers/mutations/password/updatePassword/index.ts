@@ -7,8 +7,10 @@ import {
   IPasswordEncrypted,
   IAuthSessionDocument,
   IPasswordEncryptedAtRest,
-  UpdatePasswordMutationVariables
+  UpdatePasswordMutationVariables,
+  IUserPasswordDocument
 } from 'passwordkeeper.types';
+import {decryptPwdFromStorage} from '../../../helpers/decryptPwdFromStorage';
 
 export const updatePassword = async (
   _: undefined,
@@ -45,43 +47,21 @@ export const updatePassword = async (
 
   const updatePasswordData: Partial<IPasswordEncryptedAtRest> = {
     expiresAt,
-    url: encryptedURL
-      ? {
-          encryptedData: encryptedURL
-        }
-      : undefined,
-
-    name: encryptedName
-      ? {
-          encryptedData: encryptedName
-        }
-      : undefined,
-
-    username: encryptedUsername
-      ? {
-          encryptedData: encryptedUsername
-        }
-      : undefined,
-
-    password: encryptedPassword
-      ? {
-          encryptedData: encryptedPassword
-        }
-      : undefined
+    url: encryptedURL ? {encryptedData: encryptedURL} : undefined,
+    name: encryptedName ? {encryptedData: encryptedName} : undefined,
+    username: encryptedUsername ? {encryptedData: encryptedUsername} : undefined,
+    password: encryptedPassword ? {encryptedData: encryptedPassword} : undefined
   };
 
   // Update the password
-  await EncryptedUserPasswordModel.updateOne({_id: id}, {...updatePasswordData});
+  const updated = (
+    await EncryptedUserPasswordModel.findOneAndUpdate(
+      {_id: id},
+      {...updatePasswordData},
+      {new: true, runValidators: true}
+    )
+  )?.toObject() as IUserPasswordDocument;
 
-  return {
-    ...{
-      url,
-      name,
-      _id: id,
-      username,
-      password,
-      owner: userID,
-      expiresAt: updatePasswordData.expiresAt
-    }
-  };
+  const decryptedFromStorage: IPasswordEncrypted = await decryptPwdFromStorage(updated);
+  return decryptedFromStorage;
 };

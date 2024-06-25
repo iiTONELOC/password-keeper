@@ -6,8 +6,9 @@ export * from './crypto';
 export * from './models';
 export * from './queries';
 export * from './helpers';
-export * from './resolvers';
+export * from './mutations';
 export * from './api-service';
+export * from './errors/messages';
 
 export type AuthContext = {
   session: IAuthSessionDocument;

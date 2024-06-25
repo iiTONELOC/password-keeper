@@ -1,6 +1,7 @@
 import path from 'path';
 import {myPublicKeys} from '.';
 import {getPathToKeyFolder, getPublicKey} from '../../../../utils';
+import {AUTH_SESSION_ERROR_MESSAGES} from '../../../errors/messages';
 import {describe, expect, it, beforeAll, afterAll} from '@jest/globals';
 import dbConnection, {disconnectFromDB} from '../../../../db/connection';
 import {createTestUser, TestUserCreationData} from '../../../../utils/testHelpers';
@@ -77,7 +78,7 @@ describe('queryMyPublicKeys', () => {
     };
 
     await expect(myPublicKeys(undefined, undefined, authContext)).rejects.toThrow(
-      'Error: Not Authenticated'
+      AUTH_SESSION_ERROR_MESSAGES.NOT_AUTHENTICATED
     );
   });
 
@@ -93,7 +94,7 @@ describe('queryMyPublicKeys', () => {
     };
 
     await expect(myPublicKeys(undefined, undefined, authContext)).rejects.toThrow(
-      'Error: Session Expired'
+      AUTH_SESSION_ERROR_MESSAGES.SESSION_EXPIRED
     );
   });
 });

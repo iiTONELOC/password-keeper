@@ -26,14 +26,35 @@ export const addPublicKeyMutation = async (
     }
 
     return await addPublicKey({
-      publicKey: key,
-      userId: userID,
       label,
       defaultKey,
-      description
+      description,
+      publicKey: key,
+      userId: userID
     });
   } catch (error) {
+    const ErrorMessageString = String(error);
     logger.error(error);
-    throw new GraphQLError('Error adding public key');
+
+    const validErrors = [
+      'Missing required fields',
+      'Error: Not Authenticated',
+      'Error: Max number of public keys reached',
+      'ValidationError: key: Key must be a valid public key in PEM format.'
+    ];
+
+    let errorMessage = validErrors.includes(ErrorMessageString)
+      ? ErrorMessageString
+      : 'addPublicKeyMutation:: An error occurred while adding the public key';
+
+    if (
+      ErrorMessageString.includes(
+        'E11000 duplicate key error collection: pwd-keeper-test.publickeys'
+      )
+    ) {
+      errorMessage = 'Public key already exists for this user';
+    }
+
+    throw new GraphQLError(errorMessage);
   }
 };

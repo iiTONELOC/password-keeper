@@ -1,14 +1,15 @@
 import {GraphQLError} from 'graphql';
-import {createAuthSession, addPublicKey} from '../../../helpers';
+import {createAuthSession, addPublicKey, handleErrorMessages} from '../../../helpers';
+import {ACCOUNT_ERROR_MESSAGES} from '../../../../errors/messages';
 import {AccountCompletionInviteModel, AccountModel} from '../../../../../db/Models';
 import {decryptWithPrivateKey, getAppsPrivateKey, logger} from '../../../../../utils';
 import {
   type PrivateKey,
   type IUserDocument,
-  AccountStatusTypes,
   type CompleteAccountMutationPayload,
   type CompleteAccountMutationVariables,
-  type IAccountCompletionInviteDocument
+  type IAccountCompletionInviteDocument,
+  AccountStatusTypes
 } from 'passwordkeeper.types';
 
 export const completeAccount = async (
@@ -24,13 +25,13 @@ export const completeAccount = async (
   /* istanbul ignore next */
   if (!nonce) {
     /* istanbul ignore next */
-    throw new GraphQLError('Nonce is required');
+    throw new GraphQLError(ACCOUNT_ERROR_MESSAGES.NONCE_REQUIRED);
   }
 
   /* istanbul ignore next */
   if (!publicKey) {
     /* istanbul ignore next */
-    throw new GraphQLError('Public key is required');
+    throw new GraphQLError(ACCOUNT_ERROR_MESSAGES.PUBLIC_KEY_REQUIRED);
   }
 
   // decrypt the nonce with the private key
@@ -44,7 +45,7 @@ export const completeAccount = async (
   if (!privateKey) {
     logger.error('completeAccount:: mutationError - getting private key!');
     /* istanbul ignore next */
-    throw new GraphQLError('Error getting private key');
+    throw new GraphQLError(ACCOUNT_ERROR_MESSAGES.PUBLIC_KEY_RETRIEVAL_ERROR);
   }
 
   const decryptedNonce: string | undefined = await decryptWithPrivateKey(privateKey, nonce);
@@ -53,7 +54,7 @@ export const completeAccount = async (
   if (!decryptedNonce) {
     logger.error('completeAccount:: mutationError - error decrypting nonce!');
     /* istanbul ignore next */
-    throw new GraphQLError('Error decrypting nonce');
+    throw new GraphQLError(ACCOUNT_ERROR_MESSAGES.NONCE_DECRYPT_ERROR);
   }
 
   // find the invite
@@ -69,31 +70,30 @@ export const completeAccount = async (
   /* istanbul ignore next */
   if (!invite) {
     /* istanbul ignore next */
-    throw new GraphQLError('Invite not found');
+    throw new GraphQLError(ACCOUNT_ERROR_MESSAGES.INVITE_NOT_FOUND);
   }
 
   try {
-    // add the public key to the user
-    const updatedUserData = await addPublicKey({userId: invite.user._id, publicKey});
-    // update the account status to active and add the public key
+    // update the account's status to active
     await AccountModel.findOneAndUpdate(
       {owner: invite.user._id},
-      {
-        status: AccountStatusTypes.ACTIVE,
-        $addToSet: {publicKeys: updatedUserData.user.publicKeys[0]}
-      }
+      {$set: {status: AccountStatusTypes.ACTIVE}},
+      {new: true, runValidators: true}
     );
+    // add the public key to the user
+    const updatedUserData = await addPublicKey({userId: invite.user._id, publicKey});
 
     await AccountCompletionInviteModel.deleteOne({_id: invite._id});
 
     return createAuthSession({publicKey, user: updatedUserData.user as Partial<IUserDocument>});
   } catch (error) {
-    console.error(error);
     logger.error('completeAccount:: mutationError - error adding public key!');
     // delete the invite
     /* istanbul ignore next */
     await AccountCompletionInviteModel.deleteOne({_id: invite._id});
     /* istanbul ignore next */
-    throw new GraphQLError('Error completing account');
+    throw new GraphQLError(
+      handleErrorMessages(error as Error, ACCOUNT_ERROR_MESSAGES.COMPLETE_ACCOUNT_ERROR)
+    );
   }
 };

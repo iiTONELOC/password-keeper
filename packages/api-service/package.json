@@ -7,7 +7,7 @@
     "lint": "eslint",
     "clean-logs": "node ./dist/scripts/removeLogs.js",
     "ts": "node --env-file=./.env -r ts-node/register",
-    "seed": "npm run ts -- ./src/scripts/seedDatabase.ts",
+    "seed": "node --env-file=./.env ./dist/scripts/seedDatabase.js",
     "seed-dev": "npm run ts -- ./src/scripts/seedDatabase.ts",
     "clean-logs-dev": "node -r ts-node/register ./src/scripts/removeLogs.ts",
     "remove-expired-db-entries-dev": "npm run ts -- ./src/scripts/removeExpired.ts 900000",

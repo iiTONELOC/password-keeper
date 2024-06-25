@@ -33,9 +33,11 @@ const createLoginSignature = async (username: string, challenge: string): Promis
 
   const pathToKeys = getPathToKeyFolder().replace('.private', `.${username}`);
 
+  console.log({pathToKeys});
+
   const usersPrivateKey: KeyObject = (await getPrivateKey(
     path.join(pathToKeys, `${username}_private.pem`),
-    username
+    'harry'
   )) as KeyObject;
 
   if (!usersPrivateKey) {

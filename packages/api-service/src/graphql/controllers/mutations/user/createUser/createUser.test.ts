@@ -1,4 +1,5 @@
 import {createUser} from '../../index';
+import {USER_ERROR_MESSAGES} from '../../../../errors/messages';
 import {describe, expect, it, beforeAll, afterAll} from '@jest/globals';
 import dbConnection, {disconnectFromDB} from '../../../../../db/connection';
 import {
@@ -65,7 +66,7 @@ describe('createUser', () => {
       await createUser(undefined, testVariables, undefined);
       // eslint-disable-next-line
     } catch (error: any) {
-      expect(error.message).toBe('Username is required');
+      expect(error.message).toBe(USER_ERROR_MESSAGES.USERNAME_REQUIRED);
     }
   });
 
@@ -78,20 +79,7 @@ describe('createUser', () => {
       await createUser(undefined, newUserData, undefined);
       // eslint-disable-next-line
     } catch (error: any) {
-      expect(error.message).toBe('Email is required');
-    }
-  });
-
-  it('should throw an error if no username is provided', async () => {
-    const newUserData: CreateUserMutationVariables = {
-      createUserArgs: {username: '', email: 'testy@test.com'}
-    };
-
-    try {
-      await createUser(undefined, newUserData, undefined);
-      // eslint-disable-next-line
-    } catch (error: any) {
-      expect(error.message).toBe('Username is required');
+      expect(error.message).toBe(USER_ERROR_MESSAGES.EMAIL_REQUIRED);
     }
   });
 
@@ -102,7 +90,7 @@ describe('createUser', () => {
       await createUser(undefined, newUserData, undefined);
       // eslint-disable-next-line
     } catch (error: any) {
-      expect(error.message).toBe('Username is required');
+      expect(error.message).toBe(USER_ERROR_MESSAGES.USERNAME_REQUIRED);
     }
   });
 
@@ -111,7 +99,7 @@ describe('createUser', () => {
       await createUser(undefined, testUserCreationVariables, undefined);
       // eslint-disable-next-line
     } catch (error: any) {
-      expect(error.message).toBe('User already exists');
+      expect(error.message).toBe(USER_ERROR_MESSAGES.ALREADY_EXISTS);
     }
   });
 });

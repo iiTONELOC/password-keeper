@@ -30,7 +30,7 @@ export const myPasswords = async (
       );
     };
 
-    return {passwords: await decryptedPasswords()};
+    return await decryptedPasswords();
   } catch (error) {
     logger.error('Query My Passwords:: error -', error);
     throw new GraphQLError(handleErrorMessages(error as Error));

@@ -20,6 +20,4 @@ export type QueryMyPublicKeysResponse = {
   expiresAt?: Date;
 };
 
-export type QueryMyPasswordsResponse = {
-  passwords: IPasswordEncrypted[];
-};
+export type QueryMyPasswordsResponse = IPasswordEncrypted[];

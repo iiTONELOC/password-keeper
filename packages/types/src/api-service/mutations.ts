@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
-import {Types} from 'mongoose';
 import {AddPublicKeyReturns} from './helpers';
-import {IEncryptedData, IUserDocument, ValidAccountTypes} from './models';
+import {IEncryptedData, IPublicKeyDocument, IUserDocument, ValidAccountTypes} from './models';
 
 // ______________ Create User Mutation ______________
 export type CreateUserMutationVariables = {
@@ -25,9 +24,7 @@ export type UpdateUserMutationVariables = {
   };
 };
 
-export type UpdateUserMutationPayload = {
-  user: IUserDocument;
-};
+export type UpdateUserMutationPayload = IUserDocument;
 
 // ______________ Complete Account Mutation ______________
 export type CompleteAccountMutationVariables = {
@@ -38,7 +35,7 @@ export type CompleteAccountMutationVariables = {
 };
 
 export type CompleteAccountMutationPayload = {
-  _id: Types.ObjectId | string;
+  _id: string;
   nonce: string;
   user: Partial<IUserDocument>;
   expiresAt: Date;
@@ -83,7 +80,7 @@ export type CompleteLoginMutationVariables = {
 };
 
 export type CompleteLoginMutationPayload = {
-  _id: Types.ObjectId | string;
+  _id: string;
   nonce: string;
   user: Partial<IUserDocument>;
   expiresAt: Date;
@@ -123,3 +120,26 @@ export type AddPublicKeyMutationVariables = {
 };
 
 export type AddPublicKeyMutationPayload = AddPublicKeyReturns;
+
+// ______________ Update Public Key Mutation ______________
+export type UpdatePublicKeyMutationVariables = {
+  updatePublicKeyArgs: {
+    id: string;
+    key?: string;
+    label?: string;
+    description?: string;
+    expiresAt?: Date;
+    defaultKey?: boolean;
+  };
+};
+
+export type UpdatePublicKeyMutationPayload = IPublicKeyDocument;
+
+// ______________ Delete Public Key Mutation ______________
+export type DeletePublicKeyMutationVariables = {
+  deletePublicKeyArgs: {
+    id: string;
+  };
+};
+
+export type DeletePublicKeyMutationPayload = IPublicKeyDocument;

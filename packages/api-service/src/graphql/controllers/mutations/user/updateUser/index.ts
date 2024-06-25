@@ -1,9 +1,11 @@
 import {GraphQLError} from 'graphql';
 import {logger} from '../../../../../utils';
 import {UserModel} from '../../../../../db/Models';
+import {USER_ERROR_MESSAGES} from '../../../../errors/messages';
 import {enforceUserSession, handleErrorMessages} from '../../../helpers';
 import {
   AuthContext,
+  IUserDocument,
   UpdateUserMutationPayload,
   UpdateUserMutationVariables
 } from 'passwordkeeper.types';
@@ -24,23 +26,23 @@ export const updateUser = async (
   const loggerHeader = 'updateUser mutation::';
 
   try {
-    const user = await UserModel.findOneAndUpdate(
-      {_id: session.user._id},
-      {...updateUserArgs},
-      {new: true, runValidators: true}
-    );
+    const user = (
+      await UserModel.findByIdAndUpdate(
+        {_id: session.user._id},
+        {...updateUserArgs},
+        {new: true, runValidators: true}
+      ).select('_id username email')
+    )?.toObject();
 
     if (!user) {
-      throw new GraphQLError('User not found');
+      throw new GraphQLError(USER_ERROR_MESSAGES.NOT_FOUND);
     }
 
-    return {
-      user: user.toObject()
-    };
+    return {...user} as IUserDocument;
   } catch (error) {
     logger.error(
       `${loggerHeader} User: ${session.user.username} - ${session.user._id} - ERROR - ${error}`
     );
-    throw new GraphQLError(handleErrorMessages(error as Error, 'Error updating user'));
+    throw new GraphQLError(handleErrorMessages(error as Error, USER_ERROR_MESSAGES.UPDATE_ERROR));
   }
 };

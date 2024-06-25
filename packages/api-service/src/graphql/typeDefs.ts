@@ -17,8 +17,8 @@ const typeDefs = `#graphql
         username: String!
         subUsers: [User!]!
         account: Account!
-        publicKeys: [PublicKey!]!
-        passwords: [EncryptedUserPassword!]!
+        publicKeys: [PublicKey]!
+        passwords: [EncryptedUserPassword]!
     }
 
     # _____ ACCOUNT _____
@@ -48,6 +48,7 @@ const typeDefs = `#graphql
     }
 
     # _____ PASSWORD _____
+ 
     type EncryptedUserPassword {
         _id: ID!
         owner: User!
@@ -171,8 +172,7 @@ const typeDefs = `#graphql
     }
     
     input updatePasswordArgs {
-        owner: ID!
-        passwordId: ID!
+        id: ID!
         expiresAt: String
         url: encryptedInput
         name: encryptedInput
@@ -190,6 +190,19 @@ const typeDefs = `#graphql
         description: String
     }
     
+    input updatePublicKeyArgs {
+        id: ID!
+        key: String
+        label: String
+        default: Boolean
+        expiresAt: String
+        description: String
+    }
+
+    input deletePublicKeyArgs {
+        id: ID!
+    }
+    
     # >> Query and Mutation Definition Types <<
     type Query {        
         me: ME
@@ -198,26 +211,23 @@ const typeDefs = `#graphql
     }
 
     type Mutation {
-        deleteUser: User!
+        deleteUser: User!    
         updateUser(updateUserArgs:updateUserArgs!): User!
         getPassword(passwordId: ID!): EncryptedUserPassword!
-        deletePassword(passwordId: ID!): EncryptedUserPassword!
         createUser(createUserArgs:createUserArgs!): createdUserPayload!
         completeLogin(completeLoginArgs:completeLoginArgs!): AuthSession!
-        addPassword(addPasswordArgs:addPasswordArgs!): EncryptedUserPassword!
-        completeAccount(completeAccountArgs:completeAccountArgs!): AuthSession!
+        deletePublicKey(deletePublicKeyArgs:deletePublicKeyArgs!): PublicKey!
+        updatePublicKey(updatePublicKeyArgs:updatePublicKeyArgs!): PublicKey!
+        addPassword(addPasswordArgs:addPasswordArgs!): EncryptedUserPassword!        
+        completeAccount(completeAccountArgs:completeAccountArgs!): AuthSession!                
         getLoginNonce(getLoginNonceArgs:getLoginNonceArgs!): getLoginNoncePayload!
         addPublicKey(addPublicKeyArgs:addPublicKeyArgs!): addPublicKeyMutationPayload!
+        deletePassword(deletePublicKeyArgs:deletePublicKeyArgs!): EncryptedUserPassword!
         updatePassword(updatePasswordArgs:updatePasswordArgs!): UpdatedEncryptedUserPassword!
         
 
       
-        # TODO: Finish CRUD operations for users, public keys, and passwords
-        # updatePublicKey - update public key info like label, description, expiresAt
-        # changePublicKey - change the public key and reset the expiresAt date
-        # deletePublicKey - delete a public key (remove from user and the associated account)
-        #
-        # After the CRUD operations are complete, add the following:
+        # TODO: Add the following:
         #
         # addSubUser - add a sub user to the account if supported by the account type
         # removeSubUser - remove a sub user from the account

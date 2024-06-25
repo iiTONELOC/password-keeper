@@ -12,6 +12,7 @@ export default tseslint.config(
         project: ['./tsconfig.eslint.json', './tsconfig.json', './packages/*/tsconfig.json'],
         tsconfigRootDir: import.meta.dirname
       }
-    }
+    },
+    ignores: ['**/.prettierrc.js', '/packages/**/dist/']
   }
 );

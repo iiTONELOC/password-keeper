@@ -5,8 +5,11 @@
     "declaration": true,
     "esModuleInterop": true,
     "strict": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "target": "ESNext",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext"
   },
   "include": ["eslint.config.mjs", "packages/**/*"],
-  "exclude": ["node_modules", "packages/**/node_modules", "packages/**/dist"]
+  "exclude": ["node_modules", "packages/**/node_modules", "packages/**/dist", "**/.prettierrc.js"]
 }

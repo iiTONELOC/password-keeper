@@ -1,5 +1,6 @@
 import {GraphQLError} from 'graphql';
 import {logger} from '../../../../../utils';
+import {USER_ERROR_MESSAGES} from '../../../../errors/messages';
 import {enforceUserSession, handleErrorMessages} from '../../../helpers';
 import {AccountStatusTypes, AuthContext, IUserDocument, UserRoles} from 'passwordkeeper.types';
 import {
@@ -77,13 +78,15 @@ export const deleteUser = async (
     ]);
 
     if (!user) {
-      throw new GraphQLError('User not found');
+      throw new GraphQLError(USER_ERROR_MESSAGES.NOT_FOUND);
     }
     return session.user;
   } catch (error) {
     logger.error(
       `${loggerHeader} User: ${session.user.username} - ${session.user._id} - ERROR - ${error}`
     );
-    throw new GraphQLError(handleErrorMessages(error as Error, 'Error deleting user'));
+    throw new GraphQLError(
+      handleErrorMessages(error as Error, USER_ERROR_MESSAGES.DELETE_USER_ERROR)
+    );
   }
 };
