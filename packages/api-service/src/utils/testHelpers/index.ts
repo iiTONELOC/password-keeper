@@ -1,5 +1,5 @@
 /* istanbul ignore file */
-import {publicKeyRegex} from '../../db/Models';
+import {publicKeyRegex} from 'passwordkeeper.database';
 
 export * from './createTestUser';
 export * from './requestLogin';

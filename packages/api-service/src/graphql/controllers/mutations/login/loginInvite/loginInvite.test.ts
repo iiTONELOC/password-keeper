@@ -1,9 +1,9 @@
 import path from 'path';
 import {getLoginNonce} from './index';
 import {createTestUser} from '../../../../../utils/testHelpers';
+import {connectToDB, disconnectFromDB} from 'passwordkeeper.database';
 import {describe, expect, it, beforeAll, afterAll} from '@jest/globals';
 import {GET_LOGIN_NONCE_ERROR_MESSAGES} from '../../../../errors/messages';
-import dbConnection, {disconnectFromDB} from '../../../../../db/connection';
 import {
   UserRoles,
   type IUser,
@@ -49,7 +49,7 @@ const testUserCreationData: IUser = {
  * Need to create a test user and keys for the login process
  */
 beforeAll(async () => {
-  db = await dbConnection('pwd-keeper-test');
+  db = await connectToDB('pwd-keeper-test');
 
   const createUser = await createTestUser({
     user: {createUserArgs: {...testUserCreationData} as IUser} as CreateUserMutationVariables,

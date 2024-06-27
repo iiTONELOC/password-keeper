@@ -3,7 +3,12 @@ import {addPublicKeyMutation} from '.';
 import {getAuth} from '../../../../../middleware';
 import {getPathToKeyFolder} from '../../../../../utils';
 import {beforeAll, afterAll, describe, it} from '@jest/globals';
-import dbConnection, {disconnectFromDB} from '../../../../../db/connection';
+import {
+  connectToDB,
+  AccountModel,
+  AccountTypeModel,
+  disconnectFromDB
+} from 'passwordkeeper.database';
 import {
   normalizeKey,
   createTestUser,
@@ -13,16 +18,15 @@ import {
 import {
   UserRoles,
   type IUser,
+  ValidAccountTypes,
   type DBConnection,
   type IPublicKeyDocument,
   type IAuthSessionDocument,
   type CreateUserMutationVariables,
   type AddPublicKeyMutationPayload,
   type AddPublicKeyMutationVariables,
-  type CompleteAccountMutationPayload,
-  ValidAccountTypes
+  type CompleteAccountMutationPayload
 } from 'passwordkeeper.types';
-import {AccountModel, AccountTypeModel} from '../../../../../db/Models';
 
 // store variables needed to test the login invite process
 let db: DBConnection;
@@ -54,7 +58,7 @@ const testUserCreationVariables: CreateUserMutationVariables = {
  * Need to create a test user and keys for the login process
  */
 beforeAll(async () => {
-  db = await dbConnection('pwd-keeper-test');
+  db = await connectToDB('pwd-keeper-test');
 
   // create a test user
   createTestUserResult = await createTestUser({

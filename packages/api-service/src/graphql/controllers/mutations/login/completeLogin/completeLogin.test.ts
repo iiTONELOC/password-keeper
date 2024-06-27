@@ -1,10 +1,9 @@
 import path from 'path';
 import {completeLogin} from '.';
-import {LoginInviteModel} from '../../../../../db/Models';
 import {LOGIN_ERROR_MESSAGES} from '../../../../errors/messages';
 import {describe, expect, it, beforeAll, afterAll} from '@jest/globals';
 import {getAppsPublicKey, getPathToKeyFolder} from '../../../../../utils';
-import dbConnection, {disconnectFromDB} from '../../../../../db/connection';
+import {connectToDB, disconnectFromDB, LoginInviteModel} from 'passwordkeeper.database';
 import {
   createTestUser,
   TestUserCreationData,
@@ -51,7 +50,7 @@ const testUserCreationVariables: CreateUserMutationVariables = {
  * Need to create a test user and keys for the login process
  */
 beforeAll(async () => {
-  db = await dbConnection('pwd-keeper-test');
+  db = await connectToDB('pwd-keeper-test');
 
   // get the app's public key to decrypt the nonce
   const appPublicKey: string | undefined = await getAppsPublicKey();

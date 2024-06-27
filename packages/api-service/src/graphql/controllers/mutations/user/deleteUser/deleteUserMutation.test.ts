@@ -3,7 +3,17 @@ import {deleteUser} from '.';
 import {getAuth} from '../../../../../middleware';
 import {getPathToKeyFolder} from '../../../../../utils';
 import {describe, expect, it, beforeAll, afterAll} from '@jest/globals';
-import dbConnection, {disconnectFromDB} from '../../../../../db/connection';
+import {
+  UserModel,
+  connectToDB,
+  AccountModel,
+  PublicKeyModel,
+  AuthSessionModel,
+  disconnectFromDB,
+  LoginInviteModel,
+  EncryptedUserPasswordModel,
+  AccountCompletionInviteModel
+} from 'passwordkeeper.database';
 import {
   createTestUser,
   TestUserCreationData,
@@ -15,15 +25,6 @@ import {
   CreateUserMutationVariables,
   CompleteAccountMutationPayload
 } from 'passwordkeeper.types';
-import {
-  UserModel,
-  AccountModel,
-  PublicKeyModel,
-  AuthSessionModel,
-  EncryptedUserPasswordModel,
-  AccountCompletionInviteModel
-} from '../../../../../db/Models';
-import LoginInvite from '../../../../../db/Models/LoginInvite';
 
 const pathToKeys: string = path.normalize(getPathToKeyFolder()?.replace('.private', '.deleteUser'));
 
@@ -46,7 +47,7 @@ let sessionId2: string;
 let signature2: string;
 
 beforeAll(async () => {
-  db = await dbConnection('pwd-keeper-test');
+  db = await connectToDB('pwd-keeper-test');
   testUserData = await createTestUser({
     pathToKeys,
     userRSAKeyName: 'deleteUser',
@@ -126,7 +127,7 @@ describe('deleteUser', () => {
 
     const usersSubUsersPromise = UserModel.find({owner: result._id});
     const accountPromise = AccountModel.findOne({owner: result._id});
-    const usersLoginInvitesPromise = LoginInvite.find({user: result._id});
+    const usersLoginInvitesPromise = LoginInviteModel.find({user: result._id});
     const usersPublicKeysPromise = PublicKeyModel.find({owner: result._id});
     const usersAuthSessionsPromise = AuthSessionModel.find({user: result._id});
     const usersPasswordsPromise = EncryptedUserPasswordModel.find({owner: result._id});

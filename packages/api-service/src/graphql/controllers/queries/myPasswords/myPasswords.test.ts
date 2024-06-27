@@ -6,7 +6,7 @@ import {getAuth} from '../../../../middleware';
 import {getPathToKeyFolder} from '../../../../utils';
 import {encryptAES} from '../../../../utils/crypto/aes-256';
 import {describe, expect, it, beforeAll, afterAll} from '@jest/globals';
-import dbConnection, {disconnectFromDB} from '../../../../db/connection';
+import {connectToDB, disconnectFromDB} from 'passwordkeeper.database';
 import {
   createTestUser,
   TestUserCreationData,
@@ -16,10 +16,10 @@ import {
   IPassword,
   DBConnection,
   IAuthSessionDocument,
+  QueryMyPasswordsResponse,
   CreateUserMutationVariables,
   AddPasswordMutationVariables,
-  CompleteAccountMutationPayload,
-  QueryMyPasswordsResponse
+  CompleteAccountMutationPayload
 } from 'passwordkeeper.types';
 
 const pathToKeys: string = path.normalize(
@@ -34,15 +34,15 @@ const testUserCreationData: CreateUserMutationVariables = {
 };
 
 let db: DBConnection;
-let testUserData: TestUserCreationData;
-let authSession: CompleteAccountMutationPayload;
 let sessionId: string;
 let signature: string;
+let testUserData: TestUserCreationData;
+let authSession: CompleteAccountMutationPayload;
 
 const testAESKey = 'queryMyPasswordsTestAESKey';
 
 beforeAll(async () => {
-  db = await dbConnection('pwd-keeper-test');
+  db = await connectToDB('pwd-keeper-test');
   testUserData = await createTestUser({
     pathToKeys,
     userRSAKeyName: 'queryMyPasswords',

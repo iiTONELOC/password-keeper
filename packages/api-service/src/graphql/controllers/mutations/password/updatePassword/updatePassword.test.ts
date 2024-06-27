@@ -6,7 +6,7 @@ import {getAuth} from '../../../../../middleware';
 import {getPathToKeyFolder} from '../../../../../utils';
 import {encryptAES} from '../../../../../utils/crypto/aes-256';
 import {describe, expect, it, beforeAll, afterAll} from '@jest/globals';
-import dbConnection, {disconnectFromDB} from '../../../../../db/connection';
+import {connectToDB, disconnectFromDB, EncryptedUserPasswordModel} from 'passwordkeeper.database';
 import {
   createTestUser,
   TestUserCreationData,
@@ -25,7 +25,6 @@ import {
   CompleteAccountMutationPayload,
   UpdatePasswordMutationVariables
 } from 'passwordkeeper.types';
-import {EncryptedUserPasswordModel} from '../../../../../db/Models';
 
 const pathToKeys: string = path.normalize(
   getPathToKeyFolder()?.replace('.private', '.updatePassWordMutation')
@@ -48,7 +47,7 @@ let authSession: CompleteAccountMutationPayload;
 const testAESKey = 'updatePassWordMutationTestAESKey';
 
 beforeAll(async () => {
-  db = await dbConnection('pwd-keeper-test');
+  db = await connectToDB('pwd-keeper-test');
   testUserData = await createTestUser({
     pathToKeys,
     userRSAKeyName: 'updatePassWordMutation',

@@ -1,14 +1,15 @@
 import {logger} from '../utils';
-import connectToDatabase, {disconnectFromDB} from '../db/connection';
 import {DBConnection, IAccountCompletionInviteDocument} from 'passwordkeeper.types';
 import {
   UserModel,
+  connectToDB,
   AccountModel,
   PublicKeyModel,
   AuthSessionModel,
   LoginInviteModel,
+  disconnectFromDB,
   AccountCompletionInviteModel
-} from '../db/Models';
+} from 'passwordkeeper.database';
 
 const removedExpiredAccountCompletionInvites = async () => {
   const now = new Date();
@@ -69,7 +70,7 @@ const removeExpiredPublicKeys = async () => {
 // run concurrently
 export const removeExpired = async () => {
   logger.info('Removing any expired items from the database');
-  const db: DBConnection = await connectToDatabase();
+  const db: DBConnection = await connectToDB();
   await Promise.all([
     removedExpiredAccountCompletionInvites(),
     removeExpiredAuthSessions(),

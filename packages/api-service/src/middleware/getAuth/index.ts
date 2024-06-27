@@ -1,6 +1,6 @@
 import {Request} from 'express';
-import {AuthSessionModel} from '../../db/Models';
 import {decryptAES} from '../../utils/crypto/aes-256';
+import {AuthSessionModel} from 'passwordkeeper.database';
 import {findUsersPublicKey} from '../../graphql/controllers/helpers';
 import {AccountStatusTypes, IAuthSessionDocument, PrivateKey} from 'passwordkeeper.types';
 import {verifySignature, getAppsPrivateKey, decryptWithPrivateKey, logger} from '../../utils';

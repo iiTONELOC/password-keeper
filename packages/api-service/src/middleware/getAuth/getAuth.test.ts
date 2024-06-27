@@ -1,8 +1,6 @@
 import path from 'path';
 import {getAuth} from '.';
 import {getPathToKeyFolder} from '../../utils';
-import {AccountModel, AuthSessionModel} from '../../db/Models';
-import dbConnection, {disconnectFromDB} from '../../db/connection';
 import {describe, expect, it, beforeAll, afterAll} from '@jest/globals';
 import {decryptNonceWithUsersPrivateKey} from '../../../test-scripts/session-nonce';
 import {
@@ -10,6 +8,13 @@ import {
   TestUserCreationData,
   getSessionReadyForAuthMiddleware
 } from '../../utils/testHelpers';
+import {
+  connectToDB,
+  AccountModel,
+  AuthSessionModel,
+  disconnectFromDB
+} from 'passwordkeeper.database';
+
 import {
   DBConnection,
   AccountStatusTypes,
@@ -36,7 +41,7 @@ let sessionId: string;
 let signature: string;
 
 beforeAll(async () => {
-  db = await dbConnection('pwd-keeper-test');
+  db = await connectToDB('pwd-keeper-test');
   testUserData = await createTestUser({
     pathToKeys,
     userRSAKeyName: 'getAuthMiddleware',

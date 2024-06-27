@@ -1,16 +1,19 @@
 import {GraphQLError} from 'graphql';
 import {logger} from '../../../../../utils';
-import {EncryptedUserPasswordModel} from '../../../../../db/Models';
-import {encryptPwdDataForStorage, enforceUserSession} from '../../../helpers';
+import {EncryptedUserPasswordModel} from 'passwordkeeper.database';
+import {
+  enforceUserSession,
+  decryptPwdFromStorage,
+  encryptPwdDataForStorage
+} from '../../../helpers';
 import {
   AuthContext,
   IPasswordEncrypted,
   IAuthSessionDocument,
+  IUserPasswordDocument,
   IPasswordEncryptedAtRest,
-  UpdatePasswordMutationVariables,
-  IUserPasswordDocument
+  UpdatePasswordMutationVariables
 } from 'passwordkeeper.types';
-import {decryptPwdFromStorage} from '../../../helpers/decryptPwdFromStorage';
 
 export const updatePassword = async (
   _: undefined,

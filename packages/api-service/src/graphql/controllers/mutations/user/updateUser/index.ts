@@ -1,6 +1,6 @@
 import {GraphQLError} from 'graphql';
 import {logger} from '../../../../../utils';
-import {UserModel} from '../../../../../db/Models';
+import {UserModel} from 'passwordkeeper.database';
 import {USER_ERROR_MESSAGES} from '../../../../errors/messages';
 import {enforceUserSession, handleErrorMessages} from '../../../helpers';
 import {

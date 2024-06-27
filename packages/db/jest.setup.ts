@@ -1,15 +1,15 @@
+import connectToDB from './src/connection';
 import {DBConnection} from 'passwordkeeper.types';
 import {seedAccountTypes} from './src/scripts/seedDatabase';
 import {
   UserModel,
-  connectToDB,
   AccountModel,
   PublicKeyModel,
   AuthSessionModel,
   LoginInviteModel,
   EncryptedUserPasswordModel,
   AccountCompletionInviteModel
-} from 'passwordkeeper.database';
+} from './src/Models';
 
 export let db: DBConnection | null = null; // NOSONAR - we want it to me mutable
 

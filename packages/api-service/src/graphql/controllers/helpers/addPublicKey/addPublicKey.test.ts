@@ -2,8 +2,14 @@ import path from 'path';
 import {addPublicKey} from '.';
 import {getPathToKeyFolder} from '../../../../utils';
 import {beforeAll, afterAll, describe, it} from '@jest/globals';
-import dbConnection, {disconnectFromDB} from '../../../../db/connection';
-import {UserModel, AccountModel, PublicKeyModel, AccountTypeModel} from '../../../../db/Models';
+import {
+  UserModel,
+  connectToDB,
+  AccountModel,
+  PublicKeyModel,
+  disconnectFromDB,
+  AccountTypeModel
+} from 'passwordkeeper.database';
 import {
   areKeysEqual,
   normalizeKey,
@@ -48,7 +54,7 @@ const testUserCreationVariables: CreateUserMutationVariables = {
  * Need to create a test user and keys for the login process
  */
 beforeAll(async () => {
-  db = await dbConnection('pwd-keeper-test');
+  db = await connectToDB('pwd-keeper-test');
 
   // create a test user
   const createTestUserResult: TestUserCreationData = await createTestUser({

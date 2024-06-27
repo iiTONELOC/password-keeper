@@ -1,14 +1,14 @@
 import {db} from './jest.setup';
-import {disconnectFromDB} from './src/db/connection';
 import {
   UserModel,
   AccountModel,
   PublicKeyModel,
   AuthSessionModel,
   LoginInviteModel,
+  disconnectFromDB,
   EncryptedUserPasswordModel,
   AccountCompletionInviteModel
-} from './src/db/Models';
+} from 'passwordkeeper.database';
 
 const globalTeardown = async () => {
   await Promise.all([

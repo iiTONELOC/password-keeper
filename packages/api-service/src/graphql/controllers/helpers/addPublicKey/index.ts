@@ -1,5 +1,5 @@
 import {USER_ERROR_MESSAGES, PUBLIC_KEY_ERROR_MESSAGES} from '../../../errors/messages';
-import {AccountModel, AccountTypeMap, PublicKeyModel, UserModel} from '../../../../db/Models';
+import {AccountModel, AccountTypeMap, PublicKeyModel, UserModel} from 'passwordkeeper.database';
 import {
   type IUserDocument,
   ValidAccountTypes,

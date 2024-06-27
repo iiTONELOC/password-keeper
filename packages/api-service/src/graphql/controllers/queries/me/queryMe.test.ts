@@ -2,15 +2,15 @@ import {me} from '.';
 import path from 'path';
 import {getPathToKeyFolder} from '../../../../utils';
 import {AUTH_SESSION_ERROR_MESSAGES} from '../../../errors/messages';
+import {connectToDB, disconnectFromDB} from 'passwordkeeper.database';
 import {describe, expect, it, beforeAll, afterAll} from '@jest/globals';
-import dbConnection, {disconnectFromDB} from '../../../../db/connection';
 import {createTestUser, TestUserCreationData} from '../../../../utils/testHelpers';
 import {
-  DBConnection,
-  CreateUserMutationVariables,
-  CompleteAccountMutationPayload,
   AuthContext,
-  QueryMeResponse
+  DBConnection,
+  QueryMeResponse,
+  CreateUserMutationVariables,
+  CompleteAccountMutationPayload
 } from 'passwordkeeper.types';
 
 const pathToKeys: string = path.normalize(getPathToKeyFolder()?.replace('.private', '.queryMe'));
@@ -27,7 +27,7 @@ let testUserData: TestUserCreationData;
 let authSession: CompleteAccountMutationPayload;
 
 beforeAll(async () => {
-  db = await dbConnection('pwd-keeper-test');
+  db = await connectToDB('pwd-keeper-test');
   testUserData = await createTestUser({
     pathToKeys,
     userRSAKeyName: 'queryMe',

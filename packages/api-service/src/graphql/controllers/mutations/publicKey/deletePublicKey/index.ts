@@ -1,7 +1,7 @@
 import {GraphQLError} from 'graphql';
 import {logger} from '../../../../../utils';
 import {enforceUserSession} from '../../../helpers';
-import {PublicKeyModel} from '../../../../../db/Models';
+import {PublicKeyModel} from 'passwordkeeper.database';
 import {PUBLIC_KEY_ERROR_MESSAGES as ERROR_MESSAGES} from '../../../../errors/messages';
 import {
   type AuthContext,

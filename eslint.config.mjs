@@ -13,6 +13,6 @@ export default tseslint.config(
         tsconfigRootDir: import.meta.dirname
       }
     },
-    ignores: ['**/.prettierrc.js', '/packages/**/dist/']
+    ignores: ['**/.prettierrc.js', '/dist/', '/node_modules/']
   }
 );

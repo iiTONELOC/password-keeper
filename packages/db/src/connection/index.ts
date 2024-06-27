@@ -32,6 +32,8 @@ export default async function connect(dbName?: string): Promise<DBConnectionProm
   }
 }
 
+export const connectToDB = connect;
+
 /**
  * Attempts to disconnect from the database
  * @returns true if the connection to the database was successful

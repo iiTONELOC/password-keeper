@@ -1,7 +1,7 @@
 import {GraphQLError} from 'graphql';
 import {logger} from '../../../../../utils';
 import {encryptPwdDataForStorage, enforceUserSession} from '../../../helpers';
-import {UserModel, EncryptedUserPasswordModel, AccountModel} from '../../../../../db/Models';
+import {UserModel, EncryptedUserPasswordModel, AccountModel} from 'passwordkeeper.database';
 import {
   AuthContext,
   IEncryptedData,

@@ -3,7 +3,7 @@ import {updatePublicKey} from '.';
 import {getAuth} from '../../../../../middleware';
 import {getPathToKeyFolder} from '../../../../../utils';
 import {beforeAll, afterAll, describe, it} from '@jest/globals';
-import dbConnection, {disconnectFromDB} from '../../../../../db/connection';
+import {connectToDB, disconnectFromDB} from 'passwordkeeper.database';
 import {
   normalizeKey,
   createTestUser,
@@ -46,7 +46,7 @@ const testUserCreationVariables: CreateUserMutationVariables = {
 
 // create a test user, generate their RSA keys, and create an AuthSession for them
 beforeAll(async () => {
-  db = await dbConnection('pwd-keeper-test');
+  db = await connectToDB('pwd-keeper-test');
 
   // create a test user
   createTestUserResult = await createTestUser({

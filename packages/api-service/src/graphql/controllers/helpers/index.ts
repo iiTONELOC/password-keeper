@@ -3,6 +3,7 @@ export * from './addPublicKey';
 export * from './createAuthSession';
 export * from './enforceUserSession';
 export * from './findUsersPublicKey';
+export * from './decryptPwdFromStorage';
 export * from './encryptPwdDataForEncryption';
 import {GRAPHQL_ERROR_MESSAGES} from '../../errors/messages';
 

@@ -6,11 +6,12 @@ import {Mongoose} from 'mongoose';
 import bodyParser from 'body-parser';
 import express, {Express} from 'express';
 import {ApolloServer} from '@apollo/server';
-import {createApolloServer} from './apolloServer';
+import {resolvers, typeDefs} from '../graphql';
 import {ensureRsaKeysExist, ip, logger} from '../utils';
 import {expressMiddleware} from '@apollo/server/express4';
 import {getAuth, limiter, logGraphRequest} from '../middleware';
-import connectToDatabase, {disconnectFromDB} from '../db/connection';
+import {createApolloServer} from 'passwordkeeper.graphql/dist/server';
+import {connectToDB, disconnectFromDB} from 'passwordkeeper.database';
 import type {AppServer, AuthContext, IAuthSessionDocument} from 'passwordkeeper.types';
 
 export const corsOptions: cors.CorsOptions = {
@@ -22,7 +23,11 @@ export const createAppServer = (port = 3000): AppServer => {
 
   const app: Express = express();
   const httpServer: http.Server = http.createServer(app);
-  const apolloServer: ApolloServer<AuthContext> = createApolloServer(httpServer);
+  const apolloServer: ApolloServer<AuthContext> = createApolloServer(
+    httpServer,
+    resolvers,
+    typeDefs
+  );
 
   const isProduction = process.env.NODE_ENV === 'production';
 
@@ -102,7 +107,7 @@ export const createAppServer = (port = 3000): AppServer => {
       app.use(routes);
 
       // connect to database
-      database = await connectToDatabase(
+      database = await connectToDB(
         process.env.NODE_ENV === 'production' ? process.env.DB_URI : process.env.DB_NAME
       );
 

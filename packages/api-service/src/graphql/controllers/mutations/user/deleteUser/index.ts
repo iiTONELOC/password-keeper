@@ -11,7 +11,7 @@ import {
   LoginInviteModel,
   EncryptedUserPasswordModel,
   AccountCompletionInviteModel
-} from '../../../../../db/Models';
+} from 'passwordkeeper.database';
 
 export const deleteUser = async (
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

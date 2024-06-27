@@ -1,8 +1,9 @@
 import path from 'path';
 import {updateUser} from '.';
+import {getAuth} from '../../../../../middleware';
 import {getPathToKeyFolder} from '../../../../../utils';
 import {describe, expect, it, beforeAll, afterAll} from '@jest/globals';
-import dbConnection, {disconnectFromDB} from '../../../../../db/connection';
+import {UserModel, connectToDB, disconnectFromDB} from 'passwordkeeper.database';
 import {
   createTestUser,
   TestUserCreationData,
@@ -17,8 +18,6 @@ import {
   CompleteAccountMutationPayload,
   UpdateUserMutationPayload
 } from 'passwordkeeper.types';
-import {getAuth} from '../../../../../middleware';
-import {UserModel} from '../../../../../db/Models';
 
 const testUserCreationData: IUser = {
   username: 'updateUserTest',
@@ -40,7 +39,7 @@ let authSession: CompleteAccountMutationPayload;
 let validSession: IAuthSessionDocument | undefined;
 
 beforeAll(async () => {
-  db = await dbConnection('pwd-keeper-test');
+  db = await connectToDB('pwd-keeper-test');
   testUserData = await createTestUser({
     pathToKeys,
     userRSAKeyName: 'updateUserTest',

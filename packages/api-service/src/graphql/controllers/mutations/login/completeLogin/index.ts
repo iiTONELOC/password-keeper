@@ -1,5 +1,5 @@
 import {GraphQLError} from 'graphql';
-import {LoginInviteModel} from '../../../../../db/Models';
+import {LoginInviteModel} from 'passwordkeeper.database';
 import {decryptAES} from '../../../../../utils/crypto/aes-256';
 import {LOGIN_ERROR_MESSAGES} from '../../../../errors/messages';
 import {createAuthSession, findUsersPublicKey} from '../../../helpers';

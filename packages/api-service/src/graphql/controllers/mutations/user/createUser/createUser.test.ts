@@ -1,7 +1,7 @@
 import {createUser} from '../../index';
 import {USER_ERROR_MESSAGES} from '../../../../errors/messages';
+import {connectToDB, disconnectFromDB} from 'passwordkeeper.database';
 import {describe, expect, it, beforeAll, afterAll} from '@jest/globals';
-import dbConnection, {disconnectFromDB} from '../../../../../db/connection';
 import {
   UserRoles,
   type IUser,
@@ -24,7 +24,7 @@ const testUserCreationVariables: CreateUserMutationVariables = {
 let db: DBConnection;
 
 beforeAll(async () => {
-  db = await dbConnection('pwd-keeper-test');
+  db = await connectToDB('pwd-keeper-test');
 });
 
 afterAll(async () => {

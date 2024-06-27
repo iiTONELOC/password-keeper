@@ -1,23 +1,17 @@
-import {DBConnection} from 'passwordkeeper.types';
-import {seedAccountTypes} from './src/scripts/seedDatabase';
+import {db} from './jest.setup';
+import {disconnectFromDB} from './src/connection';
 import {
   UserModel,
-  connectToDB,
   AccountModel,
   PublicKeyModel,
   AuthSessionModel,
   LoginInviteModel,
   EncryptedUserPasswordModel,
   AccountCompletionInviteModel
-} from 'passwordkeeper.database';
+} from './src/Models';
 
-export let db: DBConnection | null = null; // NOSONAR - we want it to me mutable
-
-const globalSetup = async () => {
-  db = await connectToDB('pwd-keeper-test');
-
+const globalTeardown = async () => {
   await Promise.all([
-    seedAccountTypes(),
     UserModel.deleteMany(),
     AccountModel.deleteMany(),
     PublicKeyModel.deleteMany(),
@@ -26,6 +20,8 @@ const globalSetup = async () => {
     EncryptedUserPasswordModel.deleteMany(),
     AccountCompletionInviteModel.deleteMany()
   ]);
+
+  db && (await disconnectFromDB(db));
 };
 
-export default globalSetup;
+export default globalTeardown;

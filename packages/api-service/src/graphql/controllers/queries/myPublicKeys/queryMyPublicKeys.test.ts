@@ -2,8 +2,8 @@ import path from 'path';
 import {myPublicKeys} from '.';
 import {getPathToKeyFolder, getPublicKey} from '../../../../utils';
 import {AUTH_SESSION_ERROR_MESSAGES} from '../../../errors/messages';
+import {connectToDB, disconnectFromDB} from 'passwordkeeper.database';
 import {describe, expect, it, beforeAll, afterAll} from '@jest/globals';
-import dbConnection, {disconnectFromDB} from '../../../../db/connection';
 import {createTestUser, TestUserCreationData} from '../../../../utils/testHelpers';
 import {
   AuthContext,
@@ -26,7 +26,7 @@ const testUserCreationData: CreateUserMutationVariables = {
 let db: DBConnection;
 
 beforeAll(async () => {
-  db = await dbConnection('pwd-keeper-test');
+  db = await connectToDB('pwd-keeper-test');
 });
 
 afterAll(async () => {

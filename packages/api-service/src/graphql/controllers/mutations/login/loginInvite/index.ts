@@ -1,7 +1,7 @@
 import {GraphQLError} from 'graphql';
 import {findUsersPublicKey} from '../../../helpers';
 import {encryptAES} from '../../../../../utils/crypto/aes-256';
-import {UserModel, LoginInviteModel} from '../../../../../db/Models';
+import {UserModel, LoginInviteModel} from 'passwordkeeper.database';
 import {GET_LOGIN_NONCE_ERROR_MESSAGES} from '../../../../errors/messages';
 import type {
   PrivateKey,

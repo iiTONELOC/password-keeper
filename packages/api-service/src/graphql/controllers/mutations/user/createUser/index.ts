@@ -1,4 +1,5 @@
 import {GraphQLError} from 'graphql';
+import {handleErrorMessages} from '../../../helpers';
 import {USER_ERROR_MESSAGES} from '../../../../errors/messages';
 import {createNonce, getAppsPrivateKey, encryptWithPrivateKey, logger} from '../../../../../utils';
 import {
@@ -6,7 +7,7 @@ import {
   AccountModel,
   AccountTypeModel,
   AccountCompletionInviteModel
-} from '../../../../../db/Models';
+} from 'passwordkeeper.database';
 import {
   UserRoles,
   ValidAccountTypes,
@@ -17,7 +18,6 @@ import {
   type CreateUserMutationVariables,
   type IAccountCompletionInviteDocument
 } from 'passwordkeeper.types';
-import {handleErrorMessages} from '../../../helpers';
 
 export const createUser = async (
   _: undefined,

@@ -1,6 +1,6 @@
 // istanbul ignore file
 import {GraphQLError} from 'graphql';
-import {AuthSessionModel} from '../../../db/Models';
+import {AuthSessionModel} from 'passwordkeeper.database';
 import {AUTH_SESSION_ERROR_MESSAGES} from '../../errors/messages';
 import {createNonce, encryptWithPublicKey, logger} from '../../../utils';
 import {generateAESEncryptionKey, encryptAES} from '../../../utils/crypto/aes-256';

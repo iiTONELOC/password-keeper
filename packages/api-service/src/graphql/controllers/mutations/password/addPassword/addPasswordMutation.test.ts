@@ -5,33 +5,34 @@ import {getAuth} from '../../../../../middleware';
 import {getPathToKeyFolder} from '../../../../../utils';
 import {encryptAES} from '../../../../../utils/crypto/aes-256';
 import {describe, expect, it, beforeAll, afterAll} from '@jest/globals';
-import dbConnection, {disconnectFromDB} from '../../../../../db/connection';
+import {
+  UserModel,
+  connectToDB,
+  AccountModel,
+  AccountTypeMap,
+  AccountTypeModel,
+  disconnectFromDB,
+  EncryptedUserPasswordModel
+} from 'passwordkeeper.database';
 import {
   createTestUser,
-  TestUserCreationData,
-  getSessionReadyForAuthMiddleware,
   PlainTextPassword,
-  decryptPasswordToOriginalData
+  TestUserCreationData,
+  decryptPasswordToOriginalData,
+  getSessionReadyForAuthMiddleware
 } from '../../../../../utils/testHelpers';
 import {
   IPassword,
   DBConnection,
+  IAccountDocument,
   ValidAccountTypes,
   IPasswordEncrypted,
   IAuthSessionDocument,
+  IUserPasswordDocument,
   CreateUserMutationVariables,
   AddPasswordMutationVariables,
-  CompleteAccountMutationPayload,
-  IUserPasswordDocument,
-  IAccountDocument
+  CompleteAccountMutationPayload
 } from 'passwordkeeper.types';
-import {
-  UserModel,
-  AccountTypeMap,
-  AccountTypeModel,
-  EncryptedUserPasswordModel,
-  AccountModel
-} from '../../../../../db/Models';
 
 const pathToKeys: string = path.normalize(
   getPathToKeyFolder()?.replace('.private', '.addPassWordMutation')
@@ -54,7 +55,7 @@ let addedPasswordData: IPasswordEncrypted;
 const testAESKey = 'addPassWordMutationTestAESKey';
 
 beforeAll(async () => {
-  db = await dbConnection('pwd-keeper-test');
+  db = await connectToDB('pwd-keeper-test');
   testUserData = await createTestUser({
     pathToKeys,
     userRSAKeyName: 'addPassWordMutation',

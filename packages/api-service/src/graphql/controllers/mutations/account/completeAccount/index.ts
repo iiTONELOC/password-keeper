@@ -1,15 +1,15 @@
 import {GraphQLError} from 'graphql';
-import {createAuthSession, addPublicKey, handleErrorMessages} from '../../../helpers';
 import {ACCOUNT_ERROR_MESSAGES} from '../../../../errors/messages';
-import {AccountCompletionInviteModel, AccountModel} from '../../../../../db/Models';
+import {AccountCompletionInviteModel, AccountModel} from 'passwordkeeper.database';
 import {decryptWithPrivateKey, getAppsPrivateKey, logger} from '../../../../../utils';
+import {createAuthSession, addPublicKey, handleErrorMessages} from '../../../helpers';
 import {
   type PrivateKey,
   type IUserDocument,
+  AccountStatusTypes,
   type CompleteAccountMutationPayload,
   type CompleteAccountMutationVariables,
-  type IAccountCompletionInviteDocument,
-  AccountStatusTypes
+  type IAccountCompletionInviteDocument
 } from 'passwordkeeper.types';
 
 export const completeAccount = async (

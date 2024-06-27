@@ -1,9 +1,8 @@
 import path from 'path';
 import {getPathToKeyFolder} from '../../../../../utils';
 import {createTestUser} from '../../../../../utils/testHelpers';
-import {AccountCompletionInviteModel} from '../../../../../db/Models';
 import {describe, expect, it, beforeAll, afterAll} from '@jest/globals';
-import dbConnection, {disconnectFromDB} from '../../../../../db/connection';
+import {connectToDB, disconnectFromDB, AccountCompletionInviteModel} from 'passwordkeeper.database';
 import {DBConnection, CreateUserMutationVariables, AccountStatusTypes} from 'passwordkeeper.types';
 
 const pathToKeys: string = path.join(
@@ -14,7 +13,7 @@ const pathToKeys: string = path.join(
 let db: DBConnection;
 
 beforeAll(async () => {
-  db = await dbConnection('pwd-keeper-test');
+  db = await connectToDB('pwd-keeper-test');
 });
 
 afterAll(async () => {

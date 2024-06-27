@@ -1,13 +1,6 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 /* istanbul ignore file */
 import {createUser, completeAccount} from '../../graphql/controllers/mutations';
-import type {
-  GeneratedRSAKeys,
-  CreateUserMutationPayload,
-  CreateUserMutationVariables,
-  CompleteAccountMutationPayload,
-  CompleteAccountMutationVariables
-} from 'passwordkeeper.types';
 import {
   getPublicKey,
   generateRSAKeys,
@@ -15,6 +8,13 @@ import {
   encryptWithPublicKey,
   decryptWithPublicKey
 } from '..';
+import type {
+  GeneratedRSAKeys,
+  CreateUserMutationPayload,
+  CreateUserMutationVariables,
+  CompleteAccountMutationPayload,
+  CompleteAccountMutationVariables
+} from 'passwordkeeper.types';
 
 export type TestUserCreationProps = {
   user: CreateUserMutationVariables;
