@@ -58,13 +58,13 @@ const logger = createLogger({
       ...rotationOptions,
       filename: `logs/${ENVIRONMENT_LOWER}/warn/warn-%DATE%.${ENVIRONMENT_LOWER}.log`,
       level: `warn`
-    }),
-    // info logs
-    new DailyRotateFile({
-      ...rotationOptions,
-      filename: `logs/${ENVIRONMENT_LOWER}/info/info-%DATE%.${ENVIRONMENT_LOWER}.log`,
-      level: `info`
     })
+    // // info logs
+    // new DailyRotateFile({
+    //   ...rotationOptions,
+    //   filename: `logs/${ENVIRONMENT_LOWER}/info/info-%DATE%.${ENVIRONMENT_LOWER}.log`,
+    //   level: `info`
+    // })
   ]
 });
 

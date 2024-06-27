@@ -5,7 +5,7 @@ import {ensureRsaKeysExist, getPathToPublicKey, logger} from '../../../../utils'
 const publicKeyRoutes = Router();
 
 publicKeyRoutes.get('/', async (req: Request, res: Response) => {
-  const publicKeyPath = getPathToPublicKey();
+  const publicKeyPath: string = getPathToPublicKey();
 
   if (!publicKeyPath) {
     logger.error('Public key not found >> GENERATING NEW KEYS');

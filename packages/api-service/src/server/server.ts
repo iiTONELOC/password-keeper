@@ -1,26 +1,30 @@
 import cors from 'cors';
 import http from 'http';
+import helmet from 'helmet';
 import routes from '../routes';
 import {Mongoose} from 'mongoose';
 import bodyParser from 'body-parser';
-import {getAuth} from '../middleware';
 import express, {Express} from 'express';
-import createApolloServer from './apolloServer';
+import {ApolloServer} from '@apollo/server';
+import {createApolloServer} from './apolloServer';
 import {ensureRsaKeysExist, ip, logger} from '../utils';
 import {expressMiddleware} from '@apollo/server/express4';
+import {getAuth, limiter, logGraphRequest} from '../middleware';
 import connectToDatabase, {disconnectFromDB} from '../db/connection';
-import type {AppServer, IAuthSessionDocument} from 'passwordkeeper.types';
+import type {AppServer, AuthContext, IAuthSessionDocument} from 'passwordkeeper.types';
 
-const corsOptions: cors.CorsOptions = {
+export const corsOptions: cors.CorsOptions = {
   origin: []
 };
 
 export const createAppServer = (port = 3000): AppServer => {
+  let database: Mongoose | null = null;
+
   const app: Express = express();
   const httpServer: http.Server = http.createServer(app);
-  const apolloServer = createApolloServer(httpServer);
+  const apolloServer: ApolloServer<AuthContext> = createApolloServer(httpServer);
 
-  let database: Mongoose | null = null;
+  const isProduction = process.env.NODE_ENV === 'production';
 
   const gracefulShutdown = () => {
     /* istanbul ignore next */
@@ -41,7 +45,9 @@ export const createAppServer = (port = 3000): AppServer => {
 
     async start(portOverride?: number): Promise<void> {
       await ensureRsaKeysExist();
+
       port = portOverride ?? port;
+
       logger.info('🏁 Starting server');
 
       const connectedMessages: string[] = [
@@ -50,25 +56,26 @@ export const createAppServer = (port = 3000): AppServer => {
         `Server available on LAN at http://${ip}:${port}`
       ];
 
-      // if we are in development mode, allow all origins, and display the graphql playground
       /* istanbul ignore next */
-      if (process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 'test') {
+      if (isProduction) {
+        // if we are in production mode, only allow the production origins from the environment
+        corsOptions.origin = process.env.ALLOWED_ORIGINS?.split(',') ?? [];
+        // trust the first proxy
+        app.set('trust proxy', 1);
+        // use helmet
+        app.use(helmet());
+        // use rate limiter
+        app.use(limiter);
+      } else {
         corsOptions.origin = [`http://localhost:${port}`, `http://${ip}:${port}`];
         connectedMessages.push(
           `GraphQL Playground available at http://localhost:${port}/api/v1/graphql`
         );
       }
 
-      // if we are in production mode, only allow the production origins from the environment
-      /* istanbul ignore next */
-      if (process.env.NODE_ENV === 'production') {
-        corsOptions.origin = process.env.ALLOWED_ORIGINS?.split(',') ?? [];
-      }
-
-      // disable headers
+      // disable etags
       app.disable('etag');
-      app.disable('x-powered-by');
-      // use middleware
+      // use JSON parser
       app.use(express.json());
 
       // start apollo server
@@ -84,6 +91,7 @@ export const createAppServer = (port = 3000): AppServer => {
           context: async ({req}) => {
             /* istanbul ignore next */
             const session: IAuthSessionDocument = (await getAuth(req)) as IAuthSessionDocument;
+            logGraphRequest(req, session);
             /* istanbul ignore next */
             return {session};
           }

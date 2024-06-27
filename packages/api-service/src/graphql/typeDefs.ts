@@ -225,8 +225,6 @@ const typeDefs = `#graphql
         deletePassword(deletePublicKeyArgs:deletePublicKeyArgs!): EncryptedUserPassword!
         updatePassword(updatePasswordArgs:updatePasswordArgs!): UpdatedEncryptedUserPassword!
         
-
-      
         # TODO: Add the following:
         #
         # addSubUser - add a sub user to the account if supported by the account type
