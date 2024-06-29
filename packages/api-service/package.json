@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "API Microservice for Password Keeper",
   "main": "./dist/index.js",
+  "types": "./dist/types/index.d.ts",
   "scripts": {
     "lint": "eslint",
     "build": " npm run lint && rimraf ./dist && tsc",
@@ -10,7 +11,9 @@
     "ts": "node --env-file=./.env -r ts-node/register",
     "seed-dev": "npm run ts -- ./src/scripts/seedDatabase.ts",
     "seed": "node --env-file=./.env ./dist/scripts/seedDatabase.js",
-    "clean-logs-dev": "node -r ts-node/register ./src/scripts/removeLogs.ts",
+    "clean-logs-dev": "npm run ts ./src/scripts/removeLogs.ts",
+    "remove-expired-db-entries": "node --env-file=./.env ./dist/scripts/removeExpired.js 900000",
+    "remove-expired-db-entries-dev": "npm run ts ./src/scripts/removeExpired.ts 900000",
     "test": "npm run clean-logs-dev && node --env-file=./.env ./node_modules/.bin/jest --detectOpenHandles",
     "test:dev": "npm run clean-logs-dev && node --env-file=./.env ./node_modules/.bin/jest --watch --detectOpenHandles",
     "start": "npm run clean-logs && concurrently \"node --env-file=./.env  ./dist/index.js\" \"npm run remove-expired-db-entries\"",
@@ -25,13 +28,10 @@
     "cors": "^2.8.5",
     "express": "^4.19.2",
     "express-rate-limit": "^7.3.1",
-    "graphql": "^16.8.1",
     "helmet": "^7.1.0",
-    "mongoose": "^8.4.4",
     "passwordkeeper.database": "file:../db",
     "passwordkeeper.graphql": "file:../graphql",
-    "winston": "^3.13.0",
-    "winston-daily-rotate-file": "^5.0.0"
+    "passwordkeeper.logger": "file:../logger"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",

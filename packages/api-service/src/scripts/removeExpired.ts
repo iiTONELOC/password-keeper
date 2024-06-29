@@ -1,4 +1,4 @@
-import {logger} from '../utils';
+import {logger} from 'passwordkeeper.logger';
 import {DBConnection, IAccountCompletionInviteDocument} from 'passwordkeeper.types';
 import {
   UserModel,

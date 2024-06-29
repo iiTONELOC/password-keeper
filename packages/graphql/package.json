@@ -2,25 +2,34 @@
   "name": "passwordkeeper.graphql",
   "version": "1.0.0",
   "description": "GraphQL module for Password Keeper",
-  "main": "dist/server/index.js",
+  "main": "./dist/server/index.js",
+  "types": "./dist/types/server/index.d.ts",
   "scripts": {
+    "lint": "eslint",
     "clean": "rimraf dist",
-    "build": "npm run clean && rollup -c"
+    "clean-logs": "rimraf ./logs/*",
+    "build-server": "tsc -p tsconfig.server.json",
+    "build-client": "tsc -p tsconfig.client.json",
+    "ts": "node --env-file=./.env -r ts-node/register",
+    "build": "npm run clean && npm run build-server && npm run build-client",
+    "test": "npm run clean-logs && node --env-file=./.env ./node_modules/.bin/jest --detectOpenHandles",
+    "test:dev": "npm run clean-logs && node --env-file=./.env ./node_modules/.bin/jest --watch --detectOpenHandles"
   },
   "author": "Anthony Tropeano",
   "license": "ISC",
-  "devDependencies": {
+  "dependencies": {
     "@apollo/client": "^3.10.7",
     "@apollo/server": "^4.10.4",
-    "@rollup/plugin-commonjs": "^26.0.1",
-    "@rollup/plugin-node-resolve": "^15.2.3",
-    "@rollup/plugin-typescript": "^11.1.6",
     "graphql": "^16.9.0",
     "jest": "^29.7.0",
+    "passwordkeeper.database": "file:../database"
+  },
+  "devDependencies": {
+    "mongoose": "^8.4.4",
+    "passwordkeeper.crypto": "file:../crypto",
+    "passwordkeeper.logger": "file:../logger",
     "passwordkeeper.types": "file:../types",
     "rimraf": "^5.0.7",
-    "rollup": "^4.18.0",
-    "rollup-plugin-dts": "^6.1.1",
     "ts-jest": "^29.1.5",
     "ts-node": "^10.9.2",
     "typescript": "^5.5.2"

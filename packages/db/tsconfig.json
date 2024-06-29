@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES6",
-    "module": "ESNext",
+    "module": "CommonJS",
     "strict": true,
     "sourceMap": true,
     "outDir": "./dist",
@@ -11,18 +11,9 @@
     "declarationMap": true,
     "esModuleInterop": true,
     "resolveJsonModule": true,
-    "moduleResolution": "node",
-    "tsBuildInfoFile": "./dist/tsconfig.tsbuildinfo"
+    "declarationDir": "./dist/types",
+    "forceConsistentCasingInFileNames": true
   },
-
-  "extends": "../../tsconfig.json",
-  "include": ["src/**/*", "rollup.config.mjs"],
-  "exclude": [
-    "dist/**/*",
-    "test-scripts",
-    "node_modules",
-    ".rollup.cache/",
-    "src/**/*.test.ts",
-    "src/utils/testHelpers/*"
-  ]
+  "include": ["src/**/*"],
+  "exclude": ["dist/**/*", "node_modules", "src/**/*.test.ts"]
 }

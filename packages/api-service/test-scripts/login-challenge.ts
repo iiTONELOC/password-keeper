@@ -9,7 +9,7 @@ import {
   getPathToKeyFolder,
   encryptWithPrivateKey,
   encryptWithPublicKey
-} from '../src/utils';
+} from 'passwordkeeper.crypto';
 
 const encryptChallengeWithAppsPublicKey = async (challenge: string): Promise<string> => {
   const publicKeyPath = getPathToPublicKey();
@@ -32,8 +32,6 @@ const createLoginSignature = async (username: string, challenge: string): Promis
   const signatureHash: string = (await hashData(username + challenge)) as string;
 
   const pathToKeys = getPathToKeyFolder().replace('.private', `.${username}`);
-
-  console.log({pathToKeys});
 
   const usersPrivateKey: KeyObject = (await getPrivateKey(
     path.join(pathToKeys, `${username}_private.pem`),
@@ -59,10 +57,7 @@ if (require.main === module) {
     throw new Error('Cannot run this script in production');
   }
 
-  const challenge = process.argv[2];
-  const username = process.argv[3];
-
-  console.log({challenge, username});
+  const [challenge, username] = process.argv.slice(2);
 
   if (!challenge) {
     throw new Error('Challenge is required');

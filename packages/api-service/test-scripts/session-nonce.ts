@@ -10,7 +10,7 @@ import {
   encryptWithPrivateKey,
   encryptWithPublicKey,
   decryptWithPrivateKey
-} from '../src/utils';
+} from 'passwordkeeper.crypto';
 
 const encryptNonceWithAppsPublicKey = async (nonce: string): Promise<string> => {
   const publicKeyPath = getPathToPublicKey();
@@ -86,12 +86,7 @@ if (require.main === module) {
     throw new Error('Cannot run this script in production');
   }
 
-  const nonce = process.argv[2];
-  const username = process.argv[3];
-  const userId = process.argv[4];
-  const sessionId = process.argv[5];
-  // not typically used, but can be used to override the key name - useful for testing
-  const overrideKeyName = process.argv[6] || username;
+  const [nonce, username, userId, sessionId, overrideKeyName = username] = process.argv.slice(2);
 
   if (!nonce) {
     throw new Error('Nonce is required');

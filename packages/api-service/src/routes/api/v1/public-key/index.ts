@@ -1,6 +1,8 @@
 /*istanbul ignore file */
+import {logger} from 'passwordkeeper.logger';
 import {Router, Request, Response} from 'express';
-import {ensureRsaKeysExist, getPathToPublicKey, logger} from '../../../../utils';
+import {getPathToPublicKey} from 'passwordkeeper.crypto';
+import {ensureRsaKeysExist} from 'passwordkeeper.graphql';
 
 const publicKeyRoutes = Router();
 

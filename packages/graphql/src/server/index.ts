@@ -26,3 +26,9 @@ export const createApolloServer = (
     plugins: plugins(httpServer),
     introspection: process.env.NODE_ENV !== 'production'
   });
+
+export * from './utils';
+export * from './typeDefs';
+export * from './resolvers';
+export * from './middleware';
+export * from './errors/messages';

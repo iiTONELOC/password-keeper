@@ -1,8 +1,7 @@
 {
-  "extends": "../../tsconfig.json",
   "compilerOptions": {
     "target": "ESNext",
-    "module": "NodeNext",
+    "module": "CommonJS",
     "strict": true,
     "sourceMap": true,
     "outDir": "./dist",
@@ -12,10 +11,9 @@
     "declarationMap": true,
     "esModuleInterop": true,
     "resolveJsonModule": true,
-    "moduleResolution": "NodeNext",
     "declarationDir": "./dist/types",
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["src", "test-scripts/encryptPasswordData.ts"],
-  "exclude": ["node_modules", "dist", "src/**/*.test.ts", "test-scripts", "src/utils/testHelpers/*"]
+  "include": ["src", "test-scripts"],
+  "exclude": ["node_modules", "dist", "src/**/*.test.ts", "test-scripts"]
 }

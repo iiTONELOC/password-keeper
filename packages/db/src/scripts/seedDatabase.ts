@@ -1,6 +1,12 @@
-import connectToDB, {disconnectFromDB} from '../connection';
+import {logger} from 'passwordkeeper.logger';
 import {DBConnection, IAccountType} from 'passwordkeeper.types';
-import {AccountTypeModel, AccountTypeMap, DefaultAccountTypes} from '../Models';
+import {
+  connectToDB,
+  AccountTypeMap,
+  disconnectFromDB,
+  AccountTypeModel,
+  DefaultAccountTypes
+} from '..';
 
 // seed the AccountType collection with the default account types using the data from the AccountTypeMap
 export const createDefaultAccountTypes = async () => {
@@ -19,19 +25,19 @@ export const hasPopulatedAccountTypes = async () => {
 
 export const seedAccountTypes = async () => {
   try {
-    console.log('Seeding the database with default account types...');
+    logger.info('Seeding the database with default account types...');
 
     const hasPopulated = await hasPopulatedAccountTypes();
 
     if (!hasPopulated) {
       await AccountTypeModel.deleteMany({});
       await createDefaultAccountTypes();
-      console.log('Database seeded successfully!');
+      logger.info('Database seeded successfully!');
     } else {
-      console.log('Database already seeded!');
+      logger.info('Database already seeded!');
     }
   } catch (error) {
-    console.error('Error seeding the database!\n', error); //NOSONAR
+    logger.error('Error seeding the database!\n', error); //NOSONAR
   }
 };
 

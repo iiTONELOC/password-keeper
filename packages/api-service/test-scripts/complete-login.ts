@@ -1,6 +1,5 @@
 // istanbul ignore file
 import path from 'path';
-import {PrivateKey} from 'passwordkeeper.types';
 import {
   hashData,
   getPublicKey,
@@ -10,7 +9,8 @@ import {
   encryptWithPublicKey,
   encryptWithPrivateKey,
   decryptWithPrivateKey
-} from '../src/utils';
+} from 'passwordkeeper.crypto';
+import {PrivateKey} from 'passwordkeeper.types';
 
 const decryptNonceWithUsersPrivateKey = async (
   encryptedNonce: string,
@@ -83,15 +83,7 @@ if (require.main === module) {
   if (process.env.NODE_ENV === 'production') {
     throw new Error('Cannot run this script in production');
   }
-  const nonce = process.argv[2];
-  const userId = process.argv[3];
-  const username = process.argv[4];
-
-  console.log({
-    nonce,
-    userId,
-    username
-  });
+  const [nonce, userId, username] = process.argv.slice(2);
 
   if (!nonce || !userId || !username) {
     throw new Error('Nonce, userId, and username are required');

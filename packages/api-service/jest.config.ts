@@ -8,8 +8,7 @@ const jestConfig: JestConfigWithTsJest = {
   transform: {
     '^.+\\.tsx?$': 'ts-jest'
   },
-  globalSetup: '<rootDir>/jest.setup.ts',
-  globalTeardown: '<rootDir>/jest.teardown.ts'
+  globalSetup: '<rootDir>/jest.setup.ts'
 };
 
 export default jestConfig;

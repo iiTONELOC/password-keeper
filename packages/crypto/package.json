@@ -1,0 +1,25 @@
+{
+  "name": "passwordkeeper.crypto",
+  "version": "0.0.1",
+  "description": "Crypto Module for Password Keeper",
+  "main": "./dist/node/index.js",
+  "types": "./dist/types/node/index.d.ts",
+  "scripts": {
+    "clean": "rimraf dist",
+    "build-node": "tsc -p tsconfig.node.json",
+    "build-browser": "tsc -p tsconfig.browser.json",
+    "build": "npm run clean && npm run build-node && npm run build-browser",
+    "test": "node --env-file=./.env ./node_modules/.bin/jest --detectOpenHandles"
+  },
+  "author": "Anthony Tropeano",
+  "license": "ISC",
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "passwordkeeper.logger": "file:../logger",
+    "passwordkeeper.types": "file:../types",
+    "rimraf": "^5.0.7",
+    "ts-jest": "^29.1.4",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.5"
+  }
+}

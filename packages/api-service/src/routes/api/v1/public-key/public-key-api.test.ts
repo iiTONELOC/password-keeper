@@ -1,7 +1,7 @@
-import type {AppServer} from 'passwordkeeper.types';
 import {createAppServer} from '../../../../server';
 import {describe, expect, it} from '@jest/globals';
-import {getPathToPublicKey, getPublicKey} from '../../../../utils/crypto';
+import type {AppServer} from 'passwordkeeper.types';
+import {getPathToPublicKey, getPublicKey} from 'passwordkeeper.crypto';
 
 describe('Public Key API', () => {
   it('should return the public key', async () => {

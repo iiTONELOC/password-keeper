@@ -1,36 +1,54 @@
 import cors from 'cors';
 import http from 'http';
+import {ip} from '../utils';
 import helmet from 'helmet';
 import routes from '../routes';
 import {Mongoose} from 'mongoose';
 import bodyParser from 'body-parser';
 import express, {Express} from 'express';
 import {ApolloServer} from '@apollo/server';
-import {resolvers, typeDefs} from '../graphql';
-import {ensureRsaKeysExist, ip, logger} from '../utils';
+import {logger} from 'passwordkeeper.logger';
 import {expressMiddleware} from '@apollo/server/express4';
-import {getAuth, limiter, logGraphRequest} from '../middleware';
-import {createApolloServer} from 'passwordkeeper.graphql/dist/server';
+import {limiter, logGraphRequest} from '../middleware';
 import {connectToDB, disconnectFromDB} from 'passwordkeeper.database';
 import type {AppServer, AuthContext, IAuthSessionDocument} from 'passwordkeeper.types';
+import {
+  getAuth,
+  resolvers,
+  typeDefs,
+  createApolloServer,
+  ensureRsaKeysExist
+} from 'passwordkeeper.graphql';
 
+// Set up the CORS options for the express server
+// The values will be added to the corsOptions object dynamically
 export const corsOptions: cors.CorsOptions = {
   origin: []
 };
 
+/**
+ * Create an instance of the App server
+ * @param port  The port to run the server on, defaults to 3000
+ * @returns    An instance of the AppServer
+ */
 export const createAppServer = (port = 3000): AppServer => {
   let database: Mongoose | null = null;
 
+  // create an express app
   const app: Express = express();
+  // attach the express app to the http server
   const httpServer: http.Server = http.createServer(app);
+  // create an Apollo Server instance => This will be attached as middleware to the express app
   const apolloServer: ApolloServer<AuthContext> = createApolloServer(
     httpServer,
     resolvers,
     typeDefs
   );
 
+  // Determine if the server is in production mode
   const isProduction = process.env.NODE_ENV === 'production';
 
+  // Gracefully shutdown the server
   const gracefulShutdown = () => {
     /* istanbul ignore next */
     logger.info('⛔ Gracefully shutting down server');
@@ -44,17 +62,25 @@ export const createAppServer = (port = 3000): AppServer => {
   process.on('SIGINT', gracefulShutdown);
   process.on('SIGTERM', gracefulShutdown);
 
+  // Return the AppServer instance
   return {
+    // attach the express app and http server to the AppServer instance
     app,
     server: httpServer,
 
+    /**
+     * Method to start the server
+     * @param portOverride The port to run the server on, defaults to the port passed to the createAppServer function
+     */
     async start(portOverride?: number): Promise<void> {
+      // Ensure the RSA keys exist
       await ensureRsaKeysExist();
-
+      // Determine the port to run the server on
       port = portOverride ?? port;
 
       logger.info('🏁 Starting server');
 
+      // Messages to display when the server is started
       const connectedMessages: string[] = [
         `🚀 Server started on port ${port}`,
         `Server available locally at http://localhost:${port}`,
@@ -114,7 +140,6 @@ export const createAppServer = (port = 3000): AppServer => {
       // start the http server
       await new Promise<void>(resolve => {
         httpServer.listen({port}, resolve);
-
         for (const message of connectedMessages) {
           logger.info(message);
         }

@@ -1,13 +1,13 @@
 // istanbul ignore file
 import {
-  logger,
   getPublicKey,
   generateRSAKeys,
   getPathToKeyFolder,
   getPathToPublicKey,
   decryptWithPublicKey,
   encryptWithPublicKey
-} from '../src/utils';
+} from 'passwordkeeper.crypto';
+import {logger} from 'passwordkeeper.logger';
 import {GeneratedRSAKeys} from 'passwordkeeper.types';
 
 const decryptTokenAndReEncrypt = async (token: string): Promise<void> => {
@@ -76,8 +76,7 @@ if (require.main === module) {
     process.exit(1);
   }
 
-  const token = process.argv[2];
-  const username = process.argv[3];
+  const [token, username] = process.argv.slice(2);
 
   (async () => {
     await Promise.all([decryptTokenAndReEncrypt(token), generateRSAKeysForUser(username)]);

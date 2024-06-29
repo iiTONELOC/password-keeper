@@ -1,5 +1,5 @@
-import {getAppsPrivateKey, getAppsPublicKey} from '.';
 import {describe, expect, it} from '@jest/globals';
+import {getAppsPrivateKey, getAppsPublicKey} from 'passwordkeeper.graphql';
 
 describe('getAppsPrivateKey', () => {
   it("should be able to get the app's private key", async () => {
