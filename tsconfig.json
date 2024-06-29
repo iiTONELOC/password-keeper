@@ -1,15 +1,14 @@
 {
   "compilerOptions": {
-    "rootDir": "./",
-    "composite": true,
-    "declaration": true,
-    "esModuleInterop": true,
-    "strict": true,
-    "forceConsistentCasingInFileNames": true,
-    "target": "ESNext",
+    "target": "ES6",
     "module": "NodeNext",
-    "moduleResolution": "NodeNext"
+    "strict": true,
+    "sourceMap": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "moduleResolution": "NodeNext",
+    "forceConsistentCasingInFileNames": true
   },
-  "include": ["eslint.config.mjs", "packages/**/*"],
-  "exclude": ["node_modules", "packages/**/node_modules", "packages/**/dist", "**/.prettierrc.js"]
+  "include": ["packages/**/*", "eslint.config.mjs", "jest.config.ts"],
+  "exclude": ["node_modules", "dist", "packages/**/node_modules", "packages/**/dist"]
 }

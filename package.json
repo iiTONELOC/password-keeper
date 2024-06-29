@@ -5,7 +5,11 @@
   "main": "index.js",
   "private": true,
   "scripts": {
-    "test": "jest"
+    "lint": "echo '🧹 Linting...' && eslint",
+    "server": "echo '🌎 Starting Server...' && cd packages/api-service && npm run start",
+    "server-dev": "echo '🚧 Starting Server in Development Mode...' && cd packages/api-service && npm run dev",
+    "build-packages": "echo '🏗️  Building Packages...' && npm run lint && cd packages/types && npm run build && cd ../logger && npm run build && cd ../db && npm run build && cd ../crypto && npm run build && cd ../graphql && npm run build && cd ../api-service && npm run build && echo '🏢 Build Complete!\n'",
+    "test-packages": "echo '🧪 Running Tests...' && cd packages/db && npm run test && cd ../crypto && npm run test && cd ../api-service && npm run test && cd ../graphql && npm run test && echo '\n🧬 Tests Complete!\n'"
   },
   "author": "Anthony Tropeano",
   "license": "ISC",
@@ -16,8 +20,6 @@
     "@types/jest": "^29.5.12",
     "eslint": "^8.57.0",
     "rimraf": "^5.0.7",
-    "ts-jest": "^29.1.4",
-    "ts-node": "^10.9.2",
     "typescript": "^5.4.5",
     "typescript-eslint": "^7.12.0"
   }

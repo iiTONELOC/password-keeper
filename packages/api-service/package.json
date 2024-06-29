@@ -14,8 +14,8 @@
     "clean-logs-dev": "npm run ts ./src/scripts/removeLogs.ts",
     "remove-expired-db-entries": "node --env-file=./.env ./dist/scripts/removeExpired.js 900000",
     "remove-expired-db-entries-dev": "npm run ts ./src/scripts/removeExpired.ts 900000",
-    "test": "npm run clean-logs-dev && node --env-file=./.env ./node_modules/.bin/jest --detectOpenHandles",
-    "test:dev": "npm run clean-logs-dev && node --env-file=./.env ./node_modules/.bin/jest --watch --detectOpenHandles",
+    "test": "npm run clean-logs-dev && node --env-file=./.env ./node_modules/.bin/jest --forceExit",
+    "test:dev": "npm run clean-logs-dev && node --env-file=./.env ./node_modules/.bin/jest --watch",
     "start": "npm run clean-logs && concurrently \"node --env-file=./.env  ./dist/index.js\" \"npm run remove-expired-db-entries\"",
     "dev": "npm run clean-logs-dev && npm run seed-dev && concurrently \"node --watch --env-file=./.env -r ts-node/register ./src/index.ts\" \"npm run remove-expired-db-entries-dev\""
   },

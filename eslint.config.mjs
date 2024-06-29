@@ -9,10 +9,10 @@ export default tseslint.config(
   {
     languageOptions: {
       parserOptions: {
-        project: ['./tsconfig.eslint.json', './tsconfig.json', './packages/*/tsconfig.json'],
+        project: ['./tsconfig.eslint.json', 'tsconfig.json', './packages/*/tsconfig.json'],
         tsconfigRootDir: import.meta.dirname
       }
     },
-    ignores: ['**/.prettierrc.js', '/dist/', '/node_modules/']
+    ignores: ['**/.prettierrc.js', 'packages/**/dist/', '/node_modules/']
   }
 );

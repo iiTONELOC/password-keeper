@@ -93,8 +93,11 @@ if (require.main === module) {
     removeExpired().then(() => process.exit(0));
   } else {
     removeExpired().catch(err => logger.error(err));
-
-    logger.info(`Running removeExpired script on an interval of ${interval}ms`);
+    const intervalInMs = parseInt(interval);
+    const intervalInHHMMSS = new Date(intervalInMs).toISOString().substring(11, 19);
+    logger.info(
+      `Removing expired items from the database interval of ${intervalInHHMMSS} (HH:MM:SS)`
+    );
     setInterval(async () => {
       removeExpired().catch(err => logger.error(err));
     }, parseInt(interval));

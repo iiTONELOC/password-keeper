@@ -8,5 +8,11 @@
   "include": [
     // whatever paths you intend to lint
     "packages"
+  ],
+  "exclude": [
+    // exclude any paths you don't want to lint
+    "node_modules",
+    "eslint.config.mjs",
+    "packages/**/dist/"
   ]
 }

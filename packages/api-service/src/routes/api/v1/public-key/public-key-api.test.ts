@@ -22,6 +22,8 @@ describe('Public Key API', () => {
 
     expect.assertions(2);
 
-    await appServer.stop();
-  });
+    await appServer.stop().then(() => {
+      console.log('Server stopped');
+    });
+  }, 1500);
 });
