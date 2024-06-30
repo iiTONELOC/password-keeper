@@ -1,19 +1,22 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 import {AddPublicKeyReturns} from './helpers';
-import {IEncryptedData, IPublicKeyDocument, IUserDocument, ValidAccountTypes} from './models';
+import {IUserDocument, IEncryptedData, ValidAccountTypes, IPublicKeyDocument} from '../db';
 
 // ______________ Create User Mutation ______________
 export type CreateUserMutationVariables = {
   createUserArgs: {
-    username: string;
     email: string;
+    username: string;
+    publicKey: string;
     accountType?: ValidAccountTypes;
   };
 };
 
 export type CreateUserMutationPayload = {
-  user: IUserDocument;
-  inviteToken: {token: string; expiresAt: Date};
+  expiresAt: Date;
+  nonce: string;
+  _id: string;
+  user: Partial<IUserDocument>;
 };
 
 // ______________ Update User Mutation ______________
@@ -25,21 +28,6 @@ export type UpdateUserMutationVariables = {
 };
 
 export type UpdateUserMutationPayload = IUserDocument;
-
-// ______________ Complete Account Mutation ______________
-export type CompleteAccountMutationVariables = {
-  completeAccountArgs: {
-    nonce: string;
-    publicKey: string;
-  };
-};
-
-export type CompleteAccountMutationPayload = {
-  _id: string;
-  nonce: string;
-  user: Partial<IUserDocument>;
-  expiresAt: Date;
-};
 
 // ______________ Get Login Nonce Mutation ______________
 export type GetLoginNonceMutationVariables = {
@@ -80,10 +68,10 @@ export type CompleteLoginMutationVariables = {
 };
 
 export type CompleteLoginMutationPayload = {
-  _id: string;
-  nonce: string;
-  user: Partial<IUserDocument>;
   expiresAt: Date;
+  nonce: string;
+  _id: string;
+  user: Partial<IUserDocument>;
 };
 
 // ______________ Add Password Mutation ______________

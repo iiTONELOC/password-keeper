@@ -60,7 +60,6 @@ export const requestLoginForTestUser = async (
       signature: userSignature
     }
   };
-
   // get the login invite
   return await getLoginNonce(undefined, getLoginNonceArgs, undefined);
 };

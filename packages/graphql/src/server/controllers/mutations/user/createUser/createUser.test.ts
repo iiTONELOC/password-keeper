@@ -1,14 +1,18 @@
+import path from 'path';
 import {createUser} from '../../index';
 import {USER_ERROR_MESSAGES} from '../../../../errors/messages';
 import {connectToDB, disconnectFromDB} from 'passwordkeeper.database';
 import {describe, expect, it, beforeAll, afterAll} from '@jest/globals';
+import {generateRSAKeys, getPathToKeyFolder} from 'passwordkeeper.crypto';
 import {
   UserRoles,
   type IUser,
-  type IUserDocument,
   type DBConnection,
+  type IUserDocument,
+  type GeneratedRSAKeys,
   type CreateUserMutationPayload,
   type CreateUserMutationVariables
+  // IAuthSession
 } from 'passwordkeeper.types';
 
 const testUserCreationData: IUser = {
@@ -17,11 +21,22 @@ const testUserCreationData: IUser = {
   userRole: UserRoles.ACCOUNT_OWNER
 };
 
+// path to the test keys
+const pathToKeys: string = path.join(
+  getPathToKeyFolder()?.replace('.private', 'testCreateUser'),
+  'addPublicKeyToUser'
+);
+
 const testUserCreationVariables: CreateUserMutationVariables = {
-  createUserArgs: {username: testUserCreationData.username, email: testUserCreationData.email}
+  createUserArgs: {
+    publicKey: '',
+    email: testUserCreationData.email,
+    username: testUserCreationData.username
+  }
 };
 
 let db: DBConnection;
+let testUserKeys: GeneratedRSAKeys;
 
 beforeAll(async () => {
   db = await connectToDB('pwd-keeper-test');
@@ -33,27 +48,24 @@ afterAll(async () => {
 
 describe('createUser', () => {
   it('should create a user and an account completion invite', async () => {
+    testUserKeys = (await generateRSAKeys('testCreateUser', {
+      privateKeyPath: pathToKeys,
+      publicKeyPath: pathToKeys
+    })) as GeneratedRSAKeys;
+
+    testUserCreationVariables.createUserArgs.publicKey = testUserKeys.publicKey;
+
     const result: CreateUserMutationPayload = await createUser(
       undefined,
       testUserCreationVariables,
       undefined
     );
-    const user: IUserDocument = result.user;
-    const now = new Date();
-
-    const expirationDate = new Date(result.inviteToken.expiresAt);
-    const diff = expirationDate.getTime() - now.getTime();
-
+    const user: IUserDocument = result.user as IUserDocument;
     expect(user).toBeDefined();
     expect(user.username).toBe(testUserCreationData.username);
     expect(user.email).toBe(testUserCreationData.email);
-    expect(result.inviteToken).toBeDefined();
-    expect(result.inviteToken.token).toBeDefined();
-    expect(result.inviteToken.expiresAt).toBeDefined();
-    expect(diff).toBeGreaterThan(1000 * 60 * 60 * 23);
-    expect(diff).toBeLessThanOrEqual(1000 * 60 * 60 * 24);
 
-    expect.assertions(8);
+    expect.assertions(3);
   });
 
   it('should throw an error if no username is provided', async () => {
@@ -72,7 +84,7 @@ describe('createUser', () => {
 
   it('should throw an error if no email is provided', async () => {
     const newUserData: CreateUserMutationVariables = {
-      createUserArgs: {username: 'testCreateUser2', email: ''}
+      createUserArgs: {username: 'testCreateUser2', email: '', publicKey: ''}
     };
 
     try {
@@ -84,7 +96,9 @@ describe('createUser', () => {
   });
 
   it('should throw an error if both username and email are not provided', async () => {
-    const newUserData: CreateUserMutationVariables = {createUserArgs: {username: '', email: ''}};
+    const newUserData: CreateUserMutationVariables = {
+      createUserArgs: {username: '', email: '', publicKey: ''}
+    };
 
     try {
       await createUser(undefined, newUserData, undefined);

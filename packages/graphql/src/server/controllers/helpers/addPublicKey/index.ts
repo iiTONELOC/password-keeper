@@ -1,8 +1,8 @@
 import {USER_ERROR_MESSAGES, PUBLIC_KEY_ERROR_MESSAGES} from '../../../errors/messages';
 import {AccountModel, AccountTypeMap, PublicKeyModel, UserModel} from 'passwordkeeper.database';
 import {
-  type IUserDocument,
   ValidAccountTypes,
+  type IUserDocument,
   type AddPublicKeyProps,
   type AddPublicKeyReturns
 } from 'passwordkeeper.types';

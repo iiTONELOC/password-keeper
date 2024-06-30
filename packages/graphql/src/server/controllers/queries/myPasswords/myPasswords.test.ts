@@ -6,11 +6,7 @@ import {getAuth} from '../../../middleware';
 import {encryptAES, getPathToKeyFolder} from 'passwordkeeper.crypto';
 import {describe, expect, it, beforeAll, afterAll} from '@jest/globals';
 import {connectToDB, disconnectFromDB} from 'passwordkeeper.database';
-import {
-  createTestUser,
-  TestUserCreationData,
-  getSessionReadyForAuthMiddleware
-} from '../../../utils/testHelpers';
+import {createTestUser, getSessionReadyForAuthMiddleware} from '../../../utils/testHelpers';
 import {
   IPassword,
   DBConnection,
@@ -18,7 +14,7 @@ import {
   QueryMyPasswordsResponse,
   CreateUserMutationVariables,
   AddPasswordMutationVariables,
-  CompleteAccountMutationPayload
+  CreateUserMutationPayload
 } from 'passwordkeeper.types';
 
 const pathToKeys: string = path.normalize(
@@ -27,31 +23,28 @@ const pathToKeys: string = path.normalize(
 
 const testUserCreationData: CreateUserMutationVariables = {
   createUserArgs: {
-    username: 'queryMyPasswordsTestUser',
-    email: 'queryMyPasswordsTestUser@test.com'
+    username: 'queryMyPasswords',
+    email: 'queryMyPasswords@test.com',
+    publicKey: ''
   }
 };
 
 let db: DBConnection;
 let sessionId: string;
 let signature: string;
-let testUserData: TestUserCreationData;
-let authSession: CompleteAccountMutationPayload;
+let authSession: CreateUserMutationPayload;
 
 const testAESKey = 'queryMyPasswordsTestAESKey';
 
 beforeAll(async () => {
   db = await connectToDB('pwd-keeper-test');
-  testUserData = await createTestUser({
+  authSession = await createTestUser({
     pathToKeys,
     userRSAKeyName: 'queryMyPasswords',
     user: testUserCreationData
   });
 
-  // get the created auth session for the test user
-  authSession = testUserData.createdAuthSession;
   const sessionData = await getSessionReadyForAuthMiddleware({
-    testUserData,
     authSession,
     keyName: 'queryMyPasswords'
   });
@@ -63,7 +56,7 @@ beforeAll(async () => {
     name: 'test',
     username: 'test',
     password: 'test',
-    owner: testUserData.createdAuthSession.user._id as Types.ObjectId
+    owner: authSession.user._id as Types.ObjectId
   };
 
   // create 3 passwords, adding an index to each field to make them unique

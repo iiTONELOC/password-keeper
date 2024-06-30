@@ -33,15 +33,13 @@ let testUser: IUserDocument;
 let testUserKeys: GeneratedRSAKeys;
 
 // get the path to the keys for the getLoginNonce test
-const pathToKeys: string = path.join(
-  getPathToKeyFolder()?.replace('.private', 'test-keys'),
-  'getLoginNonce'
-);
+const pathToKeys: string = path.join(getPathToKeyFolder()?.replace('.private', '.getLoginNonce'));
 
 // test user data
 const testUserCreationData: IUser = {
-  username: 'testLoginNonce',
-  email: 'testloginnonce@test.com',
+  username: 'getLoginNonce',
+  email: 'getLoginnonce@test.com',
+  publicKeys: [],
   userRole: UserRoles.ACCOUNT_OWNER
 };
 
@@ -52,13 +50,19 @@ beforeAll(async () => {
   db = await connectToDB('pwd-keeper-test');
 
   const createUser = await createTestUser({
-    user: {createUserArgs: {...testUserCreationData} as IUser} as CreateUserMutationVariables,
+    user: {createUserArgs: {...testUserCreationData, publicKey: ''}} as CreateUserMutationVariables,
     pathToKeys: pathToKeys,
     userRSAKeyName: 'getLoginNonce'
   });
 
-  testUser = createUser.createdAuthSession.user as IUserDocument;
-  testUserKeys = createUser.userKeys;
+  testUser = createUser.user as IUserDocument;
+  const publicKey = createUser.user?.publicKeys?.[0]?.key as string;
+  testUserKeys = {
+    privateKey: '',
+    publicKey,
+    pathToPrivateKey: pathToKeys,
+    pathToPublicKey: pathToKeys
+  };
 });
 
 afterAll(async () => {
@@ -75,7 +79,7 @@ describe('getLoginNonce', () => {
     const signatureHash = await hashData(testUser.username + loginChallenge);
     // get the users keys
     const usersPrivateKey: PrivateKey | undefined = await getPrivateKey(
-      testUserKeys.pathToPrivateKey
+      path.join(testUserKeys.pathToPrivateKey, `${testUser.username}_private.pem`)
     );
 
     // sign the hash with the user's private key

@@ -7,7 +7,6 @@ import {describe, expect, it, beforeAll, afterAll} from '@jest/globals';
 import {connectToDB, disconnectFromDB, LoginInviteModel} from 'passwordkeeper.database';
 import {
   createTestUser,
-  TestUserCreationData,
   requestLoginForTestUser,
   getLoginMutationVariables
 } from '../../../../utils/testHelpers';
@@ -16,7 +15,7 @@ import {
   type IUser,
   type DBConnection,
   type IUserDocument,
-  type GeneratedRSAKeys,
+  type CreateUserMutationPayload,
   type CreateUserMutationVariables,
   type GetLoginNonceMutationPayload,
   type CompleteLoginMutationPayload,
@@ -25,26 +24,27 @@ import {
 
 // store variables needed to test the login invite process
 let db: DBConnection;
-let testUser: IUserDocument;
-let testUserKeys: GeneratedRSAKeys;
+
+let authSession: CreateUserMutationPayload;
 let loginInvite: GetLoginNonceMutationPayload;
 
 // path to the test keys
-const pathToKeys: string = path.join(
-  getPathToKeyFolder()?.replace('.private', 'test-keys'),
-  'completeLogin'
-);
+const pathToKeys: string = path.join(getPathToKeyFolder()?.replace('.private', '.completeLogin'));
 
 // data to create a test user
 const testUserCreationData: IUser = {
-  username: 'testCompleteLogin',
-  email: 'testCompleteLogin@test.com',
+  username: 'completeLogin',
+  email: 'completeLogin@test.com',
   userRole: UserRoles.ACCOUNT_OWNER
 };
 
 // variables to create a test user using graphql mutation
 const testUserCreationVariables: CreateUserMutationVariables = {
-  createUserArgs: {username: testUserCreationData.username, email: testUserCreationData.email}
+  createUserArgs: {
+    username: testUserCreationData.username,
+    email: testUserCreationData.email,
+    publicKey: ''
+  }
 };
 
 /**
@@ -61,19 +61,23 @@ beforeAll(async () => {
   }
 
   // create a test user
-  const createTestUserResult = await createTestUser({
+  authSession = await createTestUser({
     pathToKeys: pathToKeys,
     userRSAKeyName: 'completeLogin',
     user: {...testUserCreationVariables}
   });
 
-  testUserKeys = createTestUserResult.userKeys;
-  testUser = createTestUserResult.createdAuthSession.user as IUserDocument;
+  const publicKey: string = authSession.user?.publicKeys?.[0]?.key as string;
 
   // get the login invite
   loginInvite = await requestLoginForTestUser({
-    testUser,
-    testUserKeys,
+    testUser: authSession.user as IUserDocument,
+    testUserKeys: {
+      publicKey,
+      privateKey: '',
+      pathToPrivateKey: path.join(pathToKeys, `${authSession.user?.username}_private.pem`),
+      pathToPublicKey: path.join(pathToKeys, `${authSession.user?.username}_public.pem`)
+    },
     appPublicKey
   });
 });
@@ -84,9 +88,16 @@ afterAll(async () => {
 
 describe('completeLogin', () => {
   it('should throw an error if the nonce is missing', async () => {
+    const publicKey: string = authSession.user?.publicKeys?.[0]?.key as string;
+
     const completeLoginVariables: CompleteLoginMutationVariables = await getLoginMutationVariables({
-      testUser,
-      testUserKeys,
+      testUser: authSession.user as IUserDocument,
+      testUserKeys: {
+        publicKey,
+        privateKey: '',
+        pathToPrivateKey: path.join(pathToKeys, `${authSession.user?.username}_private.pem`),
+        pathToPublicKey: path.join(pathToKeys, `${authSession.user?.username}_public.pem`)
+      },
       loginInvite
     });
 
@@ -97,7 +108,7 @@ describe('completeLogin', () => {
         completeLoginArgs: {
           // @ts-expect-error - checking for nonce error handling
           signature: completeLoginVariables.signature,
-          userId: testUser._id.toString()
+          userId: authSession?.user?._id?.toString() as string
         }
       },
       undefined
@@ -110,9 +121,16 @@ describe('completeLogin', () => {
   });
 
   it('should throw an error if the signature is missing', async () => {
+    const publicKey: string = authSession.user?.publicKeys?.[0]?.key as string;
+
     const completeLoginVariables: CompleteLoginMutationVariables = await getLoginMutationVariables({
-      testUser,
-      testUserKeys,
+      testUser: authSession.user as IUserDocument,
+      testUserKeys: {
+        publicKey,
+        privateKey: '',
+        pathToPrivateKey: path.join(pathToKeys, `${authSession.user?.username}_private.pem`),
+        pathToPublicKey: path.join(pathToKeys, `${authSession.user?.username}_public.pem`)
+      },
       loginInvite
     });
 
@@ -122,7 +140,7 @@ describe('completeLogin', () => {
         // @ts-expect-error - checking for nonce error handling
         completeLoginArgs: {
           nonce: completeLoginVariables.completeLoginArgs.nonce,
-          userId: testUser._id.toString()
+          userId: authSession?.user?._id?.toString() as string
         }
       },
       undefined
@@ -135,9 +153,16 @@ describe('completeLogin', () => {
   });
 
   it('should throw an error if the nonce cannot be decrypted', async () => {
+    const publicKey: string = authSession.user?.publicKeys?.[0]?.key as string;
+
     const completeLoginVariables: CompleteLoginMutationVariables = await getLoginMutationVariables({
-      testUser,
-      testUserKeys,
+      testUser: authSession.user as IUserDocument,
+      testUserKeys: {
+        publicKey,
+        privateKey: '',
+        pathToPrivateKey: path.join(pathToKeys, `${authSession.user?.username}_private.pem`),
+        pathToPublicKey: path.join(pathToKeys, `${authSession.user?.username}_public.pem`)
+      },
       loginInvite
     });
 
@@ -147,7 +172,7 @@ describe('completeLogin', () => {
         completeLoginArgs: {
           nonce: 'badNonce',
           signature: completeLoginVariables.completeLoginArgs.signature,
-          userId: testUser._id.toString()
+          userId: authSession?.user?._id?.toString() as string
         }
       },
       undefined
@@ -160,14 +185,21 @@ describe('completeLogin', () => {
   });
 
   it('Should throw an error if the user invite is not found', async () => {
+    const publicKey: string = authSession.user?.publicKeys?.[0]?.key as string;
+
     const completeLoginVariables: CompleteLoginMutationVariables = await getLoginMutationVariables({
-      testUser,
-      testUserKeys,
+      testUser: authSession.user as IUserDocument,
+      testUserKeys: {
+        publicKey,
+        privateKey: '',
+        pathToPrivateKey: path.join(pathToKeys, `${authSession.user?.username}_private.pem`),
+        pathToPublicKey: path.join(pathToKeys, `${authSession.user?.username}_public.pem`)
+      },
       loginInvite
     });
 
     // delete the login invite from the DB
-    await LoginInviteModel.deleteOne({user: testUser._id});
+    await LoginInviteModel.deleteOne({user: authSession?.user?._id?.toString() as string});
     await completeLogin(undefined, completeLoginVariables, undefined).catch(error => {
       expect(error).toBeDefined();
       expect(error.toString()).toBe(LOGIN_ERROR_MESSAGES.LOGIN_INVITE_NOT_FOUND);
@@ -177,26 +209,41 @@ describe('completeLogin', () => {
   });
 
   it('Should return an AuthSession if the login is successful', async () => {
-    testUserCreationData.username += '2';
-    testUserCreationData.email += '2';
-
     const testUserCreationVariables2: CreateUserMutationVariables = {
-      createUserArgs: {username: testUserCreationData.username, email: testUserCreationData.email}
+      createUserArgs: {
+        username: testUserCreationData.username + '2',
+        email: testUserCreationData.email + '2',
+        publicKey: ''
+      }
     };
 
-    const createTestUserResult: TestUserCreationData = await createTestUser({
-      pathToKeys: pathToKeys,
+    const pathToKeys: string = path.join(
+      getPathToKeyFolder()?.replace('.private', '.completeLogin2')
+    );
+
+    const createTestUserResult: CreateUserMutationPayload = await createTestUser({
+      pathToKeys,
       userRSAKeyName: 'completeLogin2',
       user: {...testUserCreationVariables2}
     });
 
+    const testUserKeys = {
+      publicKey: createTestUserResult.user?.publicKeys?.[0]?.key as string,
+      privateKey: '',
+      pathToPrivateKey: path.join(
+        pathToKeys,
+        `${createTestUserResult?.user?.username}_private.pem`
+      ),
+      pathToPublicKey: path.join(pathToKeys, `${createTestUserResult?.user?.username}_public.pem`)
+    };
+
     const testUser2LoginVariables: CompleteLoginMutationVariables = await getLoginMutationVariables(
       {
-        testUser: createTestUserResult.createdAuthSession.user as IUserDocument,
-        testUserKeys: createTestUserResult.userKeys,
+        testUser: createTestUserResult.user as IUserDocument,
+        testUserKeys,
         loginInvite: await requestLoginForTestUser({
-          testUser: createTestUserResult.createdAuthSession.user as IUserDocument,
-          testUserKeys: createTestUserResult.userKeys,
+          testUser: createTestUserResult.user as IUserDocument,
+          testUserKeys,
           appPublicKey: (await getAppsPublicKey()) as string
         })
       }
@@ -210,7 +257,7 @@ describe('completeLogin', () => {
 
     expect(result).toBeDefined();
     // remove the public keys from the user object - they are removed from the user object in the mutation
-    createTestUserResult.createdAuthSession.user.publicKeys = [];
-    expect(result.user).toEqual({...createTestUserResult.createdAuthSession.user});
+    createTestUserResult.user.publicKeys = [];
+    expect(result.user).toEqual({...createTestUserResult.user});
   });
 });

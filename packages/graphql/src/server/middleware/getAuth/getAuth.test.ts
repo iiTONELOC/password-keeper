@@ -3,11 +3,7 @@ import {getAuth} from '.';
 import {getPathToKeyFolder} from 'passwordkeeper.crypto';
 import {describe, expect, it, beforeAll, afterAll} from '@jest/globals';
 import {decryptNonceWithUsersPrivateKey} from '../../test-scripts/session-nonce';
-import {
-  createTestUser,
-  TestUserCreationData,
-  getSessionReadyForAuthMiddleware
-} from '../../utils/testHelpers';
+import {createTestUser, getSessionReadyForAuthMiddleware} from '../../utils/testHelpers';
 import {
   connectToDB,
   AccountModel,
@@ -20,7 +16,7 @@ import {
   AccountStatusTypes,
   IAuthSessionDocument,
   CreateUserMutationVariables,
-  CompleteAccountMutationPayload
+  CreateUserMutationPayload
 } from 'passwordkeeper.types';
 
 const pathToKeys: string = path.normalize(
@@ -29,29 +25,26 @@ const pathToKeys: string = path.normalize(
 
 const testUserCreationData: CreateUserMutationVariables = {
   createUserArgs: {
-    username: 'getAuthMiddlewareTestUser',
-    email: 'getAuthMiddlewareTestUser@test.com'
+    username: 'getAuthMiddleware',
+    email: 'getAuthMiddleware@test.com',
+    publicKey: ''
   }
 };
 
 let db: DBConnection;
-let testUserData: TestUserCreationData;
-let authSession: CompleteAccountMutationPayload;
+let authSession: CreateUserMutationPayload;
 let sessionId: string;
 let signature: string;
 
 beforeAll(async () => {
   db = await connectToDB('pwd-keeper-test');
-  testUserData = await createTestUser({
+  authSession = await createTestUser({
     pathToKeys,
     userRSAKeyName: 'getAuthMiddleware',
     user: testUserCreationData
   });
 
-  // get the created auth session for the test user
-  authSession = testUserData.createdAuthSession;
   const sessionData = await getSessionReadyForAuthMiddleware({
-    testUserData,
     authSession,
     keyName: 'getAuthMiddleware'
   });
@@ -78,7 +71,7 @@ describe('getAuthMiddleware', () => {
     const validSession: IAuthSessionDocument = await getAuth(reqData);
 
     expect(validSession).toBeDefined();
-    expect(validSession.user.username).toBe(testUserData.createdAuthSession.user.username);
+    expect(validSession.user.username).toBe(authSession.user.username);
   });
 
   it('should return undefined if the session is invalid', async () => {
@@ -126,7 +119,7 @@ describe('getAuthMiddleware', () => {
   it('should return undefined if the account status is suspended', async () => {
     // update the account status to suspended
     await AccountModel.updateOne(
-      {owner: testUserData.createdAuthSession.user._id},
+      {owner: authSession.user._id},
       {status: AccountStatusTypes.SUSPENDED}
     );
 
@@ -144,7 +137,7 @@ describe('getAuthMiddleware', () => {
   it('should return undefined if the account status is delinquent', async () => {
     // update the account status to delinquent
     await AccountModel.updateOne(
-      {owner: testUserData.createdAuthSession.user._id},
+      {owner: authSession.user._id},
       {status: AccountStatusTypes.DELINQUENT}
     );
 
@@ -162,7 +155,7 @@ describe('getAuthMiddleware', () => {
   it('should return undefined if the account status is pending', async () => {
     // update the account status to pending
     await AccountModel.updateOne(
-      {owner: testUserData.createdAuthSession.user._id},
+      {owner: authSession.user._id},
       {status: AccountStatusTypes.PENDING}
     );
 

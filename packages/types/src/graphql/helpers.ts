@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 import {Types} from 'mongoose';
-import {IUserDocument} from './models';
+import {IUserDocument} from '../db';
 
 export type AddPublicKeyProps = {
   userId: Types.ObjectId;

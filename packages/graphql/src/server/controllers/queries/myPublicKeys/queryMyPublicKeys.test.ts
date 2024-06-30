@@ -1,15 +1,15 @@
 import path from 'path';
 import {myPublicKeys} from '.';
+import {getPathToKeyFolder} from 'passwordkeeper.crypto';
+import {createTestUser} from '../../../utils/testHelpers';
 import {AUTH_SESSION_ERROR_MESSAGES} from '../../../errors/messages';
 import {connectToDB, disconnectFromDB} from 'passwordkeeper.database';
-import {getPathToKeyFolder, getPublicKey} from 'passwordkeeper.crypto';
 import {describe, expect, it, beforeAll, afterAll} from '@jest/globals';
-import {createTestUser, TestUserCreationData} from '../../../utils/testHelpers';
 import {
   AuthContext,
   DBConnection,
   CreateUserMutationVariables,
-  CompleteAccountMutationPayload
+  CreateUserMutationPayload
 } from 'passwordkeeper.types';
 
 const pathToKeys: string = path.normalize(
@@ -18,8 +18,9 @@ const pathToKeys: string = path.normalize(
 
 const testUserCreationData: CreateUserMutationVariables = {
   createUserArgs: {
-    username: 'queryMyPublicKeysTestUser',
-    email: 'queryMyPublicKeysTestUser@test.com'
+    username: 'queryMyPublicKeys',
+    email: 'queryMyPublicKeys@test.com',
+    publicKey: ''
   }
 };
 
@@ -35,14 +36,12 @@ afterAll(async () => {
 
 describe('queryMyPublicKeys', () => {
   it('should be able to get the current users public keys', async () => {
-    const testUserData: TestUserCreationData = await createTestUser({
+    const authSession: CreateUserMutationPayload = await createTestUser({
       pathToKeys,
       userRSAKeyName: 'queryMyPublicKeys',
       user: testUserCreationData
     });
 
-    // get the created auth session for the test user
-    const authSession: CompleteAccountMutationPayload = testUserData.createdAuthSession;
     const authContext: AuthContext = {
       session: {
         //@ts-expect-error - mock data for testing purposes
@@ -54,7 +53,8 @@ describe('queryMyPublicKeys', () => {
     };
 
     const result = await myPublicKeys(undefined, undefined, authContext);
-    const publicKey = await getPublicKey(testUserData.userKeys.pathToPublicKey);
+
+    const publicKey = authSession?.user?.publicKeys?.[0]?.key as string;
 
     expect(result).toEqual([
       {

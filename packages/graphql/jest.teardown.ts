@@ -6,8 +6,7 @@ import {
   AuthSessionModel,
   LoginInviteModel,
   disconnectFromDB,
-  EncryptedUserPasswordModel,
-  AccountCompletionInviteModel
+  EncryptedUserPasswordModel
 } from 'passwordkeeper.database';
 
 const globalTeardown = async () => {
@@ -17,8 +16,7 @@ const globalTeardown = async () => {
     PublicKeyModel.deleteMany(),
     AuthSessionModel.deleteMany(),
     LoginInviteModel.deleteMany(),
-    EncryptedUserPasswordModel.deleteMany(),
-    AccountCompletionInviteModel.deleteMany()
+    EncryptedUserPasswordModel.deleteMany()
   ]);
 
   db && (await disconnectFromDB(db));

@@ -1,5 +1,4 @@
 /* istanbul ignore file */
-
 import {encryptAES} from 'passwordkeeper.crypto';
 import {IEncryptedData} from 'passwordkeeper.types';
 /**

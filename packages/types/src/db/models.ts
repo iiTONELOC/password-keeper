@@ -105,22 +105,6 @@ export type IUserDocument = IUserModel &
     passwords: IUserPasswordDocument[];
   };
 
-// _______ Account Completion Invites _______
-
-export type IAccountCompletionInvite = {
-  nonce: string;
-  user: string | Types.ObjectId;
-  expiresAt: Date;
-};
-
-export type IAccountCompletionInviteModel = Model<IAccountCompletionInvite>;
-export type IAccountCompletionInviteDocument = IAccountCompletionInviteModel &
-  IAccountCompletionInvite &
-  Timestamps & {
-    _id: Types.ObjectId;
-    user: IUserDocument;
-  };
-
 //  _______ Public Keys _______
 
 export type IPublicKey = {
@@ -208,9 +192,10 @@ export type IUserPasswordDocument = IUserPasswordModel &
 // _________ Auth Sessions _______
 
 export type IAuthSession = {
-  nonce: IEncryptedData;
-  user: string | Types.ObjectId;
   expiresAt: Date;
+  nonce: IEncryptedData;
+  _id: Types.ObjectId | string;
+  user: string | Types.ObjectId | Partial<IUserDocument>;
 };
 
 export type IAuthSessionModel = Model<IAuthSession>;

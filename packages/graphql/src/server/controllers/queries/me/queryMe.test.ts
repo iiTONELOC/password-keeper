@@ -1,16 +1,16 @@
 import {me} from '.';
 import path from 'path';
 import {getPathToKeyFolder} from 'passwordkeeper.crypto';
+import {createTestUser} from '../../../utils/testHelpers';
 import {AUTH_SESSION_ERROR_MESSAGES} from '../../../errors/messages';
 import {connectToDB, disconnectFromDB} from 'passwordkeeper.database';
 import {describe, expect, it, beforeAll, afterAll} from '@jest/globals';
-import {createTestUser, TestUserCreationData} from '../../../utils/testHelpers';
 import {
   AuthContext,
   DBConnection,
   QueryMeResponse,
   CreateUserMutationVariables,
-  CompleteAccountMutationPayload
+  CreateUserMutationPayload
 } from 'passwordkeeper.types';
 
 const pathToKeys: string = path.normalize(getPathToKeyFolder()?.replace('.private', '.queryMe'));
@@ -18,24 +18,21 @@ const pathToKeys: string = path.normalize(getPathToKeyFolder()?.replace('.privat
 const testUserCreationData: CreateUserMutationVariables = {
   createUserArgs: {
     username: 'queryMeTestUser',
-    email: 'queryMeTestUser@test.com'
+    email: 'queryMeTestUser@test.com',
+    publicKey: ''
   }
 };
 
 let db: DBConnection;
-let testUserData: TestUserCreationData;
-let authSession: CompleteAccountMutationPayload;
+let authSession: CreateUserMutationPayload;
 
 beforeAll(async () => {
   db = await connectToDB('pwd-keeper-test');
-  testUserData = await createTestUser({
+  authSession = await createTestUser({
     pathToKeys,
     userRSAKeyName: 'queryMe',
     user: testUserCreationData
   });
-
-  // get the created auth session for the test user
-  authSession = testUserData.createdAuthSession;
 });
 
 afterAll(async () => {

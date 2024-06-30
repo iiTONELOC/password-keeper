@@ -16,7 +16,6 @@ import {
 import {
   createTestUser,
   PlainTextPassword,
-  TestUserCreationData,
   decryptPasswordToOriginalData,
   getSessionReadyForAuthMiddleware
 } from '../../../../utils/testHelpers';
@@ -30,7 +29,7 @@ import {
   IUserPasswordDocument,
   CreateUserMutationVariables,
   AddPasswordMutationVariables,
-  CompleteAccountMutationPayload
+  CreateUserMutationPayload
 } from 'passwordkeeper.types';
 
 const pathToKeys: string = path.normalize(
@@ -39,32 +38,29 @@ const pathToKeys: string = path.normalize(
 
 const testUserCreationData: CreateUserMutationVariables = {
   createUserArgs: {
-    username: 'addPassWordMutationTestUser',
-    email: 'addPassWordMutationTestUser@test.com'
+    username: 'addPassWordMutation',
+    email: 'addPassWordMutation@test.com',
+    publicKey: ''
   }
 };
 
 let db: DBConnection;
-let testUserData: TestUserCreationData;
-let authSession: CompleteAccountMutationPayload;
 let sessionId: string;
 let signature: string;
 let addedPasswordData: IPasswordEncrypted;
+let authSession: CreateUserMutationPayload;
 
 const testAESKey = 'addPassWordMutationTestAESKey';
 
 beforeAll(async () => {
   db = await connectToDB('pwd-keeper-test');
-  testUserData = await createTestUser({
+  authSession = await createTestUser({
     pathToKeys,
     userRSAKeyName: 'addPassWordMutation',
     user: testUserCreationData
   });
 
-  // get the created auth session for the test user
-  authSession = testUserData.createdAuthSession;
   const sessionData = await getSessionReadyForAuthMiddleware({
-    testUserData,
     authSession,
     keyName: 'addPassWordMutation'
   });
@@ -83,7 +79,7 @@ describe('addPassWordMutation', () => {
       name: 'test',
       username: 'test',
       password: 'test',
-      owner: testUserData.createdAuthSession.user._id as Types.ObjectId
+      owner: authSession.user._id as Types.ObjectId
     };
 
     const [encryptedUrl, encryptedName, encryptedUsername, encryptedPassword] = await Promise.all([
@@ -119,7 +115,7 @@ describe('addPassWordMutation', () => {
     expect(result.password).toBeDefined();
     expect(result.owner).toBeDefined();
     expect(result.expiresAt).toBeUndefined();
-    expect(result.owner.toString()).toBe(testUserData.createdAuthSession.user._id?.toString());
+    expect(result.owner.toString()).toBe(authSession.user._id?.toString());
 
     // get the updated password and decrypt it ensuring it was added correctly
     let addedPassword: IUserPasswordDocument | PlainTextPassword | undefined = (
@@ -146,7 +142,7 @@ describe('addPassWordMutation', () => {
       name: undefined,
       username: 'test',
       password: 'test',
-      owner: testUserData.createdAuthSession.user._id as Types.ObjectId
+      owner: authSession.user._id as Types.ObjectId
     };
 
     const [encryptedUrl, encryptedUsername, encryptedPassword] = await Promise.all([
@@ -182,7 +178,7 @@ describe('addPassWordMutation', () => {
       // @ts-expect-error - we are testing bad input
       username: undefined,
       password: 'test',
-      owner: testUserData.createdAuthSession.user._id as Types.ObjectId
+      owner: authSession.user._id as Types.ObjectId
     };
 
     const [encryptedUrl, encryptedName, encryptedPassword] = await Promise.all([
@@ -218,7 +214,7 @@ describe('addPassWordMutation', () => {
       username: 'test',
       // @ts-expect-error - we are testing bad input
       password: undefined,
-      owner: testUserData.createdAuthSession.user._id as Types.ObjectId
+      owner: authSession.user._id as Types.ObjectId
     };
 
     const [encryptedUrl, encryptedName, encryptedUsername] = await Promise.all([
@@ -253,7 +249,7 @@ describe('addPassWordMutation', () => {
       name: 'test',
       username: 'test',
       password: 'test',
-      owner: testUserData.createdAuthSession.user._id as Types.ObjectId
+      owner: authSession.user._id as Types.ObjectId
     };
 
     const [encryptedUrl, encryptedName, encryptedUsername, encryptedPassword] = await Promise.all([
@@ -290,13 +286,12 @@ describe('addPassWordMutation', () => {
       name: 'test',
       username: 'test',
       password: 'test',
-      owner: testUserData.createdAuthSession.user._id as Types.ObjectId
+      owner: authSession.user._id as Types.ObjectId
     };
 
     let currentNumberOfPasswords: number =
-      (
-        await UserModel.findById(testUserData.createdAuthSession.user._id).select('passwords')
-      )?.toObject().passwords?.length ?? 0;
+      (await UserModel.findById(authSession.user._id).select('passwords'))?.toObject().passwords
+        ?.length ?? 0;
 
     for (let i = currentNumberOfPasswords; i < maxPasswords; i++) {
       await Promise.all([
@@ -356,7 +351,7 @@ describe('addPassWordMutation', () => {
 
   it('should add the password to the user account', async () => {
     const userAccount: IAccountDocument | null = await AccountModel.findById(
-      testUserData?.createdAuthSession?.user?.account?._id
+      authSession?.user?.account?._id
     );
 
     expect(userAccount).toBeDefined();

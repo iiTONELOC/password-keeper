@@ -13,7 +13,7 @@ import type {
   IUserDocument,
   AES_EncryptionData,
   IAuthSessionDocument,
-  CompleteAccountMutationPayload
+  CompleteLoginMutationPayload
 } from 'passwordkeeper.types';
 
 const thirtyMinutes = 30 * 60 * 1000;
@@ -22,7 +22,7 @@ const twentyFourHours = 24 * 60 * 60 * 1000;
 /**
  * Creates a new auth session for the user in the database and sets the
  * default expiration time for the session (30 minutes)
- * @returns {Promise<CompleteAccountMutationPayload>} - the new auth session
+ * @returns {Promise<CompleteLoginMutationPayload>} - the new auth session
  */
 export const createAuthSession = async ({
   publicKey,
@@ -32,7 +32,7 @@ export const createAuthSession = async ({
   publicKey: string;
   user: Partial<IUserDocument>;
   expiresAt?: Date;
-}): Promise<CompleteAccountMutationPayload> => {
+}): Promise<CompleteLoginMutationPayload> => {
   // create a new nonce - this will be used to create an AES key
   const authSessionNonce: string | undefined = createNonce(32);
 

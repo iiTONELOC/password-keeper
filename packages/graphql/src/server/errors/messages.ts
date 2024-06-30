@@ -19,6 +19,7 @@ export const USER_ERROR_MESSAGES: UserErrorMessages = {
   DELETE_USER_ERROR: 'Error deleting user',
   USERNAME_REQUIRED: 'Username is required',
   SIGNING_NONCE_ERROR: 'Error signing nonce',
+  MISSING_PUBLIC_KEY: 'A Public key is required',
   FETCH_PRIVATE_KEY_ERROR: 'Error fetching private key'
 };
 

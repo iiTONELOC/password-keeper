@@ -11,38 +11,35 @@ import {
   AuthSessionModel,
   disconnectFromDB,
   LoginInviteModel,
-  EncryptedUserPasswordModel,
-  AccountCompletionInviteModel
+  EncryptedUserPasswordModel
 } from 'passwordkeeper.database';
-import {
-  createTestUser,
-  TestUserCreationData,
-  getSessionReadyForAuthMiddleware
-} from '../../../../utils/testHelpers';
+import {createTestUser, getSessionReadyForAuthMiddleware} from '../../../../utils/testHelpers';
 import {
   DBConnection,
   IAuthSessionDocument,
   CreateUserMutationVariables,
-  CompleteAccountMutationPayload
+  CompleteLoginMutationPayload,
+  CreateUserMutationPayload
 } from 'passwordkeeper.types';
 
 const pathToKeys: string = path.normalize(getPathToKeyFolder()?.replace('.private', '.deleteUser'));
 
 const testUserCreationData: CreateUserMutationVariables = {
   createUserArgs: {
-    username: 'deleteUserTestUser',
-    email: 'deleteUserTestUser@test.com'
+    username: 'deleteUser',
+    email: 'deleteUser@test.com',
+    publicKey: ''
   }
 };
 
 let db: DBConnection;
-let testUserData: TestUserCreationData;
-let authSession: CompleteAccountMutationPayload;
+let testUserData: CreateUserMutationPayload;
+let authSession: CompleteLoginMutationPayload;
 let sessionId: string;
 let signature: string;
 
-let testUser2Data: TestUserCreationData;
-let authSession2: CompleteAccountMutationPayload;
+let testUser2Data: CreateUserMutationPayload;
+let authSession2: CompleteLoginMutationPayload;
 let sessionId2: string;
 let signature2: string;
 
@@ -60,16 +57,15 @@ beforeAll(async () => {
     userRSAKeyName: 'deleteUser1',
     user: {
       createUserArgs: {
-        username: 'deleteUserTestUser1',
-        email: 'deleteTestUser1@test.com'
+        username: 'deleteUser1',
+        email: 'deleteUser1@test.com'
       }
     }
   });
 
   // get the created auth session for the test user
-  authSession = testUserData.createdAuthSession;
+  authSession = testUserData;
   const sessionData = await getSessionReadyForAuthMiddleware({
-    testUserData,
     authSession,
     keyName: 'deleteUser'
   });
@@ -77,9 +73,8 @@ beforeAll(async () => {
   signature = sessionData.signature as string;
 
   // get the created auth session for the second test user
-  authSession2 = testUser2Data.createdAuthSession;
+  authSession2 = testUser2Data;
   const sessionData2 = await getSessionReadyForAuthMiddleware({
-    testUserData: testUser2Data,
     authSession: authSession2,
     keyName: 'deleteUser1'
   });
@@ -100,7 +95,7 @@ describe('deleteUser', () => {
     const result = await deleteUser(undefined, undefined, {session: validSession});
 
     expect(result).toBeDefined();
-    expect(result.username).toBe(testUserData.createdAuthSession.user.username);
+    expect(result.username).toBe(testUserData.user.username);
 
     expect.assertions(2);
   });
@@ -131,16 +126,12 @@ describe('deleteUser', () => {
     const usersPublicKeysPromise = PublicKeyModel.find({owner: result._id});
     const usersAuthSessionsPromise = AuthSessionModel.find({user: result._id});
     const usersPasswordsPromise = EncryptedUserPasswordModel.find({owner: result._id});
-    const usersAccountCompletionInvitesPromise = AccountCompletionInviteModel.find({
-      user: result._id
-    });
 
     const [
       usersPasswords,
       usersPublicKeys,
       usersAuthSessions,
       usersLoginInvites,
-      usersAccountCompletionInvites,
       usersSubUsers,
       account
     ] = await Promise.all([
@@ -148,19 +139,17 @@ describe('deleteUser', () => {
       usersPublicKeysPromise,
       usersAuthSessionsPromise,
       usersLoginInvitesPromise,
-      usersAccountCompletionInvitesPromise,
       usersSubUsersPromise,
       accountPromise
     ]);
 
     expect(result).toBeDefined();
-    expect(result.username).toBe(testUser2Data.createdAuthSession.user.username);
+    expect(result.username).toBe(testUser2Data.user.username);
 
     expect(usersPasswords).toHaveLength(0);
     expect(usersPublicKeys).toHaveLength(0);
     expect(usersAuthSessions).toHaveLength(0);
     expect(usersLoginInvites).toHaveLength(0);
-    expect(usersAccountCompletionInvites).toHaveLength(0);
     expect(usersSubUsers).toHaveLength(0);
 
     expect(account).toBeDefined();
@@ -172,6 +161,6 @@ describe('deleteUser', () => {
     expect(account?.deletedAt).toBeInstanceOf(Date);
     expect(account?.deletedAt?.getUTCDate()).toBeLessThanOrEqual(new Date().getUTCDate());
 
-    expect.assertions(16);
+    expect.assertions(15);
   });
 });

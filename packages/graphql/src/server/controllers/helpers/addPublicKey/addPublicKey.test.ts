@@ -10,12 +10,7 @@ import {
   disconnectFromDB,
   AccountTypeModel
 } from 'passwordkeeper.database';
-import {
-  areKeysEqual,
-  normalizeKey,
-  createTestUser,
-  TestUserCreationData
-} from '../../../utils/testHelpers';
+import {areKeysEqual, normalizeKey, createTestUser} from '../../../utils/testHelpers';
 import {
   UserRoles,
   type IUser,
@@ -23,6 +18,7 @@ import {
   type DBConnection,
   type IUserDocument,
   type IPublicKeyDocument,
+  type CreateUserMutationPayload,
   type CreateUserMutationVariables
 } from 'passwordkeeper.types';
 import {Types} from 'mongoose';
@@ -47,7 +43,11 @@ const testUserCreationData: IUser = {
 
 // variables to create a test user using graphql mutation
 const testUserCreationVariables: CreateUserMutationVariables = {
-  createUserArgs: {username: testUserCreationData.username, email: testUserCreationData.email}
+  createUserArgs: {
+    username: testUserCreationData.username,
+    email: testUserCreationData.email,
+    publicKey: ''
+  }
 };
 
 /**
@@ -57,14 +57,15 @@ beforeAll(async () => {
   db = await connectToDB('pwd-keeper-test');
 
   // create a test user
-  const createTestUserResult: TestUserCreationData = await createTestUser({
+  const createTestUserResult: CreateUserMutationPayload = await createTestUser({
     pathToKeys: pathToKeys,
     userRSAKeyName: 'addPublicKeyToUser',
     user: {...testUserCreationVariables}
   });
 
-  testUser = createTestUserResult.createdAuthSession.user as IUserDocument;
-  userPublicKey = createTestUserResult.userKeys.publicKey;
+  testUser = createTestUserResult.user as IUserDocument;
+  const key = createTestUserResult?.user?.publicKeys?.[0]?.key;
+  userPublicKey = key as string;
 });
 
 afterAll(async () => {

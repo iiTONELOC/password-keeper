@@ -7,8 +7,7 @@ import {
   PublicKeyModel,
   AuthSessionModel,
   LoginInviteModel,
-  EncryptedUserPasswordModel,
-  AccountCompletionInviteModel
+  EncryptedUserPasswordModel
 } from 'passwordkeeper.database';
 import {ensureRsaKeysExist} from './src/server';
 
@@ -25,8 +24,7 @@ const globalSetup = async () => {
     PublicKeyModel.deleteMany(),
     AuthSessionModel.deleteMany(),
     LoginInviteModel.deleteMany(),
-    EncryptedUserPasswordModel.deleteMany(),
-    AccountCompletionInviteModel.deleteMany()
+    EncryptedUserPasswordModel.deleteMany()
   ]);
 };
 

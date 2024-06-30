@@ -12,7 +12,6 @@ import {
 import {
   normalizeKey,
   createTestUser,
-  TestUserCreationData,
   getSessionReadyForAuthMiddleware
 } from '../../../../utils/testHelpers';
 import {
@@ -25,7 +24,7 @@ import {
   type CreateUserMutationVariables,
   type AddPublicKeyMutationPayload,
   type AddPublicKeyMutationVariables,
-  type CompleteAccountMutationPayload
+  CreateUserMutationPayload
 } from 'passwordkeeper.types';
 
 // store variables needed to test the login invite process
@@ -34,8 +33,7 @@ let sessionId: string;
 let signature: string;
 let userPublicKey: string;
 let validSession: IAuthSessionDocument;
-let authSession: CompleteAccountMutationPayload;
-let createTestUserResult: TestUserCreationData;
+let authSession: CreateUserMutationPayload;
 
 // path to the test keys
 const pathToKeys: string = path.normalize(
@@ -44,14 +42,18 @@ const pathToKeys: string = path.normalize(
 
 // data to create a test user
 const testUserCreationData: IUser = {
-  username: 'testAddPublicKeyMutation',
-  email: 'testAddPublicKeyMutation@test.com',
+  username: 'addPublicKeyMutation',
+  email: 'addPublicKeyMutation@test.com',
   userRole: UserRoles.ACCOUNT_OWNER
 };
 
 // variables to create a test user using graphql mutation
 const testUserCreationVariables: CreateUserMutationVariables = {
-  createUserArgs: {username: testUserCreationData.username, email: testUserCreationData.email}
+  createUserArgs: {
+    username: testUserCreationData.username,
+    email: testUserCreationData.email,
+    publicKey: ''
+  }
 };
 
 /**
@@ -61,20 +63,20 @@ beforeAll(async () => {
   db = await connectToDB('pwd-keeper-test');
 
   // create a test user
-  createTestUserResult = await createTestUser({
+  authSession = await createTestUser({
     pathToKeys: pathToKeys,
     userRSAKeyName: 'addPublicKeyMutation',
     user: {...testUserCreationVariables}
   });
 
+  const pubKey = authSession?.user?.publicKeys?.[0]?.key as string;
+
   // testUser = createTestUserResult.createdAuthSession.user as IUserDocument;
-  userPublicKey = createTestUserResult.userKeys.publicKey;
-  authSession = createTestUserResult.createdAuthSession;
+  userPublicKey = pubKey;
 
   const sessionData = await getSessionReadyForAuthMiddleware({
     authSession,
-    keyName: 'addPublicKeyMutation',
-    testUserData: createTestUserResult
+    keyName: 'addPublicKeyMutation'
   });
 
   sessionId = sessionData.sessionId as string;

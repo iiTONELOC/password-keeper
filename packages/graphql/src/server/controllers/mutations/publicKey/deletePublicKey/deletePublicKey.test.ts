@@ -6,11 +6,7 @@ import {getPathToKeyFolder} from 'passwordkeeper.crypto';
 import {beforeAll, afterAll, describe, it} from '@jest/globals';
 import {PUBLIC_KEY_ERROR_MESSAGES} from '../../../../errors/messages';
 import {connectToDB, PublicKeyModel, disconnectFromDB} from 'passwordkeeper.database';
-import {
-  createTestUser,
-  TestUserCreationData,
-  getSessionReadyForAuthMiddleware
-} from '../../../../utils/testHelpers';
+import {createTestUser, getSessionReadyForAuthMiddleware} from '../../../../utils/testHelpers';
 import {
   UserRoles,
   type IUser,
@@ -19,29 +15,32 @@ import {
   type CreateUserMutationVariables,
   type AddPublicKeyMutationPayload,
   type AddPublicKeyMutationVariables,
-  type CompleteAccountMutationPayload
+  CreateUserMutationPayload
 } from 'passwordkeeper.types';
 
 let db: DBConnection;
 let userPublicKey: string;
 let validSession: IAuthSessionDocument;
-let authSession: CompleteAccountMutationPayload;
-let createTestUserResult: TestUserCreationData;
 let addedKey: AddPublicKeyMutationPayload;
+let authSession: CreateUserMutationPayload;
 
 const pathToKeys: string = path.normalize(
   getPathToKeyFolder()?.replace('.private', '.deletePublicKeyMutation')
 );
 
 const testUserCreationData: IUser = {
-  username: 'testDeletePublicKeyMutation',
-  email: 'testDeletePublicKeyMutation@test.com',
+  username: 'deletePublicKeyMutation',
+  email: 'deletePublicKeyMutation@test.com',
   userRole: UserRoles.ACCOUNT_OWNER
 };
 
 // variables to create a test user using graphql mutation
 const testUserCreationVariables: CreateUserMutationVariables = {
-  createUserArgs: {username: testUserCreationData.username, email: testUserCreationData.email}
+  createUserArgs: {
+    username: testUserCreationData.username,
+    email: testUserCreationData.email,
+    publicKey: ''
+  }
 };
 
 // create a test user, generate their RSA keys, and create an AuthSession for them
@@ -49,21 +48,20 @@ beforeAll(async () => {
   db = await connectToDB('pwd-keeper-test');
 
   // create a test user
-  createTestUserResult = await createTestUser({
+  authSession = await createTestUser({
     pathToKeys: pathToKeys,
     user: {...testUserCreationVariables},
     userRSAKeyName: 'deletePublicKeyMutation'
   });
 
   // set variables needed to use the AuthSession
-  authSession = createTestUserResult.createdAuthSession;
-  userPublicKey = createTestUserResult.userKeys.publicKey;
+  const pubKey = authSession?.user?.publicKeys?.[0]?.key as string;
+  userPublicKey = pubKey;
 
   // generate the client-side session data the server expects for the AuthMiddleware
   const sessionData = await getSessionReadyForAuthMiddleware({
     authSession,
-    keyName: 'deletePublicKeyMutation',
-    testUserData: createTestUserResult
+    keyName: 'deletePublicKeyMutation'
   });
 
   // set the variables needed to authenticate the user

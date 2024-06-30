@@ -109,6 +109,14 @@ if (require.main === module) {
     throw new Error('Session ID is required');
   }
 
+  console.log({
+    nonce,
+    username,
+    userId,
+    sessionId,
+    overrideKeyName
+  });
+
   (async () => {
     // need the Nonce to create a signature
     const decryptedNonce = await decryptNonceWithUsersPrivateKey(nonce, overrideKeyName);

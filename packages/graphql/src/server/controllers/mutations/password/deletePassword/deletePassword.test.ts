@@ -11,11 +11,7 @@ import {
   disconnectFromDB,
   EncryptedUserPasswordModel
 } from 'passwordkeeper.database';
-import {
-  createTestUser,
-  TestUserCreationData,
-  getSessionReadyForAuthMiddleware
-} from '../../../../utils/testHelpers';
+import {createTestUser, getSessionReadyForAuthMiddleware} from '../../../../utils/testHelpers';
 import {
   IPassword,
   DBConnection,
@@ -23,7 +19,7 @@ import {
   IAuthSessionDocument,
   CreateUserMutationVariables,
   AddPasswordMutationVariables,
-  CompleteAccountMutationPayload
+  CreateUserMutationPayload
 } from 'passwordkeeper.types';
 
 const pathToKeys: string = path.normalize(
@@ -32,8 +28,9 @@ const pathToKeys: string = path.normalize(
 
 const testUserCreationData: CreateUserMutationVariables = {
   createUserArgs: {
-    username: 'deletePasswordTestUser',
-    email: 'deletePasswordTestUser@test.com'
+    username: 'deletePassword',
+    email: 'deletePassword@test.com',
+    publicKey: ''
   }
 };
 
@@ -41,23 +38,19 @@ let db: DBConnection;
 let sessionId: string;
 let signature: string;
 let testPassword: IPasswordEncrypted;
-let testUserData: TestUserCreationData;
-let authSession: CompleteAccountMutationPayload;
+let authSession: CreateUserMutationPayload;
 
 const testAESKey = 'deletePasswordTestAESKey';
 
 beforeAll(async () => {
   db = await connectToDB('pwd-keeper-test');
-  testUserData = await createTestUser({
+  authSession = await createTestUser({
     pathToKeys,
     userRSAKeyName: 'deletePassword',
     user: testUserCreationData
   });
 
-  // get the created auth session for the test user
-  authSession = testUserData.createdAuthSession;
   const sessionData = await getSessionReadyForAuthMiddleware({
-    testUserData,
     authSession,
     keyName: 'deletePassword'
   });
@@ -72,7 +65,7 @@ beforeAll(async () => {
     name: 'test',
     username: 'test',
     password: 'test',
-    owner: testUserData.createdAuthSession.user._id as Types.ObjectId
+    owner: authSession.user._id as Types.ObjectId
   };
 
   // encrypt the password data as if it came from the client
@@ -167,8 +160,9 @@ describe('updatePassWordMutation', () => {
   it('should throw an error if the user does not own the password', async () => {
     const newUserCreationData: CreateUserMutationVariables = {
       createUserArgs: {
-        username: 'deletePasswordTestUser2',
-        email: 'deletePasswordTestUser2@test.com'
+        username: 'deletePassword2',
+        email: 'deletePassword2@test.com',
+        publicKey: ''
       }
     };
 
@@ -179,8 +173,7 @@ describe('updatePassWordMutation', () => {
     });
 
     const sessionData = await getSessionReadyForAuthMiddleware({
-      testUserData: newUser,
-      authSession: newUser.createdAuthSession,
+      authSession: newUser,
       keyName: 'deletePassword2'
     });
 
@@ -195,7 +188,7 @@ describe('updatePassWordMutation', () => {
       name: 'test',
       username: 'test',
       password: 'test',
-      owner: newUser.createdAuthSession.user._id as Types.ObjectId
+      owner: newUser.user._id as Types.ObjectId
     };
 
     // encrypt the password data as if it came from the client

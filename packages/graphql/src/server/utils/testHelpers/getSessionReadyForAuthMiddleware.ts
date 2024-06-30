@@ -1,12 +1,10 @@
 /* istanbul ignore file */
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 import {exec} from 'child_process';
-import {TestUserCreationData} from '.';
-import {CompleteAccountMutationPayload} from 'passwordkeeper.types';
+import {CompleteLoginMutationPayload} from 'passwordkeeper.types';
 
 export type SessionReadyProps = {
-  testUserData: TestUserCreationData;
-  authSession: CompleteAccountMutationPayload;
+  authSession: CompleteLoginMutationPayload;
   keyName: string;
 };
 
@@ -18,11 +16,9 @@ export const getSessionReadyForAuthMiddleware = async (
   // This script can only be run in test and development environments
   const command = `npm run ts ./src/server/test-scripts/session-nonce.ts ${
     props.authSession.nonce
-  } ${
-    props.testUserData.createdAuthSession.user.username
-  } ${props.testUserData.createdAuthSession.user._id?.toString()} ${props.authSession._id} ${
-    props.keyName
-  }`;
+  } ${props.authSession.user.username} ${props.authSession.user._id?.toString()} ${
+    props.authSession._id
+  } ${props.keyName}`;
   // prettier-ignore
   const result = new Promise((resolve, reject) => {
     exec(command, (error, stdout) => {

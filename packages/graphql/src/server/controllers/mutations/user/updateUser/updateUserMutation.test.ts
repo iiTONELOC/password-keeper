@@ -4,19 +4,15 @@ import {getAuth} from '../../../../middleware';
 import {getPathToKeyFolder} from 'passwordkeeper.crypto';
 import {describe, expect, it, beforeAll, afterAll} from '@jest/globals';
 import {UserModel, connectToDB, disconnectFromDB} from 'passwordkeeper.database';
-import {
-  createTestUser,
-  TestUserCreationData,
-  getSessionReadyForAuthMiddleware
-} from '../../../../utils/testHelpers';
+import {createTestUser, getSessionReadyForAuthMiddleware} from '../../../../utils/testHelpers';
 import {
   IUser,
   UserRoles,
   DBConnection,
   IAuthSessionDocument,
+  UpdateUserMutationPayload,
   CreateUserMutationVariables,
-  CompleteAccountMutationPayload,
-  UpdateUserMutationPayload
+  CreateUserMutationPayload
 } from 'passwordkeeper.types';
 
 const testUserCreationData: IUser = {
@@ -30,26 +26,26 @@ const pathToKeys: string = path.normalize(
 );
 
 const testUserCreationVariables: CreateUserMutationVariables = {
-  createUserArgs: {username: testUserCreationData.username, email: testUserCreationData.email}
+  createUserArgs: {
+    username: testUserCreationData.username,
+    email: testUserCreationData.email,
+    publicKey: ''
+  }
 };
 
 let db: DBConnection;
-let testUserData: TestUserCreationData;
-let authSession: CompleteAccountMutationPayload;
+let authSession: CreateUserMutationPayload;
 let validSession: IAuthSessionDocument | undefined;
 
 beforeAll(async () => {
   db = await connectToDB('pwd-keeper-test');
-  testUserData = await createTestUser({
+  authSession = await createTestUser({
     pathToKeys,
     userRSAKeyName: 'updateUserTest',
     user: testUserCreationVariables
   });
 
-  // get the created auth session for the test user
-  authSession = testUserData.createdAuthSession;
   const sessionData = await getSessionReadyForAuthMiddleware({
-    testUserData,
     authSession,
     keyName: 'updateUserTest'
   });

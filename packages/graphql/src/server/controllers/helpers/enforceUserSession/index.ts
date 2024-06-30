@@ -25,7 +25,7 @@ export const enforceUserSession = (context: AuthContext) => {
     throw new Error(AUTH_SESSION_ERROR_MESSAGES.SESSION_EXPIRED);
   }
 
-  if (!session || !session?.user || Object.keys(session?.user).length === 0) {
+  if (!session?.user || Object.keys(session?.user).length === 0) {
     throw new Error(AUTH_SESSION_ERROR_MESSAGES.NOT_AUTHENTICATED);
   }
 

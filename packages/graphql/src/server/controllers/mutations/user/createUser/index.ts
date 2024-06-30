@@ -1,25 +1,19 @@
 import {GraphQLError} from 'graphql';
 import {logger} from 'passwordkeeper.logger';
-import {getAppsPrivateKey} from '../../../../utils';
-import {handleErrorMessages} from '../../../helpers';
 import {USER_ERROR_MESSAGES} from '../../../../errors/messages';
-import {createNonce, encryptWithPrivateKey} from 'passwordkeeper.crypto';
-import {
-  UserModel,
-  AccountModel,
-  AccountTypeModel,
-  AccountCompletionInviteModel
-} from 'passwordkeeper.database';
+import {UserModel, AccountModel, AccountTypeModel} from 'passwordkeeper.database';
+import {handleErrorMessages, addPublicKey, createAuthSession} from '../../../helpers';
 import {
   UserRoles,
   ValidAccountTypes,
+  AccountStatusTypes,
   type IUserDocument,
   type IAccountDocument,
   type IAccountTypeDocument,
   type CreateUserMutationPayload,
-  type CreateUserMutationVariables,
-  type IAccountCompletionInviteDocument
+  type CreateUserMutationVariables
 } from 'passwordkeeper.types';
+import {Types} from 'mongoose';
 
 export const createUser = async (
   _: undefined,
@@ -28,7 +22,7 @@ export const createUser = async (
   __: undefined
 ): Promise<CreateUserMutationPayload> => {
   const {
-    createUserArgs: {username, email, accountType}
+    createUserArgs: {username, email, accountType, publicKey}
   } = args;
 
   const loggerHeader = 'createUser mutation::';
@@ -39,6 +33,10 @@ export const createUser = async (
 
   if (!email) {
     throw new GraphQLError(USER_ERROR_MESSAGES.EMAIL_REQUIRED);
+  }
+
+  if (!publicKey) {
+    throw new GraphQLError(USER_ERROR_MESSAGES.MISSING_PUBLIC_KEY);
   }
 
   try {
@@ -58,7 +56,8 @@ export const createUser = async (
     const userAccount: IAccountDocument | undefined | null = (
       await AccountModel.create({
         owner: user._id,
-        accountType: userAccountType?._id
+        accountType: userAccountType?._id,
+        status: AccountStatusTypes.ACTIVE
       })
     ).toObject();
 
@@ -74,53 +73,11 @@ export const createUser = async (
         .populate({path: 'account', select: 'accountType', populate: {path: 'accountType'}})
     )?.toObject();
 
-    // create a random nonce
-    const nonce = createNonce();
-    /* istanbul ignore next */
-    if (!nonce) {
-      /* istanbul ignore next */
-      logger.error(`${loggerHeader} Error creating nonce for user: ${username}`);
-      /* istanbul ignore next */
-      throw new GraphQLError(USER_ERROR_MESSAGES.NONCE_ERROR);
-    }
+    // create a public key for the user
+    const updatedUserData = await addPublicKey({userId: user?._id as Types.ObjectId, publicKey});
 
-    logger.warn(`${loggerHeader} accessing private key for user creation: ${username}`);
-    // get the private key
-    const privateKey = await getAppsPrivateKey();
-
-    /* istanbul ignore next */
-    if (!privateKey) {
-      /* istanbul ignore next */
-      logger.error(`${loggerHeader} Error getting private key for user: ${username}`);
-      /* istanbul ignore next */
-      throw new GraphQLError(USER_ERROR_MESSAGES.FETCH_PRIVATE_KEY_ERROR);
-    }
-
-    // sign the nonce with the private key
-    const signedNonce = await encryptWithPrivateKey(privateKey, nonce);
-
-    /* istanbul ignore next */
-    if (!signedNonce) {
-      /* istanbul ignore next */
-      logger.error(`${loggerHeader} Error signing nonce for user: ${username}`);
-      /* istanbul ignore next */
-      throw new GraphQLError(USER_ERROR_MESSAGES.SIGNING_NONCE_ERROR);
-    }
-
-    logger.warn(`${loggerHeader} User: ${username} created successfully. Generating invite token.`);
-    // const signedNonce = await encryptWithPrivateKey
-    const inviteToken: IAccountCompletionInviteDocument = (
-      await AccountCompletionInviteModel.create({
-        nonce,
-        user: user?._id,
-        expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24) // 24 hours
-      })
-    ).toObject();
-
-    return {
-      user: user as IUserDocument,
-      inviteToken: {token: signedNonce, expiresAt: inviteToken.expiresAt}
-    };
+    // create an auth session for the created user
+    return createAuthSession({publicKey, user: updatedUserData.user as Partial<IUserDocument>});
   } catch (error) {
     /* istanbul ignore next */
     if (error?.toString()?.includes('E11000 duplicate key error')) {
@@ -129,6 +86,7 @@ export const createUser = async (
     } else {
       /* istanbul ignore next */
       logger.error(`${loggerHeader} Error creating user: ${error}`);
+      console.error(error);
       /* istanbul ignore next */
       throw new GraphQLError(
         handleErrorMessages(error as Error, USER_ERROR_MESSAGES.CREATE_USER_ERROR)

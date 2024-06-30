@@ -1,44 +1,12 @@
 import {logger} from 'passwordkeeper.logger';
-import {DBConnection, IAccountCompletionInviteDocument} from 'passwordkeeper.types';
+import {DBConnection} from 'passwordkeeper.types';
 import {
-  UserModel,
   connectToDB,
-  AccountModel,
   PublicKeyModel,
   AuthSessionModel,
   LoginInviteModel,
-  disconnectFromDB,
-  AccountCompletionInviteModel
+  disconnectFromDB
 } from 'passwordkeeper.database';
-
-const removedExpiredAccountCompletionInvites = async () => {
-  const now = new Date();
-  // find all account completion invites that have expired, so we can get
-  // a list of users that have not completed their account setup and remove
-  // them and their accounts from the database
-  const expiredAccountCompletionInvites: IAccountCompletionInviteDocument[] =
-    (await AccountCompletionInviteModel.find({
-      expiresAt: {$lt: now}
-    })) ?? [];
-
-  const userIds = expiredAccountCompletionInvites.map(invite => invite.user);
-
-  if (userIds.length > 0) {
-    // if there are any userIds, remove them and their accounts
-    const removed = await UserModel.deleteMany({_id: {$in: userIds}});
-    // remove the associated account models
-    await AccountModel.deleteMany({owner: {$in: userIds}});
-    removed.deletedCount > 0 &&
-      logger.info(`Removed ${removed.deletedCount} users who did not complete their account setup`);
-  }
-
-  const removed = await AccountCompletionInviteModel.deleteMany({
-    expiresAt: {$lt: now}
-  });
-
-  removed.deletedCount > 0 &&
-    logger.info(`Removed ${removed.deletedCount} expired account completion invites`);
-};
 
 const removeExpiredAuthSessions = async () => {
   const now = new Date();
@@ -72,7 +40,6 @@ export const removeExpired = async () => {
   logger.info('Removing any expired items from the database');
   const db: DBConnection = await connectToDB();
   await Promise.all([
-    removedExpiredAccountCompletionInvites(),
     removeExpiredAuthSessions(),
     removeExpiredLoginInvites(),
     removeExpiredPublicKeys()

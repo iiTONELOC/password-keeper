@@ -9,8 +9,7 @@ import {
   PublicKeyModel,
   AuthSessionModel,
   LoginInviteModel,
-  EncryptedUserPasswordModel,
-  AccountCompletionInviteModel
+  EncryptedUserPasswordModel
 } from 'passwordkeeper.database';
 
 export const deleteUser = async (
@@ -64,17 +63,12 @@ export const deleteUser = async (
     const removeLoginInvitesPromise = LoginInviteModel.deleteMany({
       user: {$in: [...(session?.user?.subUsers ?? []), session.user._id]}
     });
-    // remove any pending account completion invites
-    const removeAccountCompletionInvitesPromise = AccountCompletionInviteModel.deleteMany({
-      user: {$in: [...(session?.user?.subUsers ?? []), session.user._id]}
-    });
 
     await Promise.all([
       removePasswordsPromise,
       removePublicKeysPromise,
       removeAuthSessionsPromise,
-      removeLoginInvitesPromise,
-      removeAccountCompletionInvitesPromise
+      removeLoginInvitesPromise
     ]);
 
     if (!user) {

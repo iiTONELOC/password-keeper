@@ -8,10 +8,9 @@ import {describe, expect, it, beforeAll, afterAll} from '@jest/globals';
 import {connectToDB, disconnectFromDB, EncryptedUserPasswordModel} from 'passwordkeeper.database';
 import {
   createTestUser,
-  TestUserCreationData,
-  getSessionReadyForAuthMiddleware,
+  PlainTextPassword,
   decryptPasswordToOriginalData,
-  PlainTextPassword
+  getSessionReadyForAuthMiddleware
 } from '../../../../utils/testHelpers';
 import {
   IPassword,
@@ -19,9 +18,9 @@ import {
   IPasswordEncrypted,
   IAuthSessionDocument,
   IUserPasswordDocument,
+  CreateUserMutationPayload,
   CreateUserMutationVariables,
   AddPasswordMutationVariables,
-  CompleteAccountMutationPayload,
   UpdatePasswordMutationVariables
 } from 'passwordkeeper.types';
 
@@ -31,8 +30,9 @@ const pathToKeys: string = path.normalize(
 
 const testUserCreationData: CreateUserMutationVariables = {
   createUserArgs: {
-    username: 'updatePassWordMutationTestUser',
-    email: 'updatePassWordMutationTestUser@test.com'
+    username: 'updatePassWordMutation',
+    email: 'updatePassWordMutation@test.com',
+    publicKey: ''
   }
 };
 
@@ -40,26 +40,23 @@ let db: DBConnection;
 let sessionId: string;
 let signature: string;
 let testPassword: IPasswordEncrypted;
-let testUserData: TestUserCreationData;
-let authSession: CompleteAccountMutationPayload;
+let authSession: CreateUserMutationPayload;
 
 const testAESKey = 'updatePassWordMutationTestAESKey';
 
 beforeAll(async () => {
   db = await connectToDB('pwd-keeper-test');
-  testUserData = await createTestUser({
+  authSession = await createTestUser({
     pathToKeys,
     userRSAKeyName: 'updatePassWordMutation',
     user: testUserCreationData
   });
 
-  // get the created auth session for the test user
-  authSession = testUserData.createdAuthSession;
   const sessionData = await getSessionReadyForAuthMiddleware({
-    testUserData,
     authSession,
     keyName: 'updatePassWordMutation'
   });
+
   sessionId = sessionData.sessionId as string;
   signature = sessionData.signature as string;
 
@@ -71,7 +68,7 @@ beforeAll(async () => {
     name: 'test',
     username: 'test',
     password: 'test',
-    owner: testUserData.createdAuthSession.user._id as Types.ObjectId
+    owner: authSession.user._id as Types.ObjectId
   };
 
   // encrypt the password data as if it came from the client
@@ -152,9 +149,7 @@ describe('updatePassWordMutation', () => {
     expect(modifiedPassword.password).toEqual('updatedPassword');
     expect(modifiedPassword.url).toEqual('https://www.test.com');
     expect(modifiedPassword.name).toEqual('test');
-    expect(modifiedPassword.owner.toString()).toEqual(
-      testUserData.createdAuthSession.user._id?.toString()
-    );
+    expect(modifiedPassword.owner.toString()).toEqual(authSession.user._id?.toString());
   });
 
   it('should update a user password with a new url', async () => {
@@ -195,9 +190,7 @@ describe('updatePassWordMutation', () => {
     expect(modifiedPassword.name).toEqual('test');
     expect(modifiedPassword.username).toEqual('test');
 
-    expect(modifiedPassword.owner.toString()).toEqual(
-      testUserData.createdAuthSession.user._id?.toString()
-    );
+    expect(modifiedPassword.owner.toString()).toEqual(authSession.user._id?.toString());
   });
 
   it('should update a user password with a new name', async () => {
@@ -238,9 +231,7 @@ describe('updatePassWordMutation', () => {
     expect(modifiedPassword.url).toEqual('https://www.updated.com');
     expect(modifiedPassword.password).toEqual('updatedPassword');
     expect(modifiedPassword.username).toEqual('test');
-    expect(modifiedPassword.owner.toString()).toEqual(
-      testUserData.createdAuthSession.user._id?.toString()
-    );
+    expect(modifiedPassword.owner.toString()).toEqual(authSession.user._id?.toString());
   });
 
   it('should update a user password with a new username', async () => {
@@ -282,9 +273,7 @@ describe('updatePassWordMutation', () => {
     expect(modifiedPassword.name).toEqual('updatedName');
     expect(modifiedPassword.url).toEqual('https://www.updated.com');
     expect(modifiedPassword.password).toEqual('updatedPassword');
-    expect(modifiedPassword.owner.toString()).toEqual(
-      testUserData.createdAuthSession.user._id?.toString()
-    );
+    expect(modifiedPassword.owner.toString()).toEqual(authSession.user._id?.toString());
   });
 
   it('should update a user password with a new expiration date', async () => {
@@ -325,9 +314,7 @@ describe('updatePassWordMutation', () => {
     expect(modifiedPassword.name).toEqual('updatedName');
     expect(modifiedPassword.url).toEqual('https://www.updated.com');
     expect(modifiedPassword.password).toEqual('updatedPassword');
-    expect(modifiedPassword.owner.toString()).toEqual(
-      testUserData.createdAuthSession.user._id?.toString()
-    );
+    expect(modifiedPassword.owner.toString()).toEqual(authSession.user._id?.toString());
   });
 
   it('should throw an error if no fields are provided', async () => {

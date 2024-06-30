@@ -1,14 +1,29 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
-import {IAuthSessionDocument} from './models';
+import {Server} from 'http';
+import {Express} from 'express';
+import {IAuthSessionDocument} from '../db';
 
-export * from './db';
-export * from './crypto';
-export * from './models';
-export * from './queries';
-export * from './helpers';
-export * from './mutations';
-export * from './api-service';
-export * from './errors/messages';
+/**
+ * AppPort is the port number for the app server.
+ * If the port is not provided, it will default to 3000.
+ */
+export type AppPort = number | undefined;
+
+/**
+ * Creates an app server.
+ * It takes an optional port number and returns an AppServer.
+ */
+export type CreateAppServer = (port?: AppPort) => AppServer;
+
+/**
+ * Contains the express app, server, and methods for starting and stopping the http server.
+ */
+export type AppServer = {
+  app: Express;
+  server: Server | null;
+  start: (portOverride?: AppPort) => Promise<void>;
+  stop: () => Promise<void>;
+};
 
 export type AuthContext = {
   session: IAuthSessionDocument;

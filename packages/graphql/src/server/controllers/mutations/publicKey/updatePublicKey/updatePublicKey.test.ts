@@ -7,7 +7,6 @@ import {connectToDB, disconnectFromDB} from 'passwordkeeper.database';
 import {
   normalizeKey,
   createTestUser,
-  TestUserCreationData,
   getSessionReadyForAuthMiddleware
 } from '../../../../utils/testHelpers';
 import {
@@ -18,30 +17,33 @@ import {
   type IPublicKeyDocument,
   type IAuthSessionDocument,
   type CreateUserMutationVariables,
-  type CompleteAccountMutationPayload,
-  type UpdatePublicKeyMutationVariables
+  type UpdatePublicKeyMutationVariables,
+  CreateUserMutationPayload
 } from 'passwordkeeper.types';
 
 let db: DBConnection;
 let userPublicKey: string;
 let testUser: IUserDocument;
 let validSession: IAuthSessionDocument;
-let authSession: CompleteAccountMutationPayload;
-let createTestUserResult: TestUserCreationData;
+let authSession: CreateUserMutationPayload;
 
 const pathToKeys: string = path.normalize(
   getPathToKeyFolder()?.replace('.private', '.updatePublicKeyMutation')
 );
 
 const testUserCreationData: IUser = {
-  username: 'testUpdatePublicKeyMutation',
-  email: 'testUpdatePublicKeyMutation@test.com',
+  username: 'updatePublicKeyMutation',
+  email: 'updatePublicKeyMutation@test.com',
   userRole: UserRoles.ACCOUNT_OWNER
 };
 
 // variables to create a test user using graphql mutation
 const testUserCreationVariables: CreateUserMutationVariables = {
-  createUserArgs: {username: testUserCreationData.username, email: testUserCreationData.email}
+  createUserArgs: {
+    username: testUserCreationData.username,
+    email: testUserCreationData.email,
+    publicKey: ''
+  }
 };
 
 // create a test user, generate their RSA keys, and create an AuthSession for them
@@ -49,22 +51,21 @@ beforeAll(async () => {
   db = await connectToDB('pwd-keeper-test');
 
   // create a test user
-  createTestUserResult = await createTestUser({
+  authSession = await createTestUser({
     pathToKeys: pathToKeys,
     user: {...testUserCreationVariables},
     userRSAKeyName: 'updatePublicKeyMutation'
   });
 
   // set variables needed to use the AuthSession
-  authSession = createTestUserResult.createdAuthSession;
-  userPublicKey = createTestUserResult.userKeys.publicKey;
-  testUser = createTestUserResult.createdAuthSession.user as IUserDocument;
+  const pubKey = authSession?.user?.publicKeys?.[0]?.key as string;
+  userPublicKey = pubKey;
+  testUser = authSession.user as IUserDocument;
 
   // generate the client-side session data the server expects for the AuthMiddleware
   const sessionData = await getSessionReadyForAuthMiddleware({
     authSession,
-    keyName: 'updatePublicKeyMutation',
-    testUserData: createTestUserResult
+    keyName: 'updatePublicKeyMutation'
   });
 
   // set the variables needed to authenticate the user
