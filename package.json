@@ -6,9 +6,10 @@
   "private": true,
   "scripts": {
     "lint": "echo '🧹 Linting...' && eslint",
+    "install-deps": "echo '🚀 Installing Dependencies...' && npm i && cd packages/types && npm i && cd ../logger && npm i && cd ../db && npm i && cd ../crypto && npm i && cd ../graphql && npm i && cd ../api-service && npm i && cd ../email && npm i",
     "server": "echo '🌎 Starting Server...' && cd packages/api-service && npm run start",
     "server-dev": "echo '🚧 Starting Server in Development Mode...' && cd packages/api-service && npm run dev",
-    "build-packages": "echo '🏗️  Building Packages...' && npm run lint && cd packages/types && npm run build && cd ../logger && npm run build && cd ../db && npm run build && cd ../crypto && npm run build && cd ../graphql && npm run build && cd ../api-service && npm run build && echo '🏢 Build Complete!\n'",
+    "build-packages": "echo '🏗️  Building Packages...' && npm run lint && cd packages/types && npm run build && cd ../logger && npm run build && cd ../db && npm run build && cd ../crypto && npm run build && cd ../graphql && npm run build && cd ../api-service && npm run build && cd ../email && npm run build && echo '🏢 Build Complete!\n'",
     "test-packages": "echo '🧪 Running Tests...' && cd packages/db && npm run test && cd ../crypto && npm run test && cd ../api-service && npm run test && cd ../graphql && npm run test && echo '\n🧬 Tests Complete!\n'"
   },
   "author": "Anthony Tropeano",
